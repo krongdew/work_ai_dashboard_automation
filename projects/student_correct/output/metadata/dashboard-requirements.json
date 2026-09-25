@@ -1,0 +1,19 @@
+{
+  "audience": "Academic administrators and student affairs officers",
+  "purpose": "Analyze student drop-out data across two batches to identify trends, common reasons for withdrawal, and academic performance metrics.",
+  "questions": [
+    "What are the most common reasons for student withdrawal in each batch?",
+    "How does the average GPA of dropping out students compare across different faculties?",
+    "Are there any seasonal trends in student drop-outs?"
+  ],
+  "kpis": [
+    "Total number of students who dropped out",
+    "Average GPA of dropping out students",
+    "Most common reasons for withdrawal"
+  ],
+  "filters": [
+    "Batch (Batch 1 or Batch 2)",
+    "Faculty",
+    "Major"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Dashboard Spec",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["dashboard_title", "purpose", "audience", "kpis", "filters", "charts", "insight_questions"],
+	"properties": {
+		"dashboard_title": {"type": "string"},
+		"purpose": {"type": "string"},
+		"audience": {"type": "string"},
+		"kpis": {"type": "array", "items": {"$ref": "#/$defs/kpi"}},
+		"filters": {"type": "array", "items": {"type": "string"}},
+		"display_labels": {"type": "object", "additionalProperties": {"type": "string"}},
+		"charts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/chart"}},
+		"insight_questions": {"type": "array", "items": {"type": "string"}}
+	},
+	"$defs": {
+		"kpi": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["name", "metric", "aggregation", "formula", "source_fields", "limitations"],
+			"properties": {
+				"name": {"type": "string"}, "metric": {"type": "string"}, "aggregation": {"type": "string"},
+				"formula": {"type": "string"}, "source_fields": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "string"},
+				"comparison": {"type": "object", "additionalProperties": false, "required": ["enabled", "period"], "properties": {"enabled": {"type": "boolean"}, "period": {"type": "string", "enum": ["previous_period", "latest_year_vs_previous_year"]}}}
+			}
+		},
+		"chart": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["title", "type", "dimension", "metric", "aggregation", "formula", "source_fields", "limitations"],
+			"properties": {
+				"title": {"type": "string"}, "type": {"type": "string", "enum": ["bar", "line", "pie"]},
+				"dimension": {"type": "string"}, "metric": {"type": "string"}, "aggregation": {"type": "string"},
+				"formula": {"type": "string"}, "source_fields": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "string"},
+				"target": {"type": "object", "additionalProperties": false, "required": ["value", "label"], "properties": {"value": {"type": "number"}, "label": {"type": "string"}, "year_be": {"type": "integer"}}}
+			}
+		}
+	}
+}

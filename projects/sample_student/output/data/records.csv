@@ -1,0 +1,41 @@
+_source_file,_source_row,_source_sheet,คณะ_สาขา,จำนวนคนลาออก,จำนวนนักศึกษาในรุ่น,ปีการศึกษาที่เข้า,รหัสนักศึกษา,สถานะการจบตามวงรอบ,สาเหตุการลาออก,อัตราการจบตามวงรอบ,เดือน_วันที่ลาออก
+sample_student_dropout_1.xlsx,2,Uncleaned_Data,,1,150,2563,6301001,จบตามวงรอบ,ปัญหาทางการเงิน,85%,2023-05-15
+sample_student_dropout_1.xlsx,3,Uncleaned_Data,,1 คน,150,2563,6301002 , จบตามวงรอบ ,การเงิน,0.85,15/05/2023
+sample_student_dropout_1.xlsx,4,Uncleaned_Data,,1,150 คน,2020,6301003,จบ, Financial problems ,85.0%,พ.ค. 66
+sample_student_dropout_1.xlsx,5,Uncleaned_Data,,1,150,2563,6301003,จบตามวงรอบ,ปัญหาทางการเงิน,85%,2023-05-15
+sample_student_dropout_1.xlsx,6,Uncleaned_Data,,2,120,2564,STD-6301005,ไม่จบตามวงรอบ,ผลการเรียนไม่ถึงเกณฑ์,78%,2023/08/20
+sample_student_dropout_1.xlsx,7,Uncleaned_Data,,2,120,2564,6301006,ไม่จบ,เกรดไม่ถึง,N/A,2566-08-20
+sample_student_dropout_1.xlsx,8,Uncleaned_Data,,0,120,2564,,ไม่จบตามวงรอบ, - ,0.78,-
+sample_student_dropout_1.xlsx,9,Uncleaned_Data,,1,180,2564/2021,6301008,จบตามวงรอบ,ย้ายสถานศึกษา,92.5%,2023-11-01
+sample_student_dropout_1.xlsx,10,Uncleaned_Data,,3,180,2565,6301009,จบตามวงรอบ,ย้ายคณะ/ย้าย ม.,90%,Dec 2023
+sample_student_dropout_1.xlsx,11,Uncleaned_Data,,N/A,,2565,6301010,N/A,ปัญหาสุขภาพ,-,2024-01-10
+sample_student_dropout_1.xlsx,12,Uncleaned_Data,,,200,,6301011,จบตามวงรอบ,,0.8,
+sample_student_dropout_1.xlsx,13,Uncleaned_Data,,1,200,2565,6301012,จบ,สุขภาพ,80%,10-01-2024
+sample_student_dropout_1.xlsx,14,Uncleaned_Data,,1 คน,200,2565 , 6301013 ,จบตามวงรอบ,Personal reason,,2024/02/14
+sample_student_dropout_1.xlsx,15,Uncleaned_Data,,2,160,2566,6301014,จบตามวงรอบ,ปัญหาทางการเงิน,88%,14/02/2567
+sample_student_dropout_1.xlsx,16,Uncleaned_Data,,2,160 คน,2023,6301015,จบตามวงรอบ,ไม่มีเงินจ่ายค่าเทอม,0.88,2024-03-30
+sample_student_dropout_1.xlsx,17,Uncleaned_Data,,1,160,2566,STD_6301016,จบตามวงรอบ,ย้ายสถานศึกษา,88.0%,30/03/2024
+sample_student_dropout_1.xlsx,18,Uncleaned_Data,,4,175,2566,6301017,ไม่จบตามวงรอบ,ผลการเรียน,91%,2024-04-12
+sample_student_dropout_1.xlsx,19,Uncleaned_Data,,4 คน,175,2566,6301018,ไม่จบ, academic failure ,0.91,เม.ย. 67
+sample_student_dropout_1.xlsx,20,Uncleaned_Data,,1,175,2566,6301019,ไม่จบตามวงรอบ,ปัญหาสุขภาพ,91%,2024-05-01
+sample_student_dropout_1.xlsx,21,Uncleaned_Data,,1,175,2566,6301020,จบ,ไม่ระบุ,91%,2024/05/01
+sample_student_dropout_v2.xlsx,2,Uncleaned_Data_Batch2,วิศวกรรมศาสตร์,1,210,2564,6402001,PASS,เรียนไม่ไหว,90%,2023.06.12
+sample_student_dropout_v2.xlsx,3,Uncleaned_Data_Batch2,วิศวฯ,1,210,2564,6402002,จบการศึกษา,เกรดต่ำกว่าเกณฑ์,0.90,12-06-2023
+sample_student_dropout_v2.xlsx,4,Uncleaned_Data_Batch2,วิศวกรรมศาสตร์,1,210,2564,6402002,จบ, academic fail ,90.0%,12/06/66
+sample_student_dropout_v2.xlsx,5,Uncleaned_Data_Batch2,บริหารธุรกิจ,2,95,64,  6402004,ไม่จบการศึกษา,ปัญหาสุขภาพ,75%,2023-09-18
+sample_student_dropout_v2.xlsx,6,Uncleaned_Data_Batch2,บริหารฯ,2 คน,95 คน,2021,ID6402005,FAIL,ป่วยเรื้อรัง,0.75,ก.ย. 2566
+sample_student_dropout_v2.xlsx,7,Uncleaned_Data_Batch2,ENG,-1,210,2564,6402006,ERROR,ปัญหาสุขภาาพ,#VALUE!,2023/09/18
+sample_student_dropout_v2.xlsx,8,Uncleaned_Data_Batch2,บริหารธุรกิจ,1,100,2565,,ไม่จบ,ย้ายคณะ,0.75,2023-10-05
+sample_student_dropout_v2.xlsx,9,Uncleaned_Data_Batch2,วิทยาศาสตร์,1,130,2565,6402008,จบการศึกษา,เปลี่ยนสายเรียน,105%,05/10/2023
+sample_student_dropout_v2.xlsx,10,Uncleaned_Data_Batch2,วิทยฯ,3,130,2022,6402009,จบ,ย้าย ม.,82%,ต.ค. 66
+sample_student_dropout_v2.xlsx,11,Uncleaned_Data_Batch2,นิเทศศาสตร์,3,130 คน,2565/2022,6402010,จบการศึกษา,ทำงานร่วมกับเรียนไม่ได้,0.82,2023.12.01
+sample_student_dropout_v2.xlsx,12,Uncleaned_Data_Batch2,นิเทศฯ,1,80,2565,6402011,ไม่จบ,ภาระทางบ้าน,70%,01-12-2566
+sample_student_dropout_v2.xlsx,13,Uncleaned_Data_Batch2,สถาปัตยกรรมศาสตร์,1 คน,80,2565,6402012,ไม่จบการศึกษา,ปัญหาครอบครัว,0.7,01/12/2023
+sample_student_dropout_v2.xlsx,14,Uncleaned_Data_Batch2,สถาปัตย์,1,80,2022,6402013,ไม่จบ,Family issues,70.0%,2024-01-15
+sample_student_dropout_v2.xlsx,15,Uncleaned_Data_Batch2,ศิลปศาสตร์,2,150,2566,STUDENT-6402014,จบการศึกษา,ค่าใช้จ่ายสูง,88%,ม.ค. 67
+sample_student_dropout_v2.xlsx,16,Uncleaned_Data_Batch2,Humanities,2,150,2566,6402015,จบ,ปัญหาการเงิน,0.88,2024/01/15
+sample_student_dropout_v2.xlsx,17,Uncleaned_Data_Batch2,เทคโนโลยีสารสนเทศ,N/A,150,66,6402016 ,จบการศึกษา,ไม่ตรงสายที่อยากเรียน,88%,2024-02-28
+sample_student_dropout_v2.xlsx,18,Uncleaned_Data_Batch2,IT,5,110 คน,2566,6402017,ไม่จบการศึกษา,ย้ายไปต่างประเทศ,65%,28/02/2024
+sample_student_dropout_v2.xlsx,19,Uncleaned_Data_Batch2,IT,5 คน,110,2023,6402018,ไม่จบ,ย้ายประเทศ,0.65,ก.พ. 67
+sample_student_dropout_v2.xlsx,20,Uncleaned_Data_Batch2,นิติศาสตร์,1,-5,2566,6402019,N/A,ไม่ระบุสาเหตุ,N/A,2024-04-10
+sample_student_dropout_v2.xlsx,21,Uncleaned_Data_Batch2,นิติศาสตร์,0,110,,6402020,ไม่ระบุ,-,-,

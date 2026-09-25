@@ -1,0 +1,48 @@
+{
+  "audience": "ผู้บริหารระดับคณะและมหาวิทยาลัย",
+  "purpose": "ให้ผู้บริหารมองเห็นจำนวนนักศึกษา การจบการศึกษา การลาออกและสาเหตุการลาออกตามปีและเดือน",
+  "questions": [
+    "จำนวนรวมของนักศึกษาเพิ่มขึ้นหรือลดลงตามปีอย่างไร?",
+    "อัตราการจบการศึกษาเปรียบเทียบกับปี 2569 เป็นอย่างไร?",
+    "นักศึกษาอยู่ในชั้นปีใดบ้างและมีการกระจายอย่างไร?",
+    "จำนวนการลาออกมีแนวโน้มเพิ่มหรือลดลงตามปีและเดือนหรือไม่?",
+    "สาเหตุหลักของการลาออกคืออะไร?"
+  ],
+  "kpis": [
+    {
+      "name": "จำนวนนักศึกษาทั้งหมดต่อปี",
+      "metric": "unique_student_count",
+      "aggregation": "COUNT(DISTINCT รหัสนักศึกษา)",
+      "formula": "COUNT(DISTINCT รหัสนักศึกษา)",
+      "source_fields": [
+        "รหัสนักศึกษา",
+        "_year_be"
+      ],
+      "limitations": "ต้องมีรหัสนักศึกษาไม่ซ้ำในแต่ละปีเพื่อให้ผลรวมถูกต้อง",
+      "comparison": {
+        "enabled": false,
+        "period": "previous_period"
+      }
+    },
+    {
+      "name": "อัตราการจบการศึกษา (%)",
+      "metric": "record_count",
+      "aggregation": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
+      "formula": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
+      "source_fields": [
+        "รหัสนักศึกษา",
+        "สถานะ",
+        "_year_be"
+      ],
+      "limitations": "หากไม่มีข้อมูลสถานะจบการศึกษาในบางปีจะไม่สามารถคำนวณได้",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "คณะ",
+    "สาขาวิชา"
+  ]
+}

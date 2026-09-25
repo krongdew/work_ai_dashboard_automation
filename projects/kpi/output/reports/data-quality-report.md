@@ -1,0 +1,7 @@
+# Data Quality Report
+
+- Input records: 116 records processed
+- Identifier exclusion: Excluded from metrics: None
+- Duplicate rows: 20
+- Missing values: column_1: 61, column_10: 100, column_11: 104, column_12: 58, column_13: 107, column_14: 113, column_15: 116, column_16: 116, column_17: 116, column_18: 116, column_19: 116, column_2: 61, column_20: 116, column_21: 116, column_22: 116, column_23: 116, column_24: 116, column_25: 116, column_26: 116, column_27: 116, column_3: 50, column_4: 54, column_5: 41, column_6: 44, column_7: 48, column_8: 54, column_9: 89
+- Date normalization: All recognized date values were normalized

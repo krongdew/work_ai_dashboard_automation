@@ -7,5 +7,6 @@
   "show_insights": true,
   "show_data_table": true,
   "responsive": true,
-  "theme": "mahidol-faculty"
+  "theme": "mahidol-faculty",
+  "category": "การบริการวิชาการ"
 }

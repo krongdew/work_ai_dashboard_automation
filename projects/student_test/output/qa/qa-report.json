@@ -1,0 +1,30 @@
+{
+  "status": "warning",
+  "checks": [
+    {
+      "name": "Input records",
+      "status": "pass",
+      "detail": "40 records processed"
+    },
+    {
+      "name": "Identifier exclusion",
+      "status": "pass",
+      "detail": "Excluded from metrics: รหัสนักศึกษา, เกรดเฉลี่ย_GPAX"
+    },
+    {
+      "name": "Duplicate rows",
+      "status": "pass",
+      "detail": "0"
+    },
+    {
+      "name": "Missing values",
+      "status": "warning",
+      "detail": "วันที่ลาออก: 32, สาเหตุการลาออก: 32, เกรดเฉลี่ย_GPAX: 1"
+    },
+    {
+      "name": "Date normalization",
+      "status": "pass",
+      "detail": "All recognized date values were normalized"
+    }
+  ]
+}

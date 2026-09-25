@@ -1,2 +1,9 @@
 .DS_Store
+.env
 projects/*/input/*
+
+.env
+.venv/
+local-ai/demo_profile.json
+local-ai/dashboard-spec.json
+__pycache__/

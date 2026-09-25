@@ -1,0 +1,11 @@
+{
+  "project": "research_test",
+  "timestamp": "2026-09-22T14:10:33.633867+00:00",
+  "stages": [
+    "profile",
+    "local-ai-spec",
+    "build",
+    "qa"
+  ],
+  "status": "warning"
+}

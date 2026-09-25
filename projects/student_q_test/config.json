@@ -1,0 +1,16 @@
+{
+  "name": "student_q_test",
+  "category": "Uncategorized",
+  "language": "th",
+  "timezone": "Asia/Bangkok",
+  "dashboard_type": "auto",
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "show_insights": true,
+  "show_data_table": true,
+  "responsive": true,
+  "theme": "mahidol-faculty",
+  "source_files": [
+    "student_records_batch1_clean85.xlsx",
+    "student_records_batch2_clean85.xlsx"
+  ]
+}

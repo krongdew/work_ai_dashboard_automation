@@ -1,0 +1,30 @@
+{
+  "status": "warning",
+  "checks": [
+    {
+      "name": "Input records",
+      "status": "pass",
+      "detail": "40 records processed"
+    },
+    {
+      "name": "Identifier exclusion",
+      "status": "pass",
+      "detail": "Excluded from metrics: รหัสนักศึกษา"
+    },
+    {
+      "name": "Duplicate rows",
+      "status": "pass",
+      "detail": "0"
+    },
+    {
+      "name": "Missing values",
+      "status": "warning",
+      "detail": "คณะ_สาขา: 20, จำนวนคนลาออก: 1, จำนวนนักศึกษาในรุ่น: 1, ปีการศึกษาที่เข้า: 2, รหัสนักศึกษา: 2, สาเหตุการลาออก: 1, อัตราการจบตามวงรอบ: 1, เดือน_วันที่ลาออก: 2"
+    },
+    {
+      "name": "Date normalization",
+      "status": "warning",
+      "detail": "เดือน_วันที่ลาออก: parse ไม่ได้ 2 ค่า"
+    }
+  ]
+}

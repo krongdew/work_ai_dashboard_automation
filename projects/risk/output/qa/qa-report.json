@@ -1,0 +1,30 @@
+{
+  "status": "warning",
+  "checks": [
+    {
+      "name": "Input records",
+      "status": "pass",
+      "detail": "18756 records processed"
+    },
+    {
+      "name": "Identifier exclusion",
+      "status": "pass",
+      "detail": "Excluded from metrics: Advisor_ID, Course_Code, Enrollment_ID, ID, Student_ID, engCode, thaiCode, รหัสนักศึกษา, รหัสวิชา, รหัสอาจารย์ที่ปรึกษา"
+    },
+    {
+      "name": "Duplicate rows",
+      "status": "pass",
+      "detail": "0"
+    },
+    {
+      "name": "Missing values",
+      "status": "warning",
+      "detail": "Admission_Type: 18756, Advisor_ID: 18756, Advisor_Name: 18756, Allowed_Program_Type: 18756, Category: 18741, Course_Code: 18002, Course_Name_EN: 18007, Course_Name_TH: 18002, Credits: 18002, Dropout_Year: 18756, Eng_status: 18754, Enrollment_ID: 10989, Full_Name: 18750, HSK: 17970, HSK_Exam_Date: 18756, HSK_Status: 18754, ID: 10235, Is_Passed: 18756, Is_Work_And_Travel: 18756, Literacy_Group: 18756, Major: 17996, Phone_Number: 18756, ProgramName: 18741, Reason: 18756, RequiredCredits: 18741, Required_By_Year: 18212, Section: 10989, SmartEDU Status: 18118, Student_ID: 17788, SubCategory: 18741, Sub_Type: 18002, Type: 18002, Year: 18002, category: 18118, classType: 18056, column_10: 18756, column_11: 18756, column_12: 18756, column_13: 18756, column_14: 18756, column_15: 18756, column_16: 18756, column_17: 18756, column_18: 18756, column_19: 18756, column_20: 18756, column_21: 18756, column_22: 18756, column_23: 18756, column_24: 18756, column_25: 18756, column_26: 18756, column_27: 18756, column_5: 18756, column_6: 18756, column_7: 18756, column_8: 18756, column_9: 18756, courseType: 18051, credit: 18051, creditCount: 18051, displayName: 18051, editDate: 18118, eligibleProg: 18118, eligibleProgList: 18118, engCode: 18051, engCourseDesc: 18051, engCourseName: 18051, engRegName: 18118, entryDate: 18118, faculty: 18051, grading: 18082, language: 18051, literacy: 18118, programType: 18051, structureType: 18118, thaiCode: 18118, thaiCourseDesc: 18051, thaiCourseName: 18051, thaiRegName: 18118, กรองแก้ว: 18734, คณะ: 10203, คำนำหน้า: 17970, จารุรักษา: 18734, ชั้นปี: 10055, ชื่อ-นามสกุล: 10989, ชื่อ-สกุล: 17793, ชื่อจริง: 17970, ชื่อวิชา: 10989, น.ส.: 18734, น.ส.กรองแก้ว จารุรักษา: 18734, นามสกุล: 17970, ประเภทการรับเข้า: 18756, ประเภทการสอบ: 17822, ปีการศึกษา: 10989, ปีที่เข้า: 17970, ผลคะแนน: 17798, รหัสนักศึกษา: 10203, รหัสวิชา: 10989, รหัสอาจารย์ที่ปรึกษา: 18756, วันที่สอบ: 17997, วันหมดอายุ: 18732, สถานะเกรด: 11194, หมายเหตุ: 18756, หลักสูตร: 17822, หลักสูตร/สาขา: 17970, เกณฑ์มาตรฐาน: 17793, เกรดแปลงOSW: 18756, เทอม: 10989, เบอร์โทร: 18756, เรียนวิชานี้เป็นครั้งที่: 10989, แต้มระดับคะแนน: 12899"
+    },
+    {
+      "name": "Date normalization",
+      "status": "warning",
+      "detail": "Required_By_Year: parse ไม่ได้ 544 ค่า, ชั้นปี: parse ไม่ได้ 8701 ค่า"
+    }
+  ]
+}

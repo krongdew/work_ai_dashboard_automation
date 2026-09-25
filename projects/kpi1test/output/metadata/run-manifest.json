@@ -1,0 +1,11 @@
+{
+  "project": "kpi1test",
+  "timestamp": "2026-09-23T04:49:41.032003+00:00",
+  "stages": [
+    "profile",
+    "local-ai-spec",
+    "build",
+    "qa"
+  ],
+  "status": "warning"
+}

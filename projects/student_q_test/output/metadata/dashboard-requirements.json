@@ -1,0 +1,59 @@
+{
+  "audience": "ผู้บริหารคณะและสำนักงานทะเบียน",
+  "purpose": "สรุปจำนวนนักศึกษาและอัตราการจบการศึกษาโดยแยกตามคณะและชั้นปี",
+  "questions": [
+    "จำนวนนักศึกษาทั้งหมดและตามคณะเป็นเท่าใด?",
+    "จำนวนนักศึกษาในชั้นปี 4 มีการกระจายอย่างไรบ้าง?",
+    "อัตราการจบการศึกษาในแต่ละคณะเป็นเท่าใดและเปรียบเทียบกับปีที่ผ่านมา?"
+  ],
+  "kpis": [
+    {
+      "name": "จำนวนนักศึกษา (รวม)",
+      "metric": "รหัสนักศึกษา",
+      "aggregation": "count_distinct",
+      "formula": "COUNT(DISTINCT รหัสนักศึกษา)",
+      "source_fields": [
+        "รหัสนักศึกษา"
+      ],
+      "limitations": "นับจำนวนรหัสนักศึกษาไม่ซ้ำกันในข้อมูล",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "จำนวนนักศึกษา ชั้นปี 4",
+      "metric": "รหัสนักศึกษา",
+      "aggregation": "count_distinct",
+      "formula": "COUNT(DISTINCT CASE WHEN LEFT(รหัสนักศึกษา,2)='66' THEN รหัสนักศึกษา END)",
+      "source_fields": [
+        "รหัสนักศึกษา"
+      ],
+      "limitations": "คำนวณจากสองตัวแรกของรหัสนักศึกษาเป็น '66' ซึ่งหมายถึงปีการศึกษา 2566; ปีปัจจุบัน 2569 ถือเป็นชั้นปี 4",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "อัตราการจบการศึกษา (เปอร์เซ็นต์)",
+      "metric": "รหัสนักศึกษา",
+      "aggregation": "count_distinct",
+      "formula": "(COUNT(DISTINCT CASE WHEN สถานะ='จบการศึกษา' THEN รหัสนักศึกษา END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
+      "source_fields": [
+        "รหัสนักศึกษา",
+        "สถานะ"
+      ],
+      "limitations": "อัตราขึ้นอยู่กับการกำหนดค่าของสถานะ 'จบการศึกษา'; หากไม่มีข้อมูลอาจเป็นค่าไม่ครบถ้วน",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "คณะ",
+    "สาขาวิชา",
+    "_year_be"
+  ]
+}

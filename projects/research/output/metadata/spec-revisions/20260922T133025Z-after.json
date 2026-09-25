@@ -1,0 +1,74 @@
+{
+  "dashboard_title": "Research",
+  "purpose": "Monitor the uploaded dataset",
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "kpis": [
+    {
+      "name": "จำนวนรายการ",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [
+        "ชื่อ_สกุลนักวิจัย",
+        "ชื่อผลงานวิจัย",
+        "ฐานข้อมูล_ระดับควอไทล์",
+        "ฐานข้อมูลที่ตีพิมพ์"
+      ],
+      "limitations": "Counts all profiled records",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "ปีงบประมาณ",
+    "ชื่อ_สกุลนักวิจัย",
+    "ชื่อผลงานวิจัย",
+    "ฐานข้อมูล_ระดับควอไทล์",
+    "ฐานข้อมูลที่ตีพิมพ์"
+  ],
+  "charts": [
+    {
+      "title": "จำนวนผลงานตีพิมพ์ by ชื่อ_สกุลนักวิจัย",
+      "type": "bar",
+      "dimension": "ชื่อ_สกุลนักวิจัย",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "formula": "SUM(จำนวนผลงานตีพิมพ์)",
+      "source_fields": [
+        "ชื่อ_สกุลนักวิจัย",
+        "จำนวนผลงานตีพิมพ์"
+      ],
+      "limitations": "Counts all profiled records",
+      "target": {
+        "value": 7,
+        "label": "เป้าหมายปี 2568",
+        "year_be": 2543
+      }
+    },
+    {
+      "title": "จำนวนผลงานตีพิมพ์ by ปีงบประมาณ",
+      "type": "line",
+      "dimension": "ปีงบประมาณ",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "formula": "SUM(จำนวนผลงานตีพิมพ์)",
+      "source_fields": [
+        "ปีงบประมาณ",
+        "จำนวนผลงานตีพิมพ์"
+      ],
+      "limitations": "Counts all profiled records",
+      "target": {
+        "value": 7,
+        "label": "เป้าหมายปี 2568",
+        "year_be": 2543
+      }
+    }
+  ],
+  "insight_questions": [
+    "What patterns need follow-up?"
+  ],
+  "generated_by": "local-ai",
+  "last_instruction": "ตัวกรองปีที่เกิดเหตุ ขอแก้ไขคำเป็น ปีที่ตีพิมพ์\nลบตัวกรองปีการศึกษาออก\nสร้างกราฟจำนวนผลงานวิจัย แยกตามรายปี และให้มีเส้นเป้าหมายอยู่ภายในกราฟ เส้นเป้าหมายปี 2568 คือ 7 เรื่อง"
+}

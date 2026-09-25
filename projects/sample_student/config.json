@@ -1,0 +1,16 @@
+{
+  "name": "sample_student",
+  "language": "th",
+  "timezone": "Asia/Bangkok",
+  "dashboard_type": "auto",
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "show_insights": true,
+  "show_data_table": true,
+  "responsive": true,
+  "theme": "mahidol-faculty",
+  "source_files": [
+    "sample_student_dropout_1.xlsx",
+    "sample_student_dropout_v2.xlsx"
+  ],
+  "category": "Student Analytics"
+}

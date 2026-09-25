@@ -129,6 +129,7 @@ Identify:
 - row/column counts
 - sheets
 - data types
+- semantic field role: identifier, measure, category, or date
 - date fields
 - measures
 - dimensions
@@ -201,8 +202,89 @@ Preferred visualization:
 
 Avoid decorative and misleading charts.
 
+Never use identifiers (student IDs, document IDs, codes, or near-unique
+numbers) as a KPI metric, aggregation, chart axis, or filter. If a field has
+too many distinct category values for a readable chart, do not chart it; report
+that grouping or source-data review is required instead.
+
+For each date field, parse the dominant valid format first, normalize compatible
+formats into BE year, Thai abbreviated month, and quarter, and report values
+that cannot be parsed. Never show raw mixed-format dates as separate chart
+categories. A date-based chart must use a normalized year/month/quarter
+dimension.
+
+Generate filters from suitable low-cardinality dimensions. Filters must allow
+multiple selected values; no selected values means all values. When date data
+supports it, include multi-select year, month, and quarter filters. Explicit
+user requirements may add filters only when their fields pass these checks.
+
+## Global Language And Layout Standard
+
+Never expose internal field names such as `_year_be` or `_academic_year_be` in
+the user interface. Use concise context-appropriate Thai labels, for example
+`ปีที่เกิดเหตุ (พ.ศ.)`, `ปีการศึกษา (พ.ศ.)`, `เดือน`, and `ไตรมาส`.
+Users may override displayed filter text without changing data logic by a Local
+AI instruction such as `แก้ไขข้อความบนฟิลเตอร์ year_ เป็นคำว่า ปีงบประมาณ`.
+
+On desktop, the detail area must use a stable 3-column layout: the data table
+spans 2 columns and the issue-tracking panel occupies 1 column. On narrower
+screens, stack these panels. The tracker panel is mandatory even when it only
+states that no structural issue was found.
+
+Bar charts must show the category axis, metric axis, and a visible numeric
+scale from zero to the filtered maximum; never rely solely on in-bar lengths.
+For trend columns, category labels belong below the X-axis and values belong
+above the marks, with horizontal grid lines for comparison.
+
+## Requirement-to-calculation contract
+
+When a user requests a dashboard in natural language, translate each requested
+visual into a structured plan before building: `title`, `chart type`,
+`dimension`, `metric`, `aggregation`, `formula`, and `data limitations`.
+Reject or flag a request when one of these cannot be grounded in source fields.
+
+For a student dataset, interpret common requests consistently:
+- total students: documented cohort total; de-duplicate by student ID and
+  reporting year when the data represents individual students
+- students by faculty/program: pie share or sorted bar using the cohort total
+- students by year: annual comparison bar
+- dropouts by month/year/faculty: sum the dropout count at the requested grain
+- dropout reasons and completion status: proportions with an explicit total
+- completion rate: average only when source values are comparable percentages;
+  otherwise calculate from a documented numerator and denominator
+
+The dashboard must visibly state limitations when repeated cohort rows, missing
+faculty values, mixed date formats, or incompatible percentages prevent an
+exact calculation.
+
+Every generated chart and KPI must include an accessible calculation detail:
+source field, grouping dimension, formula/aggregation, input-row count, active
+filters, and limitations. A user may correct a chart by naming the chart,
+source column, formula, and expected value; retain that correction in the spec
+revision and validate it before publishing.
+
 Create:
 `output/metadata/dashboard-spec.json`
+
+## Local AI dashboard specification
+
+When LM Studio is configured, use the local model to propose the dashboard
+specification from the completed dataset profile. This uses the OpenAI-compatible
+LM Studio endpoint configured in the root `.env`; it does not call a cloud AI
+provider.
+
+From the repository root, run:
+
+```bash
+python local-ai/generate_dashboard_spec.py \
+  --profile projects/<project>/output/metadata/dataset-profile.json \
+  --output projects/<project>/output/metadata/dashboard-spec.local-ai.json
+```
+
+Review the generated proposal against the data-quality report and dashboard
+rules before using it to create or update `dashboard-spec.json`. The local model
+must not override explicit `dashboard-request.md` requirements or cause
+unsupported KPIs, charts, or values to be added.
 
 ## Data transformation
 
@@ -212,6 +294,12 @@ Create analytical data under:
 Never overwrite raw input.
 
 Document important transformations.
+
+Read and apply `rules/data-rules.md` as a mandatory global skill. In
+particular, normalize documented categories, create compatible year/month/
+quarter dimensions, display reporting years as Buddhist Era (BE), and preserve
+source values for traceability. Apply its calculation rules for every rate,
+percentage, share, and comparison.
 
 ## Dashboard build
 
@@ -256,11 +344,14 @@ QA report.
 
 Validate:
 - major KPI values
+- identifiers are excluded from metrics and chart axes
 - row counts
 - nulls
 - duplicates
 - date ranges
+- date parse coverage and normalized date groups
 - categories
+- high-cardinality categories and unsupported chart plans
 - charts
 - labels
 - layout

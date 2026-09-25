@@ -1,0 +1,11 @@
+{
+  "project": "re_test",
+  "timestamp": "2026-09-23T03:33:48.360322+00:00",
+  "stages": [
+    "profile",
+    "local-ai-spec",
+    "build",
+    "qa"
+  ],
+  "status": "warning"
+}

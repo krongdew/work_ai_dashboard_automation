@@ -1,0 +1,313 @@
+{
+  "project": "re_test",
+  "generated_at": "2026-09-23T04:13:41.929772+00:00",
+  "input_files": [
+    "sample_research_performance_uncleaned_v1.xlsx",
+    "sample_research_performance_uncleaned_v2.xlsx"
+  ],
+  "records": 40,
+  "worksheets": [
+    {
+      "file": "sample_research_performance_uncleaned_v1.xlsx",
+      "sheet": "Research_Performance_1",
+      "rows": 20,
+      "columns": 8,
+      "fields": [
+        "รหัสนักวิจัย_อาจารย์",
+        "สังกัด_ภาควิชา",
+        "ชื่อผลงานวิจัย",
+        "ฐานข้อมูลที่ตีพิมพ์",
+        "จำนวนผลงานตีพิมพ์",
+        "เป้าหมาย_KPI",
+        "ผลการดำเนินงาน_เทียบเป้า",
+        "รางวัลที่ได้รับ"
+      ]
+    },
+    {
+      "file": "sample_research_performance_uncleaned_v2.xlsx",
+      "sheet": "Research_Performance_2",
+      "rows": 20,
+      "columns": 8,
+      "fields": [
+        "ปีงบประมาณ",
+        "ชื่อ_สกุลนักวิจัย",
+        "รหัสโครงการ",
+        "ประเภทผลงาน_ตีพิมพ์",
+        "ฐานข้อมูล_ระดับควอไทล์",
+        "ดัชนีประสิทธิภาพ_KPI_Pct",
+        "สถานะเทียบเป้าหมาย",
+        "รางวัล_การเชิดชูเกียรติ"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "จำนวนผลงานตีพิมพ์",
+      "type": "number",
+      "role": "measure",
+      "non_null": 19,
+      "distinct": 10,
+      "numeric_ratio": 0.789,
+      "examples": [
+        "1",
+        "1 เรื่อง",
+        "2",
+        "2 เรื่อง",
+        "0"
+      ]
+    },
+    {
+      "name": "ชื่อ_สกุลนักวิจัย",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 20,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ดร.สมชาย ใจดี",
+        " สมชาย ใจดี ",
+        "Dr. Somchai Jaidee",
+        "ผศ.ดร. สมหญิง รักเรียน",
+        "สมหญิง รักเรียน"
+      ]
+    },
+    {
+      "name": "ชื่อผลงานวิจัย",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 19,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "AI for Healthcare Optimization",
+        "AI for Healthcare Optimization ",
+        "AI for Healthcare",
+        "IoT Smart Farming System",
+        "Smart Farming with IoT Sensors"
+      ]
+    },
+    {
+      "name": "ฐานข้อมูล_ระดับควอไทล์",
+      "type": "category",
+      "role": "category",
+      "non_null": 19,
+      "distinct": 17,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Scopus Q1",
+        "Q1",
+        "Scopus (Q1)",
+        "TCI 1",
+        "TCI กลุ่ม 1"
+      ]
+    },
+    {
+      "name": "ฐานข้อมูลที่ตีพิมพ์",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 15,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Scopus (Q1)",
+        "Scopus Q1",
+        "Scopus",
+        "TCI กลุ่ม 1",
+        "TCI 1"
+      ]
+    },
+    {
+      "name": "ดัชนีประสิทธิภาพ_KPI_Pct",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 20,
+      "distinct": 18,
+      "numeric_ratio": 0.85,
+      "examples": [
+        "120%",
+        "1.2",
+        "120.0%",
+        "80%",
+        "0.80"
+      ]
+    },
+    {
+      "name": "ประเภทผลงาน_ตีพิมพ์",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 14,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Journal Article",
+        "บทความวารสาร",
+        "Journal",
+        "Conference Paper",
+        "บทความประชุมวิชาการ"
+      ]
+    },
+    {
+      "name": "ปีงบประมาณ",
+      "type": "date",
+      "role": "date",
+      "non_null": 19,
+      "distinct": 12,
+      "numeric_ratio": 0.789,
+      "examples": [
+        "2566",
+        "2023",
+        "FY2566",
+        "66",
+        "2567"
+      ]
+    },
+    {
+      "name": "ผลการดำเนินงาน_เทียบเป้า",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 14,
+      "numeric_ratio": 0.2,
+      "examples": [
+        "บรรลุเป้าหมาย",
+        "ผ่าน",
+        "Pass",
+        "เกินเป้าหมาย (200%)",
+        "EXCEEDED"
+      ]
+    },
+    {
+      "name": "รหัสนักวิจัย_อาจารย์",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 19,
+      "distinct": 18,
+      "numeric_ratio": 0.053,
+      "examples": [
+        "RES-6601",
+        "RES-6601 ",
+        "RES-6603",
+        "06604",
+        "RES_6605"
+      ]
+    },
+    {
+      "name": "รหัสโครงการ",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 19,
+      "distinct": 11,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PRJ-2023-01",
+        "PRJ202301",
+        "PRJ-2023-02",
+        "PRJ-2023-03",
+        "PRJ-2024-01"
+      ]
+    },
+    {
+      "name": "รางวัล_การเชิดชูเกียรติ",
+      "type": "category",
+      "role": "category",
+      "non_null": 19,
+      "distinct": 14,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Best Paper Award 2023",
+        "รางวัลบทความยอดเยี่ยม",
+        "Best Paper",
+        " - ",
+        "ไม่มี"
+      ]
+    },
+    {
+      "name": "รางวัลที่ได้รับ",
+      "type": "category",
+      "role": "category",
+      "non_null": 19,
+      "distinct": 14,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "รางวัลวิจัยดีเด่น",
+        " Outstanding Paper Award ",
+        "ไม่มี",
+        "รางวัลนวัตกรรมระดับชาติ (Gold)",
+        "เหรียญทอง นวัตกรรม"
+      ]
+    },
+    {
+      "name": "สถานะเทียบเป้าหมาย",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 17,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "OVER_TARGET",
+        "สูงกว่าเป้า",
+        "สูงกว่าเป้าหมาย",
+        "BELOW_TARGET",
+        "ต่ำกว่าเป้า"
+      ]
+    },
+    {
+      "name": "สังกัด_ภาควิชา",
+      "type": "category",
+      "role": "category",
+      "non_null": 19,
+      "distinct": 12,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "วิทยาการคอมพิวเตอร์",
+        "วิทยการคอมฯ",
+        "Computer Science",
+        "วิศวกรรมซอฟต์แวร์",
+        "SE"
+      ]
+    },
+    {
+      "name": "เป้าหมาย_KPI",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 5,
+      "numeric_ratio": 0.85,
+      "examples": [
+        "1",
+        "1 เรื่อง/ปี",
+        "1 เรื่อง",
+        "2",
+        "2 เรื่อง"
+      ]
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 0,
+    "missing_values": {
+      "จำนวนผลงานตีพิมพ์": 21,
+      "ชื่อ_สกุลนักวิจัย": 20,
+      "ชื่อผลงานวิจัย": 20,
+      "ฐานข้อมูล_ระดับควอไทล์": 21,
+      "ฐานข้อมูลที่ตีพิมพ์": 20,
+      "ดัชนีประสิทธิภาพ_KPI_Pct": 20,
+      "ประเภทผลงาน_ตีพิมพ์": 20,
+      "ปีงบประมาณ": 21,
+      "ผลการดำเนินงาน_เทียบเป้า": 20,
+      "รหัสนักวิจัย_อาจารย์": 21,
+      "รหัสโครงการ": 21,
+      "รางวัล_การเชิดชูเกียรติ": 21,
+      "รางวัลที่ได้รับ": 21,
+      "สถานะเทียบเป้าหมาย": 20,
+      "สังกัด_ภาควิชา": 21,
+      "เป้าหมาย_KPI": 20
+    },
+    "date_parsing": {
+      "ปีงบประมาณ": {
+        "parsed": 19,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

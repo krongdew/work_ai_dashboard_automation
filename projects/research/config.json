@@ -1,0 +1,16 @@
+{
+  "name": "research",
+  "category": "Uncategorized",
+  "language": "th",
+  "timezone": "Asia/Bangkok",
+  "dashboard_type": "auto",
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "show_insights": true,
+  "show_data_table": true,
+  "responsive": true,
+  "theme": "mahidol-faculty",
+  "source_files": [
+    "sample_research_performance_uncleaned_v1.xlsx",
+    "sample_research_performance_uncleaned_v2.xlsx"
+  ]
+}

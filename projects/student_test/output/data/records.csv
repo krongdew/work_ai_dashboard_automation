@@ -1,0 +1,41 @@
+_source_file,_source_row,_source_sheet,คณะ,ชื่อ_นามสกุล,รหัสนักศึกษา,วันที่ลาออก,สถานะ,สาขาวิชา,สาเหตุการลาออก,เกรดเฉลี่ย_GPAX
+student_records_batch1_clean85.xlsx,2,Students_Batch1,วิศวกรรมศาสตร์,นายสมชาย ใจดี,6601001,,กำลังศึกษา,วิศวกรรมคอมพิวเตอร์,,3.25
+student_records_batch1_clean85.xlsx,3,Students_Batch1,วิศวกรรมศาสตร์,นางสาววิภา รักเรียน,6601002,,กำลังศึกษา,วิศวกรรมคอมพิวเตอร์,,3.8
+student_records_batch1_clean85.xlsx,4,Students_Batch1,วิทยาศาสตร์,นายอนันต์ มั่นคง,6601003 ,2023-09-15,ลาออก,วิทยาการคอมพิวเตอร์,ปัญหาทางการเงิน,2.15
+student_records_batch1_clean85.xlsx,5,Students_Batch1,วิทยาศาสตร์,นายกานต์ สดใส,6601004,,กำลังศึกษา,วิทยาการคอมพิวเตอร์,,3.1
+student_records_batch1_clean85.xlsx,6,Students_Batch1,เทคโนโลยีสารสนเทศ,นางสาวนภา เพียรเรียน,6601005,,กำลังศึกษา,เทคโนโลยีสารสนเทศ,,2.95
+student_records_batch1_clean85.xlsx,7,Students_Batch1,เทคโนโลยีสารสนเทศ,นายชัย เลิศล้ำ,6601006,2023-10-01,ลาออก,เทคโนโลยีสารสนเทศ,ผลการเรียนไม่ถึงเกณฑ์,1.85
+student_records_batch1_clean85.xlsx,8,Students_Batch1,บริหารธุรกิจ,นางสาวพร ชัยชนะ,6601007,,กำลังศึกษา,การตลาด,,"3,45"
+student_records_batch1_clean85.xlsx,9,Students_Batch1,บริหารธุรกิจ,นายพิมพ์ ก้าวหน้า,6601008,,กำลังศึกษา,การตลาด,,2.7
+student_records_batch1_clean85.xlsx,10,Students_Batch1,วิศวกรรมศาสตร์,นายสุชาติ วิชาการ,6601009,,กำลังศึกษา,วิศวกรรมโยธา,,3
+student_records_batch1_clean85.xlsx,11,Students_Batch1,วิศวกรรมศาสตร์,นายเดชา ปัญญา,6601010,,กำลังศึกษา,วิศวกรรมโยธา,,2.4
+student_records_batch1_clean85.xlsx,12,Students_Batch1,วิทยาศาสตร์,นางสาวนิพา สุขใจ,6601011,15/11/2023,ลาออก,เคมี,ปัญหาสุขภาพ,2.1
+student_records_batch1_clean85.xlsx,13,Students_Batch1,วิทยาศาสตร์,นายศิริ ชาญฉลาด,6601012,,จบการศึกษา,เคมี,,3.65
+student_records_batch1_clean85.xlsx,14,Students_Batch1,บริหารธุรกิจ,นายวีระ สู้ชีวิต,6601013,,จบการศึกษา,การเงิน,,3.15
+student_records_batch1_clean85.xlsx,15,Students_Batch1,บริหารธุรกิจ,นางสาวอุมา สวยงาม,6601014,,กำลังศึกษา,การเงิน,,2.8
+student_records_batch1_clean85.xlsx,16,Students_Batch1,เทคโนโลยีสารสนเทศ,นายฤทธิ์ เกรียงไกร,6601015,2023-12-20,ลาออก,เทคโนโลยีสารสนเทศ,ปัญหาสุขภาาพ,1.9
+student_records_batch1_clean85.xlsx,17,Students_Batch1,วิศวกรรมศาสตร์,นางสาวสุดา ดีเลิศ,6601016,,จบการศึกษา,วิศวกรรมคอมพิวเตอร์,,3.9
+student_records_batch1_clean85.xlsx,18,Students_Batch1,วิทยาศาสตร์,นายกิตติ เก่งกล้า,6601017,,กำลังศึกษา,วิทยาการคอมพิวเตอร์,,3.05
+student_records_batch1_clean85.xlsx,19,Students_Batch1,บริหารธุรกิจ,นางสาวมนตรี มีสุข,6601018,,กำลังศึกษา,การตลาด,,
+student_records_batch1_clean85.xlsx,20,Students_Batch1,เทคโนโลยีสารสนเทศ,นายปัญญา ชนะศึก,6601019,,กำลังศึกษา,เทคโนโลยีสารสนเทศ,,2.6
+student_records_batch1_clean85.xlsx,21,Students_Batch1,วิศวกรรมศาสตร์,นางสาวศิริพร เจริญ,6601020,,จบการศึกษา,วิศวกรรมโยธา,,3.3
+student_records_batch2_clean85.xlsx,2,Students_Batch2,วิศวกรรมศาสตร์,นายธนกฤต มั่นคง,6602001,,กำลังศึกษา,วิศวกรรมคอมพิวเตอร์,,3.4
+student_records_batch2_clean85.xlsx,3,Students_Batch2,วิศวกรรมศาสตร์,นางสาวชลธิชา สดใส,STD-6602002,,กำลังศึกษา,วิศวกรรมคอมพิวเตอร์,,3.15
+student_records_batch2_clean85.xlsx,4,Students_Batch2,วิทยาศาสตร์,นายณัฐพงษ์ ใจดี,6602003,2024-01-10,ลาออก,วิทยาการคอมพิวเตอร์,ย้ายสถานศึกษา,2.05
+student_records_batch2_clean85.xlsx,5,Students_Batch2,วิทยาศาสตร์,นางสาวเกศินี เพียรเรียน,6602004,,กำลังศึกษา,วิทยาการคอมพิวเตอร์,,3.5
+student_records_batch2_clean85.xlsx,6,Students_Batch2,เทคโนโลยีสารสนเทศ,นายปารเมศ วิชาการ,6602005,,กำลังศึกษา,เทคโนโลยีสารสนเทศ,,2.85
+student_records_batch2_clean85.xlsx,7,Students_Batch2,เทคโนโลยีสารสนเทศ,นางสาวภัทรา สุขใจ,6602006,,จบการศึกษา,เทคโนโลยีสารสนเทศ,,3.7
+student_records_batch2_clean85.xlsx,8,Students_Batch2,บริหารธุรกิจ,นายธีรภัทร ชัยชนะ,6602007,,กำลังศึกษา,การตลาด,,2.9
+student_records_batch2_clean85.xlsx,9,Students_Batch2,บริหารธุรกิจ,นางสาวอนันตญา ก้าวหน้า,6602008,10-02-2567,ลาออก,การตลาด,ปัญหาทางการเงิน,1.95
+student_records_batch2_clean85.xlsx,10,Students_Batch2,วิศวกรรมศาสตร์,นายวรเมธ ปัญญา,6602009,,กำลังศึกษา,วิศวกรรมไฟฟ้า,,3.2
+student_records_batch2_clean85.xlsx,11,Students_Batch2,วิศวกรรมศาสตร์,นางสาวธัญญารัตน์ ชาญฉลาด,66020010,,กำลังศึกษา,วิศวกรรมไฟฟ้า,,2.5
+student_records_batch2_clean85.xlsx,12,Students_Batch2,วิทยาศาสตร์,นายศุภกร ดีเลิศ,6602011,,จบการศึกษา,เคมี,,3.85
+student_records_batch2_clean85.xlsx,13,Students_Batch2,วิทยาศาสตร์,นางสาวกานต์ธิดา มีสุข,6602012,2024-03-01,ลา ออก,เคมี,ผลการเรียนไม่ถึงเกณฑ์,1.8
+student_records_batch2_clean85.xlsx,14,Students_Batch2,บริหารธุรกิจ,นายอภิสิทธิ์ สุขสมบูรณ์,6602013,,กำลังศึกษา,การเงิน,,3.1
+student_records_batch2_clean85.xlsx,15,Students_Batch2,บริหารธุรกิจ,นางสาวสุภาพร เลิศล้ำ,6602014,,กำลังศึกษา,การเงิน,,2.75
+student_records_batch2_clean85.xlsx,16,Students_Batch2,เทคโนโลยีสารสนเทศ,นายพงศธร เกรียงไกร,6602015,,จบการศึกษา,เทคโนโลยีสารสนเทศ,,3.6
+student_records_batch2_clean85.xlsx,17,Students_Batch2,วิศวกรรมศาสตร์,นางสาววรรณิดา สวยงาม,6602016,,กำลังศึกษา,วิศวกรรมคอมพิวเตอร์,,4.5
+student_records_batch2_clean85.xlsx,18,Students_Batch2,วิทยาศาสตร์,นายกฤษดา ชนะศึก,6602017,2024-04-15,ลาออก,วิทยาการคอมพิวเตอร์,ปัญหาสุขภาพ,2.3
+student_records_batch2_clean85.xlsx,19,Students_Batch2,บริหารธุรกิจ,นางสาวพิมลพรรณ เจริญ,6602018,,กำลังศึกษา,การตลาด,,3.05
+student_records_batch2_clean85.xlsx,20,Students_Batch2,วิทยาศาสตร์,นายชยพล กล้าหาญ,6602019,,กำลังศึกษา,วิทยการคอมฯ,,2.9
+student_records_batch2_clean85.xlsx,21,Students_Batch2,เทคโนโลยีสารสนเทศ,นางสาวจินตนา มั่นใจ,6602020,,จบการศึกษา,เทคโนโลยีสารสนเทศ,,3.45

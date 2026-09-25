@@ -1,0 +1,20 @@
+{
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "purpose": "Monitor the uploaded dataset",
+  "questions": [
+    "What patterns need follow-up?"
+  ],
+  "kpis": [
+    {
+      "name": "จำนวนรายการ",
+      "metric": "record_count",
+      "reason": "Counts all profiled records"
+    }
+  ],
+  "filters": [
+    "Admission_Type",
+    "Advisor_Name",
+    "Allowed_Program_Type",
+    "Category"
+  ]
+}

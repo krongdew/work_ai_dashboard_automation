@@ -1,6 +1,6 @@
 {
   "project": "cass",
-  "run_id": "cass-20260922T133629",
+  "run_id": "cass-20260922T172110",
   "input_files": [
     "Academic_services_without_income.xlsx",
     "Operational & Service Excellence by CAAS.xlsx",
@@ -27,5 +27,5 @@
     "non-income activity view includes only named projects"
   ],
   "critical_errors": [],
-  "timestamp": "2026-09-22T13:36:29.204105+07:00"
+  "timestamp": "2026-09-22T17:21:10.950129+07:00"
 }

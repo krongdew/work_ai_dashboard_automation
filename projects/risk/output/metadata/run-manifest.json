@@ -1,0 +1,11 @@
+{
+  "project": "risk",
+  "timestamp": "2026-09-22T14:12:56.533342+00:00",
+  "stages": [
+    "profile",
+    "local-ai-spec",
+    "build",
+    "qa"
+  ],
+  "status": "warning"
+}

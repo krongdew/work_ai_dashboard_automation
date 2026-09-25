@@ -1,0 +1,59 @@
+{
+  "dashboard_title": "Student Dropout Analysis Dashboard",
+  "purpose": "To analyze student dropout data from two datasets, including reasons for dropouts, trends over time, and comparisons between different student cohorts.",
+  "audience": "Academic administrators and student affairs staff",
+  "kpis": [
+    "Total number of dropouts",
+    "Dropout rate by academic year",
+    "Most common reasons for dropout"
+  ],
+  "filters": [
+    "Academic year",
+    "Reason for dropout",
+    "Month of dropout"
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Dropout Reasons Distribution",
+      "description": "Distribution of reasons for student dropouts across different categories.",
+      "fields": [
+        "สาเหตุการลาออก"
+      ]
+    },
+    {
+      "type": "line",
+      "title": "Dropout Trends Over Time",
+      "description": "Trend of student dropouts by month and academic year.",
+      "fields": [
+        "เดือน_วันที่ลาออก",
+        "ปีการศึกษาที่เข้า"
+      ]
+    },
+    {
+      "type": "bar",
+      "title": "Dropout Rate by Academic Year",
+      "description": "Proportion of dropouts per academic year.",
+      "fields": [
+        "ปีการศึกษาที่เข้า",
+        "อัตราการจบตามวงรอบ"
+      ]
+    },
+    {
+      "type": "bar",
+      "title": "Comparison of Dropout Reasons by Academic Year",
+      "description": "Comparison of reasons for dropout across different academic years.",
+      "fields": [
+        "ปีการศึกษาที่เข้า",
+        "สาเหตุการลาออก"
+      ]
+    }
+  ],
+  "insight_questions": [
+    "What are the primary reasons students drop out?",
+    "How has the dropout rate changed over different academic years?",
+    "Are there specific months or times when dropouts are more common?"
+  ],
+  "generated_by": "local-ai",
+  "last_instruction": "อยากให้ dashboard นี้ แสดงจำนวนนักศึกษาทั้งหมด,จำนวนนักศึกษาแยกตาม คณะ/สาขา เป็นสัดส่วน กราฟวงกลม,แสดงจำนวนนักศึกษาเปรียบเทียบในแต่ละปี,แสดงจำนวนนักศึกษาที่ลาออกแยกตามรายเดือน-รายปี-แยกตามคณะ/สาขา,แสดงสาเหตุการลาออกเป็นสัดส่วน,แสดงอัตราร้อยละของการสำเร็จการศึกษาตามวงรอบ,แสดงอัตราสัดส่วนของการสำเร็จการศึกษาและไม่สำเร็จการศึกษา"
+}
