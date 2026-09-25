@@ -2,6 +2,24 @@
 
 Multi-project AI dashboard automation for VS Code + GitHub Copilot Agent.
 
+## เปิดใช้ระบบ
+
+1. สร้าง Groq API key แล้วกำหนด `GROQ_API_KEY`, `GROQ_MODEL=openai/gpt-oss-120b` และ `GROQ_FALLBACK_MODEL=llama-3.3-70b-versatile` ใน environment หรือ `.env` ที่ไม่ commit.
+2. เปิด Terminal ที่โฟลเดอร์ repository และรัน:
+
+```bash
+source .venv/bin/activate
+python factory-ui/app.py
+```
+
+3. เปิด `http://127.0.0.1:5050` แล้วสร้างหรือเลือก project, อัปโหลดข้อมูล,
+	กด Profile, Groq AI Suggest/Improve และ Build Dashboard ตามลำดับ.
+
+ระบบสร้างหรือปรับ dashboard spec ผ่าน **Groq API** โดยค่าเริ่มต้นใช้ `openai/gpt-oss-120b` และ fallback เป็น `llama-3.3-70b-versatile`.
+ระบบส่งเฉพาะ metadata ที่ลดข้อมูลแล้ว: ไม่ส่ง source files, raw records, example values,
+identifier หรือ field PII. การคำนวณ KPI, การสร้าง dashboard และ QA ทำในเครื่องทั้งหมด.
+API key อยู่ใน environment หรือ `.env` เท่านั้น และห้าม commit ลง repository.
+
 Workflow:
 1. Create or select a project.
 2. Put Excel/CSV files into `projects/<project>/input/`.
@@ -68,3 +86,4 @@ GitHub Pages จะ deploy อัตโนมัติหลัง push ไฟ�
 - คลิกแท่งกราฟเพื่อ cross-filter KPI, กราฟ และตาราง แล้วล้างได้
 - เลือกปีงบประมาณเพื่อดู KPI เทียบปีก่อนด้วยลูกศรและเปอร์เซ็นต์
 - แยก 3 แท็บ: บริการมีรายได้, บริการวิชาการแบบไม่ได้รายได้, และเปรียบเทียบงบประมาณ
+# data_agentic_private
