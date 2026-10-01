@@ -1,0 +1,95 @@
+{
+  "dashboard_title": "Dashboard of Academic Targets",
+  "purpose": "Monitor and compare academic year targets across categories and programs to support strategic planning.",
+  "audience": "University management and academic planners.",
+  "kpis": [
+    {
+      "name": "Total Target",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "SUM",
+      "formula": "SUM(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)"
+      ],
+      "limitations": "Small dataset (10 records); targets may represent program-level goals and summing across categories could double-count if programs overlap.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Average Target per Program",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "AVG",
+      "formula": "AVG(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)",
+        "Program (หลักสูตร)"
+      ],
+      "limitations": "Average across programs; assumes each program target is comparable.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "Academic_Year (ปีการศึกษา)สำหรับฟิว",
+    "Category (ประเภท)",
+    "Program (หลักสูตร)"
+  ],
+  "display_labels": {
+    "Academic_Year (ปีการศึกษา)สำหรับฟิว": "ปีการศึกษา",
+    "Category (ประเภท)": "ประเภท",
+    "Program (หลักสูตร)": "หลักสูตร",
+    "_year_be": "ปี พ.ศ."
+  },
+  "charts": [
+    {
+      "title": "Target Trend by Academic Year",
+      "type": "line",
+      "dimension": "_year_be",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "SUM",
+      "formula": "SUM(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)",
+        "_year_be"
+      ],
+      "limitations": "Aggregated sum; assumes targets are additive across records for the same year."
+    },
+    {
+      "title": "Target Distribution by Category",
+      "type": "bar",
+      "dimension": "Category (ประเภท)",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "SUM",
+      "formula": "SUM(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)",
+        "Category (ประเภท)"
+      ],
+      "limitations": "Sum may double-count if categories overlap."
+    },
+    {
+      "title": "Target Share by Program",
+      "type": "pie",
+      "dimension": "Program (หลักสูตร)",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "SUM",
+      "formula": "SUM(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)",
+        "Program (หลักสูตร)"
+      ],
+      "limitations": "Shares based on summed targets; assumes programs are mutually exclusive."
+    }
+  ],
+  "insight_questions": [
+    "Is the total target increasing compared to the previous academic year?",
+    "Which category contributes the most to the overall target?",
+    "How does each program's target share change over time?",
+    "Are there any programs with declining target levels year-over-year?"
+  ],
+  "generated_by": "groq-ai"
+}

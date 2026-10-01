@@ -140,6 +140,43 @@ Identify:
 Create:
 `output/metadata/dataset-profile.json`
 
+## AI semantic profile
+
+After deterministic profiling, use the configured AI provider to create
+`output/metadata/semantic-profile.local-ai.json` before proposing a dashboard
+specification. This is an advisory layer, not a replacement for profiling or
+calculation rules.
+
+Send only privacy-reduced metadata: field names, detected roles and types,
+non-null/distinct counts, numeric ratios, date parsing coverage, and derived
+dimensions. Do not send source files, rows, example values, identifiers, or PII
+fields to a cloud provider.
+
+Use the AI result to suggest a field's likely business meaning, unit, and safe
+aggregation guidance with confidence and limitations. Validate every suggestion
+against the deterministic profile and data rules. AI must never create a field,
+relationship, formula, KPI, or value not grounded in the source profile.
+Regenerate the semantic profile whenever the deterministic profile changes.
+
+## AI-assisted normalization
+
+Create a normalization plan from low-cardinality category and date values after
+profiling. The configured AI provider may propose an exact-value mapping only
+when values are clearly equivalent. Validate that the field and source value
+exist in the profile before applying a mapping. Never map identifiers, names,
+free-text fields, high-cardinality values, or numeric measures automatically.
+
+Apply accepted mappings only to analytical output; never edit raw input. Record
+every source-to-target change, its reason, affected-row count, and all AI
+warnings in `output/reports/transformation-report.md`. A warning is required
+when a value is ambiguous or cannot be normalized safely.
+
+Detect date fields from values as well as headers. Parse valid Thai Buddhist
+Era, Gregorian, ISO datetime, Thai month-name, and English month-name values
+into normalized dashboard dimensions. All dashboard year summaries, filters,
+and labels must display Buddhist Era years. Retain raw date values only for
+traceability; do not group charts on mixed raw date strings.
+
 ## Data quality
 
 Check:

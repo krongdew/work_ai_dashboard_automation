@@ -2,16 +2,22 @@
 from __future__ import annotations
 
 import csv
+import hashlib
+from html import escape
+from io import BytesIO
 import json
 import re
 import shutil
 import sys
+import zipfile
+from uuid import uuid4
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from threading import Lock, Thread
+from typing import Any, Callable
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from openpyxl import load_workbook
 
@@ -27,6 +33,8 @@ sys.path.insert(0, str(LOCAL_AI))
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024
 ALLOWED_UPLOAD_SUFFIXES = {".xlsx", ".xlsm", ".csv"}
+AI_JOBS: dict[str, dict[str, Any]] = {}
+AI_JOBS_LOCK = Lock()
 
 
 def project_dir(name: str) -> Path:
@@ -107,6 +115,9 @@ THAI_MONTHS = {
     "ม.ค.": (1, "ม.ค."), "ก.พ.": (2, "ก.พ."), "มี.ค.": (3, "มี.ค."), "เม.ย.": (4, "เม.ย."),
     "พ.ค.": (5, "พ.ค."), "มิ.ย.": (6, "มิ.ย."), "ก.ค.": (7, "ก.ค."), "ส.ค.": (8, "ส.ค."),
     "ก.ย.": (9, "ก.ย."), "ต.ค.": (10, "ต.ค."), "พ.ย.": (11, "พ.ย."), "ธ.ค.": (12, "ธ.ค."),
+    "มกราคม": (1, "ม.ค."), "กุมภาพันธ์": (2, "ก.พ."), "มีนาคม": (3, "มี.ค."), "เมษายน": (4, "เม.ย."),
+    "พฤษภาคม": (5, "พ.ค."), "มิถุนายน": (6, "มิ.ย."), "กรกฎาคม": (7, "ก.ค."), "สิงหาคม": (8, "ส.ค."),
+    "กันยายน": (9, "ก.ย."), "ตุลาคม": (10, "ต.ค."), "พฤศจิกายน": (11, "พ.ย."), "ธันวาคม": (12, "ธ.ค."),
 }
 ENGLISH_MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
 
@@ -152,10 +163,10 @@ def field_role(name: str, values: list[Any], record_count: int) -> str:
     distinct_ratio = len({str(value) for value in values}) / max(len(values), 1)
     numeric_ratio = sum(numeric(value) is not None for value in values) / max(len(values), 1)
     date_ratio = sum(parse_reporting_date(value) is not None for value in values) / max(len(values), 1)
+    if date_ratio >= .5 and not (numeric_ratio >= .8 and distinct_ratio >= .85):
+        return "date"
     if re.search(r"id|หัส|code|เลขที่", label) or (numeric_ratio >= .8 and distinct_ratio >= .85):
         return "identifier"
-    if re.search(r"date|วัน|เดือน|year|ปี", label) and (date_ratio >= .5 or numeric_ratio >= .7):
-        return "date"
     if numeric_ratio >= .7 and distinct_ratio < .85:
         return "measure"
     return "category"
@@ -194,8 +205,142 @@ def profile_project(name: str) -> dict[str, Any]:
     return profile
 
 
+def default_calculation_rules() -> dict[str, Any]:
+    return {
+        "current_academic_year_be": datetime.now().year + 543,
+        "student_id": {
+            "field": "",
+            "entry_year_digits": 2,
+            "entry_year_base_be": 2500,
+            "program_years": 4,
+            "maximum_study_years": 8,
+        },
+        "risk": {"gpa_field": "", "gpa_below": 2.0},
+        "calculation_instruction": "",
+        "metric_contracts": [],
+    }
+
+
 def default_config(name: str, profile: dict[str, Any]) -> dict[str, Any]:
-    return {"name": name, "category": "Uncategorized", "language": "th", "timezone": "Asia/Bangkok", "dashboard_type": "auto", "audience": "ผู้บริหารและผู้ปฏิบัติงาน", "show_insights": True, "show_data_table": True, "responsive": True, "theme": "mahidol-faculty", "source_files": profile["input_files"]}
+    return {
+        "name": name,
+        "category": "Uncategorized",
+        "language": "th",
+        "timezone": "Asia/Bangkok",
+        "dashboard_type": "auto",
+        "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+        "show_insights": True,
+        "show_data_table": True,
+        "responsive": True,
+        "theme": "mahidol-faculty",
+        "source_files": profile["input_files"],
+        "calculation_rules": default_calculation_rules(),
+    }
+
+
+def project_config(name: str, profile: dict[str, Any]) -> dict[str, Any]:
+    path = project_dir(name) / "config.json"
+    defaults = default_config(name, profile)
+    current = read_json(path, {})
+    config = {**defaults, **current}
+    config["source_files"] = profile["input_files"]
+    config["calculation_rules"] = {**defaults["calculation_rules"], **(current.get("calculation_rules") or {})}
+    config["calculation_rules"]["student_id"] = {**defaults["calculation_rules"]["student_id"], **(config["calculation_rules"].get("student_id") or {})}
+    config["calculation_rules"]["risk"] = {**defaults["calculation_rules"]["risk"], **(config["calculation_rules"].get("risk") or {})}
+    return config
+
+
+def validate_calculation_rules(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError("Calculation rules must be an object.")
+    defaults = default_calculation_rules()
+    rules = {**defaults, **value}
+    rules["student_id"] = {**defaults["student_id"], **(value.get("student_id") or {})}
+    rules["risk"] = {**defaults["risk"], **(value.get("risk") or {})}
+    year = rules.get("current_academic_year_be")
+    if not isinstance(year, int) or not 2400 <= year <= 2700:
+        raise ValueError("Current academic year must be a Buddhist Era year between 2400 and 2700.")
+    student = rules["student_id"]
+    if not isinstance(student.get("field"), str) or not isinstance(student.get("entry_year_digits"), int) or student["entry_year_digits"] not in {2, 4}:
+        raise ValueError("Student ID rule must specify a field and two or four entry-year digits.")
+    for key in ("entry_year_base_be", "program_years", "maximum_study_years"):
+        if not isinstance(student.get(key), int) or student[key] < 1:
+            raise ValueError(f"Student ID rule {key} must be a positive integer.")
+    risk = rules["risk"]
+    if not isinstance(risk.get("gpa_field"), str) or not isinstance(risk.get("gpa_below"), (int, float)) or not 0 <= float(risk["gpa_below"]) <= 4:
+        raise ValueError("Risk rule must contain a GPA field and threshold from 0 to 4.")
+    if not isinstance(rules.get("calculation_instruction"), str) or len(rules["calculation_instruction"]) > 5000:
+        raise ValueError("Calculation instruction must be text with at most 5000 characters.")
+    contracts = rules.get("metric_contracts")
+    if not isinstance(contracts, list) or len(contracts) > 30:
+        raise ValueError("Metric contracts must be a list containing at most 30 items.")
+    contract_ids: set[str] = set()
+    validated_contracts = []
+    required_fields = {
+        "completion_rate": ("numerator_field", "denominator_field"),
+        "profit": ("revenue_field", "expense_field"),
+        "ratio": ("numerator_field", "denominator_field"),
+        "category_share": ("category_field", "category_value"),
+    }
+    for contract in contracts:
+        if not isinstance(contract, dict):
+            raise ValueError("Each metric contract must be an object.")
+        contract_id = str(contract.get("id", "")).strip()
+        contract_type = str(contract.get("type", "")).strip()
+        status = str(contract.get("status", "draft")).strip()
+        if not re.fullmatch(r"[a-z][a-z0-9_-]{1,63}", contract_id) or contract_id in contract_ids:
+            raise ValueError("Each metric contract needs a unique lowercase id.")
+        if contract_type not in required_fields or status not in {"draft", "approved"}:
+            raise ValueError("Metric contract type or status is invalid.")
+        if not isinstance(contract.get("name"), str) or not contract["name"].strip() or len(contract["name"]) > 120:
+            raise ValueError("Each metric contract needs a name up to 120 characters.")
+        for field in required_fields[contract_type]:
+            if not isinstance(contract.get(field), str) or not contract[field].strip() or len(contract[field]) > 160:
+                raise ValueError(f"Metric contract {contract_id} needs {field}.")
+        scale = contract.get("scale", 100)
+        if not isinstance(scale, (int, float)) or not 0 < float(scale) <= 100000:
+            raise ValueError("Metric contract scale must be greater than zero.")
+        version = contract.get("version", 1)
+        if not isinstance(version, int) or version < 1:
+            raise ValueError("Metric contract version must be a positive integer.")
+        validated_contracts.append({
+            **contract,
+            "id": contract_id,
+            "type": contract_type,
+            "name": contract["name"].strip(),
+            "status": status,
+            "scale": float(scale),
+            "version": version,
+        })
+        contract_ids.add(contract_id)
+    rules["metric_contracts"] = validated_contracts
+    return rules
+
+
+METRIC_CONTRACT_TEMPLATES = [
+    {"id": "education-completion-rate", "name": "อัตราสำเร็จการศึกษา", "type": "completion_rate", "description": "ผลรวมตัวตั้ง ÷ ผลรวมตัวหาร × 100", "fields": ["numerator_field", "denominator_field"]},
+    {"id": "finance-profit", "name": "กำไร", "type": "profit", "description": "ผลรวมรายรับ - ผลรวมค่าใช้จ่าย", "fields": ["revenue_field", "expense_field"]},
+    {"id": "general-ratio", "name": "อัตราส่วน", "type": "ratio", "description": "ผลรวมตัวตั้ง ÷ ผลรวมตัวหาร × scale", "fields": ["numerator_field", "denominator_field"]},
+    {"id": "general-category-share", "name": "สัดส่วนหมวดหมู่", "type": "category_share", "description": "จำนวนรายการในค่าหมวดหมู่ ÷ จำนวนรายการทั้งหมด × 100", "fields": ["category_field", "category_value"]},
+]
+
+
+def approved_metric_contracts(rules: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {item["id"]: item for item in rules.get("metric_contracts", []) if item.get("status") == "approved"}
+
+
+def validate_metric_contract_fields(rules: dict[str, Any], profile: dict[str, Any]) -> None:
+    available = {field["name"] for field in profile.get("fields", [])}
+    fields_by_type = {
+        "completion_rate": ("numerator_field", "denominator_field"),
+        "profit": ("revenue_field", "expense_field"),
+        "ratio": ("numerator_field", "denominator_field"),
+        "category_share": ("category_field",),
+    }
+    for contract in rules["metric_contracts"]:
+        missing = [field for field in fields_by_type[contract["type"]] if contract[field] not in available]
+        if missing:
+            raise ValueError(f"Metric contract {contract['id']} refers to unavailable field(s): {', '.join(missing)}.")
 
 
 DISPLAY_LABELS = {
@@ -256,11 +401,11 @@ def student_analytics_spec(instruction: str, profile: dict[str, Any]) -> dict[st
     }
 
 
-def grounded_spec_errors(spec: dict[str, Any], profile: dict[str, Any]) -> list[str]:
+def grounded_spec_errors(spec: dict[str, Any], profile: dict[str, Any], rules: dict[str, Any] | None = None) -> list[str]:
     """Reject a plan that cannot be rendered from the profiled dataset."""
     fields = {field["name"] for field in profile["fields"]}
     allowed_dimensions = fields | {"_year_be", "_academic_year_be", "_month_th", "_quarter", "_source_file"}
-    allowed_metrics = fields | {"record_count", "unique_student_count"}
+    allowed_metrics = fields | {"record_count", "unique_student_count"} | {f"contract:{contract_id}" for contract_id in approved_metric_contracts(rules or default_calculation_rules())}
     errors = []
     charts = spec.get("charts")
     if not isinstance(charts, list) or not charts:
@@ -336,8 +481,135 @@ def cloud_safe_profile(profile: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def planner_workflow_contract() -> str:
-    """Load repository skills and provide Groq the enforceable planning subset."""
+def semantic_profile_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["field_interpretations", "dataset_summary", "warnings"],
+        "properties": {
+            "dataset_summary": {"type": "string"},
+            "warnings": {"type": "array", "items": {"type": "string"}},
+            "field_interpretations": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["field", "semantic_type", "unit", "aggregation_guidance", "business_role", "confidence", "limitations"],
+                    "properties": {
+                        "field": {"type": "string"},
+                        "semantic_type": {"type": "string", "enum": ["identifier", "date", "currency", "count", "percentage", "rate", "quantity", "category", "text", "unknown"]},
+                        "unit": {"type": "string"},
+                        "aggregation_guidance": {"type": "string", "enum": ["do_not_aggregate", "count_distinct", "sum_when_additive", "average_when_comparable", "group_only", "unknown"]},
+                        "business_role": {"type": "string"},
+                        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                        "limitations": {"type": "string"},
+                    },
+                },
+            },
+        },
+    }
+
+
+def semantic_profile(profile: dict[str, Any]) -> dict[str, Any]:
+    """Use AI to interpret profiled fields without exposing source rows or examples."""
+    from ai_client import generate_json, provider_name
+
+    safe_profile = cloud_safe_profile(profile)
+    available_fields = {field["name"] for field in safe_profile["fields"]}
+    result = generate_json(
+        "You are a careful data governance analyst. Interpret field meaning only from the supplied metadata. "
+        "Do not invent business facts, relationships, formulas, or values. Treat every conclusion as a suggestion, "
+        "not a calculation. Identify aggregation risks, especially repeated totals and percentages.",
+        "Create a semantic profile for this dataset. Use only exact field names from the metadata. "
+        "For each included field, state its likely semantic type, unit when evident, aggregation guidance, business role, "
+        "confidence, and limitations. Omit fields whose meaning cannot be inferred safely.\n\n"
+        f"METADATA ONLY:\n{json.dumps(safe_profile, ensure_ascii=False)}",
+        semantic_profile_schema(),
+    )
+    interpretations = [
+        item for item in result.get("field_interpretations", [])
+        if isinstance(item, dict) and item.get("field") in available_fields
+    ]
+    return {
+        "generated_by": f"{provider_name()}-ai",
+        "source": "metadata_only",
+        "profile_generated_at": profile.get("generated_at"),
+        "dataset_summary": str(result.get("dataset_summary", "")),
+        "warnings": [str(item) for item in result.get("warnings", [])],
+        "field_interpretations": interpretations,
+    }
+
+
+def get_semantic_profile(name: str, profile: dict[str, Any]) -> dict[str, Any]:
+    path = project_dir(name) / "output/metadata/semantic-profile.local-ai.json"
+    current = read_json(path, None)
+    if isinstance(current, dict) and current.get("profile_generated_at") == profile.get("generated_at"):
+        return current
+    result = semantic_profile(profile)
+    write_json(path, result)
+    return result
+
+
+def normalization_context(profile: dict[str, Any], records: list[dict[str, Any]]) -> dict[str, Any]:
+    pii_name = re.compile(r"name|surname|email|phone|address|ชื่อ|นามสกุล|อีเมล|โทร|ที่อยู่", re.IGNORECASE)
+    fields = []
+    for field in profile["fields"]:
+        name, role = field["name"], field.get("role")
+        if role not in {"category", "date"} or pii_name.search(name) or field.get("distinct", 0) > 80:
+            continue
+        counts = Counter(str(record.get(name)).strip() for record in records if record.get(name) not in (None, ""))
+        if not counts:
+            continue
+        fields.append({"field": name, "role": role, "values": [{"value": value, "count": count} for value, count in counts.most_common(50)]})
+    return {"profile_generated_at": profile.get("generated_at"), "fields": fields, "requirement": "Map equivalent category values only. All date output must use Buddhist Era years."}
+
+
+def normalization_plan_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["mappings", "warnings"],
+        "properties": {
+            "warnings": {"type": "array", "items": {"type": "string"}},
+            "mappings": {"type": "array", "items": {"type": "object", "additionalProperties": False, "required": ["field", "source", "target", "reason", "confidence"], "properties": {"field": {"type": "string"}, "source": {"type": "string"}, "target": {"type": "string"}, "reason": {"type": "string"}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}}}},
+        },
+    }
+
+
+def get_normalization_plan(name: str, profile: dict[str, Any], records: list[dict[str, Any]]) -> dict[str, Any]:
+    path = project_dir(name) / "output/metadata/normalization-plan.ai.json"
+    current = read_json(path, None)
+    if isinstance(current, dict) and current.get("profile_generated_at") == profile.get("generated_at"):
+        return current
+    from ai_client import generate_json, provider_name
+
+    context = normalization_context(profile, records)
+    result = generate_json(
+        "You are a cautious data-normalization analyst. Propose only exact-value category mappings that are clearly equivalent. "
+        "Never map distinct business categories together. Do not infer or alter identifiers, names, free text, or numeric measures. "
+        "For date fields, identify ambiguity in warnings; Python will normalize valid dates to Buddhist Era dimensions.",
+        f"NORMALIZATION CANDIDATES:\n{json.dumps(context, ensure_ascii=False)}",
+        normalization_plan_schema(),
+    )
+    allowed = {item["field"]: {value["value"] for value in item["values"]} for item in context["fields"]}
+    mappings = [
+        {key: item[key] for key in ("field", "source", "target", "reason", "confidence")}
+        for item in result.get("mappings", [])
+        if isinstance(item, dict) and item.get("field") in allowed and item.get("source") in allowed[item["field"]] and isinstance(item.get("target"), str) and item["target"].strip() and float(item.get("confidence", 0)) >= 0.75
+    ]
+    plan = {"generated_by": f"{provider_name()}-ai", "profile_generated_at": profile.get("generated_at"), "mappings": mappings, "warnings": [str(item) for item in result.get("warnings", [])]}
+    write_json(path, plan)
+    return plan
+
+
+def planner_workflow_contract(compact: bool = False) -> str:
+    """Return the enforceable workflow contract; compact form protects Groq TPM budget."""
+    if compact:
+        return """PLANNER EXECUTION CONTRACT
+Create a grounded dashboard plan only. Raw input is read-only and Python calculates every number locally.
+Use exact supplied field names only. Never invent fields, values, relationships, or formulas. Never use identifiers or near-unique values as a sum, axis, filter, or KPI. Use COUNT(DISTINCT stable ID) for entities.
+SUM only additive row-grain measures. Average comparable rates after normalizing them to 0-100; never sum rates. Ratios need a stated non-zero denominator. Use normalized BE date dimensions when available.
+Each KPI/chart requires exact source fields, aggregation/formula, an appropriate dimension, and limitations. Prefer low-cardinality filters and readable groupings. State unsupported requirements as limitations. The local build independently validates calculations and rejects mismatches."""
     if not DASHBOARD_SKILL.exists() or not DATA_RULES.exists():
         raise FileNotFoundError("Dashboard workflow skills are missing from the repository.")
     skill = DASHBOARD_SKILL.read_text(encoding="utf-8")
@@ -361,7 +633,7 @@ def uncovered_requirements(instruction: str, profile: dict[str, Any], spec: dict
     """Use an independent structured review to check request coverage, not just field validity."""
     if not instruction:
         return []
-    from cloud_ai_client import generate_json
+    from ai_client import generate_json
     derived_fields = ["_year_be", "_month_th", "_quarter"] if any(field.get("role") == "date" for field in profile["fields"]) else []
     schema = {
         "type": "object", "additionalProperties": False, "required": ["requirements"],
@@ -387,19 +659,29 @@ def uncovered_requirements(instruction: str, profile: dict[str, Any], spec: dict
     return [f"{item['request']}: {item['evidence']}" for item in review.get("requirements", []) if item.get("status") == "missing"]
 
 
-def local_ai_spec(profile: dict[str, Any], instruction: str, current_spec: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Ask the Cloud planner to create and repair a grounded dashboard plan."""
-    from cloud_ai_client import generate_json
+def local_ai_spec(profile: dict[str, Any], rules: dict[str, Any], instruction: str, current_spec: dict[str, Any] | None = None, semantic: dict[str, Any] | None = None, calculation_results: list[dict[str, Any]] | None = None, normalization_plan: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Ask the configured AI provider to create and repair a grounded dashboard plan."""
+    from ai_client import generate_json, provider_name
     schema = grounded_schema(profile)
     guidance = (LOCAL_AI / "prompts/dashboard-spec.md").read_text(encoding="utf-8")
-    workflow = planner_workflow_contract()
+    provider = provider_name()
+    workflow = planner_workflow_contract(compact=provider == "groq")
     request_text = instruction or "Propose the most useful management dashboard supported by this dataset."
     available_fields = sorted(field["name"] for field in profile["fields"])
-    allowed_references = available_fields + ["record_count", "unique_student_count", "_year_be", "_academic_year_be", "_month_th", "_quarter"]
+    contract_metrics = [f"contract:{contract_id}" for contract_id in approved_metric_contracts(rules)]
+    allowed_references = available_fields + ["record_count", "unique_student_count", "_year_be", "_academic_year_be", "_month_th", "_quarter"] + contract_metrics
     prompt = (
         f"{workflow}\n\n{guidance}\n\nUSER REQUEST:\n{request_text}\n\n"
         "DATA PROFILE (metadata only; field names must be copied exactly):\n"
         f"{json.dumps(cloud_safe_profile(profile), ensure_ascii=False)}\n\n"
+        "SEMANTIC PROFILE (metadata-only suggestions; do not treat as facts or use it to invent fields, values, or formulas):\n"
+        f"{json.dumps(semantic or {}, ensure_ascii=False)}\n\n"
+        "NORMALIZATION PLAN (validated category mappings that the local build applies; use canonical target values in filters and describe ambiguities as limitations):\n"
+        f"{json.dumps(normalization_plan or {}, ensure_ascii=False)}\n\n"
+        "LOCAL CALCULATION TOOL RESULTS (computed by Python from the actual project data; use these values as evidence, but only use fields from the allowlist):\n"
+        f"{json.dumps(calculation_results or [], ensure_ascii=False)}\n\n"
+        "APPROVED METRIC CONTRACTS (optional deterministic metrics; use contract:<id> exactly as the metric and preserve the listed formula):\n"
+        f"{json.dumps(list(approved_metric_contracts(rules).values()), ensure_ascii=False)}\n\n"
         "Return each KPI as an object with name, metric, aggregation, formula, source_fields, limitations, and comparison. "
         "Use comparison.enabled=true and comparison.period=latest_year_vs_previous_year when the user requests an up/down KPI. "
         "Return each chart as an object with title, type (bar/line/pie), dimension, metric, aggregation, formula, source_fields, limitations, and optional target. "
@@ -419,7 +701,7 @@ def local_ai_spec(profile: dict[str, Any], instruction: str, current_spec: dict[
             "When a requested calculation is unsupported, retain the valid current plan and state the limitation instead."
         )
     spec = generate_json("You are a careful cloud analytics planner. Return only grounded JSON.", prompt, schema)
-    errors = grounded_spec_errors(spec, profile)
+    errors = grounded_spec_errors(spec, profile, rules)
     if errors:
         repair_prompt = (
             f"{prompt}\n\nYOUR PREVIOUS SPECIFICATION FAILED VALIDATION:\n- "
@@ -428,7 +710,7 @@ def local_ai_spec(profile: dict[str, Any], instruction: str, current_spec: dict[
             "Return a complete corrected JSON specification."
         )
         repaired = generate_json("You repair dashboard plans using only exact available fields. Return only grounded JSON.", repair_prompt, schema)
-        errors = grounded_spec_errors(repaired, profile)
+        errors = grounded_spec_errors(repaired, profile, rules)
         if errors:
             raise ValueError("Local AI produced an unsupported dashboard plan: " + " ".join(errors))
         spec = repaired
@@ -443,7 +725,7 @@ def local_ai_spec(profile: dict[str, Any], instruction: str, current_spec: dict[
         + "\nRevise the complete dashboard plan so every item is directly covered by a KPI or chart, or omit only items unsupported by the data profile."
     )
     covered_spec = generate_json("You repair dashboard plans so every explicit request is covered with grounded fields. Return only JSON.", coverage_prompt, schema)
-    errors = grounded_spec_errors(covered_spec, profile)
+    errors = grounded_spec_errors(covered_spec, profile, rules)
     if errors:
         raise ValueError("Local AI produced an unsupported dashboard plan after requirement review: " + " ".join(errors))
     missing = requested_capability_errors(instruction, covered_spec)
@@ -452,24 +734,51 @@ def local_ai_spec(profile: dict[str, Any], instruction: str, current_spec: dict[
     return covered_spec
 
 
-def suggest_spec(name: str, instruction: str = "") -> dict[str, Any]:
+def suggest_spec(name: str, instruction: str = "", progress: Callable[[int, str], None] | None = None) -> dict[str, Any]:
+    from ai_client import provider_name
+
     directory = project_dir(name)
     profile = read_json(directory / "output/metadata/dataset-profile.json", None)
     if not profile:
         profile = profile_project(name)
+    def update(percent: int, stage: str) -> None:
+        if progress:
+            progress(percent, stage)
+
     try:
-        spec = local_ai_spec(profile, instruction.strip())
-        source = "groq-ai"
+        update(5, "กำลังตรวจ Data Profile และกฎการคำนวณ")
+        config = project_config(name, profile)
+        rules = validate_calculation_rules(config["calculation_rules"])
+        records, _ = load_sources(directory / "input")
+        update(15, "AI กำลังวิเคราะห์ semantic, normalization และผลคำนวณที่ต้องตรวจสอบ")
+        planning_instruction = f"{instruction.strip()}\n\nPROJECT CALCULATION RULES:\n{rules['calculation_instruction']}".strip()
+        semantic, normalization_plan, calculation_requests = get_ai_analysis_bundle(name, profile, records, planning_instruction)
+        update(55, "กำลังเตรียมข้อมูลวิเคราะห์ในเครื่อง")
+        prepared, _ = prepare_analytical_records(records, profile, rules, normalization_plan)
+        update(70, "กำลังคำนวณผลที่ AI ร้องขอในเครื่อง")
+        calculations = []
+        for calculation_request in calculation_requests:
+            try:
+                calculations.append(execute_calculation_tool(prepared, calculation_request, profile, rules))
+            except ValueError:
+                continue
+        write_json(directory / "output/metadata/ai-tool-results.json", {"instruction": instruction.strip(), "requests": calculation_requests, "results": calculations})
+        update(85, "AI กำลังออกแบบ KPI, filters และ charts")
+        spec = local_ai_spec(profile, rules, planning_instruction, semantic=semantic, calculation_results=calculations, normalization_plan=normalization_plan)
+        source = f"{provider_name()}-ai"
     except Exception as exc:
-        raise ValueError(f"Groq AI could not create the specification: {exc}") from exc
+        raise ValueError(f"Configured AI provider could not create the specification: {exc}") from exc
     spec["generated_by"] = source
     if instruction.strip():
         spec["last_instruction"] = instruction.strip()
     write_json(directory / "output/metadata/dashboard-spec.local-ai.json", spec)
+    update(100, "สร้าง specification สำเร็จ")
     return spec
 
 
 def improve_spec(name: str, instruction: str) -> dict[str, Any]:
+    from ai_client import provider_name
+
     directory = project_dir(name)
     profile = read_json(directory / "output/metadata/dataset-profile.json", None)
     current_spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None)
@@ -479,15 +788,28 @@ def improve_spec(name: str, instruction: str) -> dict[str, Any]:
     if not instruction:
         raise ValueError("Enter an improvement request.")
     try:
-        spec = local_ai_spec(profile, instruction, current_spec)
+        config = project_config(name, profile)
+        rules = validate_calculation_rules(config["calculation_rules"])
+        records, _ = load_sources(directory / "input")
+        planning_instruction = f"{instruction}\n\nPROJECT CALCULATION RULES:\n{rules['calculation_instruction']}".strip()
+        semantic, normalization_plan, calculation_requests = get_ai_analysis_bundle(name, profile, records, planning_instruction)
+        prepared, _ = prepare_analytical_records(records, profile, rules, normalization_plan)
+        calculations = []
+        for calculation_request in calculation_requests:
+            try:
+                calculations.append(execute_calculation_tool(prepared, calculation_request, profile, rules))
+            except ValueError:
+                continue
+        write_json(directory / "output/metadata/ai-tool-results.json", {"instruction": instruction, "requests": calculation_requests, "results": calculations})
+        spec = local_ai_spec(profile, rules, planning_instruction, current_spec, semantic, calculations, normalization_plan)
     except Exception as exc:
-        raise ValueError(f"Groq AI could not revise the specification: {exc}") from exc
+        raise ValueError(f"Configured AI provider could not revise the specification: {exc}") from exc
     revisions = directory / "output/metadata/spec-revisions"
     revisions.mkdir(parents=True, exist_ok=True)
     revision = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     write_json(revisions / f"{revision}-before.json", current_spec)
     write_json(revisions / f"{revision}-request.json", {"instruction": instruction, "timestamp": datetime.now(timezone.utc).isoformat()})
-    spec.setdefault("generated_by", "groq-ai")
+    spec["generated_by"] = f"{provider_name()}-ai"
     spec["last_instruction"] = instruction
     label_overrides = extract_label_overrides(instruction)
     if label_overrides:
@@ -582,13 +904,47 @@ function render(){const data=shownRows();renderKpis(data);plans.forEach(plan=>dr
         .replace("__FIELDS__", json.dumps(fields, ensure_ascii=False)))
 
 
-def analytical_records(records: list[dict[str, Any]], profile: dict[str, Any]) -> list[dict[str, Any]]:
+def normalize_category(field: str, value: Any) -> tuple[Any, str | None]:
+    if not isinstance(value, str):
+        return value, None
+    compact = re.sub(r"\s+", " ", value).strip()
+    key = compact.lower().replace(" ", "")
+    label = field.lower()
+    if re.search(r"gender|เพศ", label):
+        if key in {"ชาย", "ช", "male", "m"}:
+            return "ชาย", None if compact == "ชาย" else "รวมค่ารูปแบบเพศเป็น 'ชาย'"
+        if key in {"หญิง", "ญ", "female", "f"}:
+            return "หญิง", None if compact == "หญิง" else "รวมค่ารูปแบบเพศเป็น 'หญิง'"
+    if re.search(r"status|สถานะ", label):
+        if key in {"ลาออก", "withdraw", "withdrawn", "dropout"}:
+            return "ลาออก", None if compact == "ลาออก" else "รวมค่ารูปแบบสถานะเป็น 'ลาออก'"
+        if key in {"กำลังศึกษา", "กำลังเรียน", "studying", "active"}:
+            return "กำลังศึกษา", None if compact == "กำลังศึกษา" else "รวมค่ารูปแบบสถานะเป็น 'กำลังศึกษา'"
+        if key in {"จบการศึกษา", "สำเร็จการศึกษา", "graduated", "complete"}:
+            return "สำเร็จการศึกษา", None if compact == "สำเร็จการศึกษา" else "รวมค่ารูปแบบสถานะเป็น 'สำเร็จการศึกษา'"
+    return compact, "ตัดช่องว่างหรือจัดรูปแบบข้อความ" if compact != value else None
+
+
+def prepare_analytical_records(records: list[dict[str, Any]], profile: dict[str, Any], rules: dict[str, Any], normalization_plan: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     date_fields = [field["name"] for field in profile["fields"] if field.get("role") == "date"]
     parse_counts = profile["quality"].get("date_parsing", {})
     primary_date = max(date_fields, key=lambda field: ("เดือน" in field or "วัน" in field or "date" in field.lower(), parse_counts.get(field, {}).get("parsed", 0)), default=None)
     prepared = []
+    notices: Counter[str] = Counter()
+    mappings = {(item["field"], item["source"].strip()): item for item in (normalization_plan or {}).get("mappings", []) if isinstance(item, dict) and all(key in item for key in ("field", "source", "target", "reason"))}
     for record in records:
         item = dict(record)
+        for field, value in list(item.items()):
+            if field.startswith("_"):
+                continue
+            mapping = mappings.get((field, str(value).strip()))
+            if mapping:
+                item[field] = mapping["target"].strip()
+                notices[f"{field}: {mapping['source']} -> {mapping['target']} ({mapping['reason']})"] += 1
+            normalized, notice = normalize_category(field, item[field] if mapping else value)
+            item[field] = item[field] if mapping else normalized
+            if notice:
+                notices[f"{field}: {notice}"] += 1
         for field in ("คณะ_สาขา", "สถานะการจบตามวงรอบ", "สาเหตุการลาออก"):
             if item.get(field) is not None:
                 text = str(item[field]).strip().lower()
@@ -606,15 +962,292 @@ def analytical_records(records: list[dict[str, Any]], profile: dict[str, Any]) -
         academic_year = parse_reporting_date(record.get("ปีการศึกษาที่เข้า"))
         if academic_year:
             item["_academic_year_be"] = academic_year["year_be"]
+        student_rule = rules["student_id"]
+        student_field = student_rule["field"]
+        if student_field and item.get(student_field) not in (None, ""):
+            match = re.search(rf"(?:[A-Za-z]+)?\s*(\d{{{student_rule['entry_year_digits']}}})\d+", str(item[student_field]))
+            if match:
+                entry_year = student_rule["entry_year_base_be"] + int(match.group(1)) if student_rule["entry_year_digits"] == 2 else int(match.group(1))
+                study_year = rules["current_academic_year_be"] - entry_year + 1
+                if 1 <= study_year <= student_rule["maximum_study_years"]:
+                    item["_student_entry_year_be"] = entry_year
+                    item["_student_year"] = study_year
+                else:
+                    notices[f"{student_field}: ไม่สามารถระบุชั้นปีจากรหัสนักศึกษาได้"] += 1
+        risk_rule = rules["risk"]
+        if risk_rule["gpa_field"] and numeric(item.get(risk_rule["gpa_field"])) is not None:
+            item["_academic_risk"] = "เสี่ยง" if numeric(item[risk_rule["gpa_field"]]) < float(risk_rule["gpa_below"]) else "ปกติ"
         prepared.append(item)
-    return prepared
+    notices.update({f"AI normalization warning: {warning}": 0 for warning in (normalization_plan or {}).get("warnings", [])})
+    return prepared, [{"notice": text, "affected_records": count} for text, count in notices.most_common()]
 
 
-def render_dashboard_qa(name: str, config: dict[str, Any], spec: dict[str, Any], profile: dict[str, Any], records: list[dict[str, Any]]) -> str:
-    prepared = analytical_records(records, profile)
+def analytical_records(records: list[dict[str, Any]], profile: dict[str, Any], rules: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    return prepare_analytical_records(records, profile, validate_calculation_rules(rules or default_calculation_rules()))[0]
+
+
+def aggregate_rows(records: list[dict[str, Any]], metric: str, aggregation: str, rules: dict[str, Any]) -> float | int:
+    if metric.startswith("contract:"):
+        contract = approved_metric_contracts(rules).get(metric.removeprefix("contract:"))
+        if not contract:
+            raise ValueError("Metric contract is not approved.")
+        if contract["type"] == "profit":
+            revenue = aggregate_rows(records, contract["revenue_field"], "sum", rules)
+            expense = aggregate_rows(records, contract["expense_field"], "sum", rules)
+            return revenue - expense
+        if contract["type"] == "category_share":
+            if not records:
+                return 0
+            matches = sum(str(record.get(contract["category_field"], "")).strip() == contract["category_value"] for record in records)
+            return matches / len(records) * contract["scale"]
+        numerator = aggregate_rows(records, contract["numerator_field"], "sum", rules)
+        denominator = aggregate_rows(records, contract["denominator_field"], "sum", rules)
+        return numerator / denominator * contract["scale"] if denominator else 0
+    if metric == "record_count":
+        return len(records)
+    if metric == "unique_student_count":
+        field = rules["student_id"]["field"]
+        return len({str(record.get(field, "")).strip() for record in records if field and str(record.get(field, "")).strip()})
+    values = [numeric(record.get(metric)) for record in records]
+    numbers = [value for value in values if value is not None]
+    if aggregation == "count":
+        return len(numbers)
+    if not numbers:
+        return 0
+    if aggregation == "average":
+        return sum(numbers) / len(numbers)
+    if aggregation == "minimum":
+        return min(numbers)
+    if aggregation == "maximum":
+        return max(numbers)
+    return sum(numbers)
+
+
+def apply_tool_filters(records: list[dict[str, Any]], filters: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    filtered = records
+    for item in filters:
+        if not isinstance(item, dict):
+            continue
+        field, value = item.get("field"), item.get("equals")
+        if isinstance(field, str) and isinstance(value, str):
+            filtered = [record for record in filtered if str(record.get(field, "")).strip() == value]
+    return filtered
+
+
+def execute_calculation_tool(records: list[dict[str, Any]], request_item: dict[str, Any], profile: dict[str, Any], rules: dict[str, Any]) -> dict[str, Any]:
+    derived_fields = {"_year_be", "_academic_year_be", "_month_th", "_quarter", "_student_entry_year_be", "_student_year", "_academic_risk"}
+    contract_metrics = {f"contract:{contract_id}" for contract_id in approved_metric_contracts(rules)}
+    available = {field["name"] for field in profile["fields"]} | derived_fields | {"record_count", "unique_student_count"} | contract_metrics
+    metric = str(request_item.get("metric", "record_count"))
+    aggregation = str(request_item.get("aggregation", "count"))
+    dimension = request_item.get("dimension")
+    if metric not in available or aggregation not in {"count", "distinct", "sum", "average", "minimum", "maximum", "contract"}:
+        raise ValueError("Calculation tool request contains an unsupported metric or aggregation.")
+    if dimension is not None and dimension not in available:
+        raise ValueError("Calculation tool request contains an unsupported dimension.")
+    selected = apply_tool_filters(records, request_item.get("filters", []))
+    normalized_aggregation = "count" if aggregation == "distinct" and metric == "record_count" else aggregation
+    if metric.startswith("contract:"):
+        normalized_aggregation = "contract"
+    if aggregation == "distinct":
+        value = len({str(record.get(metric, "")).strip() for record in selected if str(record.get(metric, "")).strip()})
+    elif dimension:
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for record in selected:
+            groups.setdefault(str(record.get(dimension, "ไม่ระบุ")), []).append(record)
+        value = [
+            {"label": label, "value": aggregate_rows(group, metric, normalized_aggregation, rules), "rows": len(group)}
+            for label, group in sorted(groups.items(), key=lambda entry: str(entry[0]))[:50]
+        ]
+    else:
+        value = aggregate_rows(selected, metric, normalized_aggregation, rules)
+    return {
+        "name": str(request_item.get("name") or f"{aggregation} {metric}"),
+        "metric": metric,
+        "aggregation": aggregation,
+        "dimension": dimension,
+        "filters": request_item.get("filters", []),
+        "rows": len(selected),
+        "value": value,
+    }
+
+
+def analysis_request_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["requests"],
+        "properties": {
+            "requests": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["name", "metric", "aggregation", "dimension", "filters"],
+                    "properties": {
+                        "name": {"type": "string"},
+                        "metric": {"type": "string"},
+                        "aggregation": {"type": "string", "enum": ["count", "distinct", "sum", "average", "minimum", "maximum"]},
+                        "dimension": {"type": ["string", "null"]},
+                        "filters": {"type": "array", "items": {"type": "object", "additionalProperties": False, "required": ["field", "equals"], "properties": {"field": {"type": "string"}, "equals": {"type": "string"}}}},
+                    },
+                },
+            },
+        },
+    }
+
+
+def request_local_calculations(profile: dict[str, Any], semantic: dict[str, Any], instruction: str, records: list[dict[str, Any]], rules: dict[str, Any]) -> list[dict[str, Any]]:
+    """Let the configured AI select bounded aggregate tools, then execute locally."""
+    from ai_client import generate_json
+
+    allowed = sorted({field["name"] for field in profile["fields"]} | {"record_count", "unique_student_count"})
+    plan = generate_json(
+        "You are a dashboard analyst. Choose up to ten local aggregate calculations that will verify the user's request. "
+        "You may only request the supplied fields and fixed aggregation types. Never request raw records, examples, SQL, formulas, or unbounded filters.",
+        f"USER REQUEST:\n{instruction or 'Create a useful management dashboard.'}\n\n"
+        f"AVAILABLE FIELDS:\n{json.dumps(allowed, ensure_ascii=False)}\n\n"
+        f"SEMANTIC PROFILE:\n{json.dumps(semantic, ensure_ascii=False)}",
+        analysis_request_schema(),
+    )
+    results = []
+    for item in plan.get("requests", []):
+        try:
+            results.append(execute_calculation_tool(records, item, profile, rules))
+        except ValueError:
+            continue
+    return results
+
+
+def analysis_bundle_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["semantic", "normalization", "calculations"],
+        "properties": {
+            "semantic": semantic_profile_schema(),
+            "normalization": normalization_plan_schema(),
+            "calculations": analysis_request_schema(),
+        },
+    }
+
+
+def analysis_bundle_cache_key(profile: dict[str, Any], instruction: str, provider: str) -> str:
+    payload = {"profile_generated_at": profile.get("generated_at"), "instruction": instruction, "provider": provider}
+    return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def get_ai_analysis_bundle(name: str, profile: dict[str, Any], records: list[dict[str, Any]], instruction: str) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+    """Run the metadata-only AI analysis once, then reuse it until the input changes."""
+    from ai_client import generate_json, provider_name
+
+    provider = provider_name()
+    cache_path = project_dir(name) / "output/metadata/ai-analysis-plan.json"
+    cache_key = analysis_bundle_cache_key(profile, instruction, provider)
+    cached = read_json(cache_path, None)
+    if isinstance(cached, dict) and cached.get("cache_key") == cache_key:
+        semantic = cached.get("semantic")
+        normalization = cached.get("normalization")
+        requests = cached.get("calculation_requests")
+        if isinstance(semantic, dict) and isinstance(normalization, dict) and isinstance(requests, list):
+            return semantic, normalization, [item for item in requests if isinstance(item, dict)]
+
+    safe_profile = cloud_safe_profile(profile)
+    normalization = normalization_context(profile, records)
+    allowed_fields = {field["name"] for field in safe_profile["fields"]}
+    tool_fields = sorted(allowed_fields | {"record_count", "unique_student_count"})
+    result = generate_json(
+        "You are a careful data-governance and dashboard-analysis planner. Work only from supplied metadata and bounded category counts. "
+        "Never invent facts, fields, values, formulas, relationships, or raw-data examples. Identify aggregation risks. "
+        "Propose only clearly equivalent category mappings; never map identifiers, names, free text, or numeric measures. "
+        "Choose no more than ten bounded aggregate requests using exact allowed fields and equality filters only.",
+        f"USER REQUEST:\n{instruction or 'Create a useful management dashboard.'}\n\n"
+        f"DATA PROFILE (metadata only):\n{json.dumps(safe_profile, ensure_ascii=False)}\n\n"
+        f"NORMALIZATION CANDIDATES:\n{json.dumps(normalization, ensure_ascii=False)}\n\n"
+        f"AVAILABLE AGGREGATE FIELDS:\n{json.dumps(tool_fields, ensure_ascii=False)}\n\n"
+        "Return semantic interpretations, normalization mappings, and calculation requests in the requested JSON object.",
+        analysis_bundle_schema(),
+    )
+    semantic_result = result.get("semantic") if isinstance(result.get("semantic"), dict) else {}
+    semantic = {
+        "generated_by": f"{provider}-ai",
+        "source": "metadata_only",
+        "profile_generated_at": profile.get("generated_at"),
+        "dataset_summary": str(semantic_result.get("dataset_summary", "")),
+        "warnings": [str(item) for item in semantic_result.get("warnings", [])],
+        "field_interpretations": [
+            item for item in semantic_result.get("field_interpretations", [])
+            if isinstance(item, dict) and item.get("field") in allowed_fields
+        ],
+    }
+    allowed_values = {item["field"]: {value["value"] for value in item["values"]} for item in normalization["fields"]}
+    normalization_result = result.get("normalization") if isinstance(result.get("normalization"), dict) else {}
+    normalization_plan = {
+        "generated_by": f"{provider}-ai",
+        "profile_generated_at": profile.get("generated_at"),
+        "mappings": [
+            {key: item[key] for key in ("field", "source", "target", "reason", "confidence")}
+            for item in normalization_result.get("mappings", [])
+            if isinstance(item, dict) and item.get("field") in allowed_values and item.get("source") in allowed_values[item["field"]]
+            and isinstance(item.get("target"), str) and item["target"].strip() and float(item.get("confidence", 0)) >= 0.75
+        ],
+        "warnings": [str(item) for item in normalization_result.get("warnings", [])],
+    }
+    calculation_result = result.get("calculations") if isinstance(result.get("calculations"), dict) else {}
+    calculation_requests = [item for item in calculation_result.get("requests", []) if isinstance(item, dict)]
+    write_json(project_dir(name) / "output/metadata/semantic-profile.local-ai.json", semantic)
+    write_json(project_dir(name) / "output/metadata/normalization-plan.ai.json", normalization_plan)
+    write_json(cache_path, {"cache_key": cache_key, "semantic": semantic, "normalization": normalization_plan, "calculation_requests": calculation_requests})
+    return semantic, normalization_plan, calculation_requests
+
+
+def calculation_request_from_spec(item: dict[str, Any]) -> dict[str, Any]:
+    formula = str(item.get("formula", ""))
+    metric = str(item.get("metric", "record_count"))
+    aggregation = str(item.get("aggregation", "count")).lower()
+    match = re.search(r"\b(count\s*\(\s*distinct|count|sum|avg|average|min|max)\s*\(\s*([^\)]+)\s*\)", formula, flags=re.IGNORECASE)
+    if match:
+        token = match.group(1).lower().replace(" ", "")
+        matched_metric = match.group(2).strip()
+        metric = "record_count" if matched_metric == "*" else matched_metric
+        aggregation = {"count(distinct": "distinct", "count": "count", "sum": "sum", "avg": "average", "average": "average", "min": "minimum", "max": "maximum"}.get(token, aggregation)
+    if "distinct" in aggregation:
+        aggregation = "distinct"
+    elif metric.startswith("contract:"):
+        aggregation = "contract"
+    elif aggregation in {"avg", "average-percent"}:
+        aggregation = "average"
+    elif aggregation not in {"count", "sum", "average", "minimum", "maximum", "contract"}:
+        aggregation = "count" if metric == "record_count" else "sum"
+    filters = []
+    where = re.search(r"\bwhere\s+(.+)$", formula, flags=re.IGNORECASE)
+    if where:
+        for field, value in re.findall(r"([^=\s]+)\s*=\s*['\"]([^'\"]+)['\"]", where.group(1)):
+            filters.append({"field": field.strip(), "equals": value.strip()})
+    return {"name": str(item.get("name") or item.get("title") or metric), "metric": metric, "aggregation": aggregation, "dimension": item.get("dimension"), "filters": filters}
+
+
+def calculate_spec_results(records: list[dict[str, Any]], spec: dict[str, Any], profile: dict[str, Any], rules: dict[str, Any]) -> dict[str, Any]:
+    results: dict[str, Any] = {"kpis": [], "charts": [], "errors": []}
+    for section, key in (("kpis", "kpis"), ("charts", "charts")):
+        for item in spec.get(section, []):
+            if not isinstance(item, dict):
+                continue
+            try:
+                results[key].append(execute_calculation_tool(records, calculation_request_from_spec(item), profile, rules))
+            except ValueError as exc:
+                results["errors"].append(f"{item.get('name') or item.get('title') or section}: {exc}")
+    return results
+
+
+def render_dashboard_qa(name: str, config: dict[str, Any], spec: dict[str, Any], profile: dict[str, Any], records: list[dict[str, Any]], calculations: dict[str, Any] | None = None) -> str:
+    # Build passes the one analytical copy already prepared with this project's rules.
+    prepared = records
     roles = {field["name"]: field.get("role") for field in profile["fields"]}
     fields = [field["name"] for field in profile["fields"]]
-    measures = [field for field in fields if roles[field] == "measure"]
+    contracts = approved_metric_contracts(config.get("calculation_rules", default_calculation_rules()))
+    measures = [field for field in fields if roles[field] == "measure"] + [f"contract:{contract_id}" for contract_id in contracts]
     dimensions = [field for field in fields if roles[field] == "category"] + ["_year_be", "_academic_year_be", "_month_th", "_quarter"]
     plans = []
     issues = []
@@ -634,9 +1267,9 @@ def render_dashboard_qa(name: str, config: dict[str, Any], spec: dict[str, Any],
         chart_type = chart.get("type", "bar").lower()
         if chart_type not in {"bar", "line", "pie"}:
             chart_type = "bar"
-        formula = chart.get("formula") or ("COUNT(DISTINCT รหัสนักศึกษา)" if metric == "unique_student_count" else ("AVG(อัตราการจบตามวงรอบ) x 100" if "อัตรา" in metric else f"SUM({metric})"))
+        formula = chart.get("formula") or (f"CONTRACT({metric.removeprefix('contract:')})" if metric.startswith("contract:") else ("COUNT(DISTINCT รหัสนักศึกษา)" if metric == "unique_student_count" else ("AVG(อัตราการจบตามวงรอบ) x 100" if "อัตรา" in metric else f"SUM({metric})")))
         target = chart.get("target") if isinstance(chart.get("target"), dict) else None
-        plans.append({"id": f"chart-{index}", "title": chart.get("title", f"ภาพรวมตาม {dimension}"), "type": chart_type, "dimension": dimension, "metric": metric, "formula": formula, "target": target})
+        plans.append({"id": f"chart-{index}", "title": chart.get("title", f"ภาพรวมตาม {dimension}"), "type": chart_type, "dimension": dimension, "metric": metric, "aggregation": chart.get("aggregation", ""), "formula": formula, "target": target})
     if not plans:
         safe_dimension = next((field for field in dimensions if len({str(row.get(field)) for row in prepared if row.get(field) not in (None, "")}) <= 12), "_source_file")
         plans = [{"id": "chart-0", "title": f"จำนวนรายการตาม {safe_dimension}", "type": "bar", "dimension": safe_dimension, "metric": "record_count"}]
@@ -664,6 +1297,8 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
     let reviewOnly = false;
     const labels = __LABELS__;
     const plannedKpis = __KPIS__;
+    const verifiedCalculations = __CALCULATIONS__;
+    const metricContracts = __CONTRACTS__;
     const esc = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
     const problem = row => Object.entries(row).some(([field, value]) => !field.startsWith('_') && (value === null || value === '' || value === '-' || value === 'N/A' || value === '#VALUE!')) || !row._year_be || Number(String(row['จำนวนนักศึกษาในรุ่น'] ?? '').replace(/[^0-9.-]/g,'')) < 0;
     function decorate() {
@@ -747,22 +1382,59 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
     document.addEventListener('click', event => {
         if (event.target.id === 'clear') queueMicrotask(decorate);
     }, true);
+    function formulaPlan(plan) {
+        const formula = String(plan.formula || '');
+        const match = formula.match(/\b(count\s*\(\s*distinct|count|sum|avg|average|min|max)\s*\(\s*([^\)]+)\s*\)/i);
+        const token = match ? match[1].toLowerCase().replaceAll(' ', '') : String(plan.aggregation || '').toLowerCase();
+        const metric = match ? (match[2].trim() === '*' ? 'record_count' : match[2].trim()) : plan.metric;
+        const aggregation = token.includes('distinct') ? 'distinct' : token === 'avg' || token === 'average' || token.includes('percent') ? 'average' : token === 'min' ? 'minimum' : token === 'max' ? 'maximum' : token === 'count' ? 'count' : 'sum';
+        const filters = [...formula.matchAll(/([^=\s]+)\s*=\s*['\"]([^'\"]+)['\"]/g)].map(match => ({field: match[1].trim(), value: match[2].trim()}));
+        return {metric, aggregation, filters};
+    }
+    function planRows(data, plan) { const info = formulaPlan(plan); return data.filter(row => info.filters.every(filter => String(row[filter.field] ?? '').trim() === filter.value)); }
+    function planAggregate(data, plan) {
+        const info = formulaPlan(plan);
+        if (info.metric.startsWith('contract:')) {
+            const contract = metricContracts[info.metric.slice(9)];
+            if (!contract) return 0;
+            const sum = field => data.reduce((total, row) => total + numericValue(row[field]), 0);
+            if (contract.type === 'profit') return sum(contract.revenue_field) - sum(contract.expense_field);
+            if (contract.type === 'category_share') return data.length ? data.filter(row => String(row[contract.category_field] ?? '').trim() === contract.category_value).length / data.length * Number(contract.scale) : 0;
+            const denominator = sum(contract.denominator_field);
+            return denominator ? sum(contract.numerator_field) / denominator * Number(contract.scale) : 0;
+        }
+        if (info.metric === 'record_count') return data.length;
+        if (info.aggregation === 'distinct') return new Set(data.map(row => String(row[info.metric] ?? '').trim()).filter(Boolean)).size;
+        const values = data.map(row => numericValue(row[info.metric])).filter(Number.isFinite);
+        if (!values.length) return 0;
+        if (info.aggregation === 'count') return values.length;
+        if (info.aggregation === 'average') return values.reduce((sum, value) => sum + value, 0) / values.length;
+        if (info.aggregation === 'minimum') return Math.min(...values);
+        if (info.aggregation === 'maximum') return Math.max(...values);
+        return values.reduce((sum, value) => sum + value, 0);
+    }
+    const baseDraw = draw;
+    draw = function (plan, data) {
+        const constrained = planRows(data, plan);
+        const buckets = {};
+        constrained.forEach(row => (buckets[String(row[plan.dimension] ?? 'ไม่ระบุ')] ??= []).push(row));
+        const items = Object.entries(buckets).map(([label, group]) => [label, planAggregate(group, plan)]).sort((left, right) => plan.type === 'line' ? String(left[0]).localeCompare(String(right[0]), 'th', {numeric: true}) : right[1] - left[1]).slice(0, 12);
+        const max = Math.max(...items.map(item => item[1]), 1), total = items.reduce((sum, item) => sum + item[1], 0) || 1;
+        const target = document.querySelector('#' + plan.id), colors = ['#263988','#0F8F83','#FECD54','#C94A4A','#8094b8','#718c8e','#6B7280'];
+        const detail = `Field: ${formulaPlan(plan).metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${constrained.length}`;
+        if (plan.type === 'pie') { let run = 0; const parts = items.map(([label, value], index) => { const start = run; run += value / total * 100; return `${colors[index % colors.length]} ${start}% ${run}%`; }); target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label, value], index) => `<div style="color:${colors[index % colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value / total * 100)}%)</span></div>`).join('')}</div></div>`; }
+        else if (plan.type === 'line') target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">` + items.map(([label, value], index) => `<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index % colors.length]};height:${Math.max(value / max * 100, 3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('') + '</div>';
+        else target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button>` + items.map(([label, value], index) => `<div class="bar-row"><button class="bar-label" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" title="กรองตาม ${esc(label)}">${esc(label)}</button><div class="track"><div class="bar" style="width:${Math.max(value / max * 100, 2)}%;background:${colors[index % colors.length]}"></div></div><b>${fmt.format(value)}</b></div>`).join('') || '<p class="empty">ไม่พบข้อมูล</p>';
+    };
     const baseRender = render;
     render = function () {
         baseRender();
-        plannedKpis.filter(item => item.comparison?.enabled).slice(0, 3).forEach((kpi, index) => {
-            const card = document.querySelectorAll('#kpis .card')[index];
-            if (!card) return;
-            const yearly = rows.filter(row => row._year_be).map(row => Number(row._year_be));
-            const latest = Math.max(...yearly, 0);
-            const current = aggregate(rows.filter(row => Number(row._year_be) === latest), kpi.metric);
-            const previous = aggregate(rows.filter(row => Number(row._year_be) === latest - 1), kpi.metric);
-            const arrow = previous ? (current >= previous ? '▲' : '▼') : '—';
-            card.querySelector('span').textContent = kpi.name;
-            card.querySelector('strong').textContent = fmt.format(current);
-            const delta = card.querySelector('.delta');
-            if (delta) delta.textContent = previous ? `${arrow} ${fmt.format(Math.abs((current - previous) / previous * 100))}% เทียบปี ${latest - 1}` : 'ไม่มีฐานเปรียบเทียบ';
-        });
+        const filtered = visible();
+        document.querySelector('#kpis').innerHTML = plannedKpis.slice(0, 6).map(kpi => {
+            const rowsForKpi = planRows(filtered, kpi), verified = !filterFields.some((field, index) => selectedValues(field, index).size) && !chartFilter ? verifiedCalculations.kpis.find(item => item.name === kpi.name) : null;
+            const value = verified && typeof verified.value === 'number' ? verified.value : planAggregate(rowsForKpi, kpi);
+            return `<article class="card"><span>${esc(kpi.name)}</span><strong>${fmt.format(value)}</strong><div class="delta neutral">${esc(kpi.formula || '')} | ${fmt.format(rowsForKpi.length)} แถว</div></article>`;
+        }).join('') || '<article class="card"><span>ไม่พบ KPI ที่ผ่านการตรวจ</span></article>';
         queueMicrotask(decorate);
     };
     render();
@@ -770,17 +1442,22 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
 })();
 </script>'''
     labels = {field: display_label(field, label_overrides) for field in set(fields) | {"_year_be", "_academic_year_be", "_month_th", "_quarter", "record_count", "unique_student_count"}}
-    return html.replace("</body>", enhancement.replace("__LABELS__", json.dumps(labels, ensure_ascii=False)).replace("__KPIS__", json.dumps(spec.get("kpis", []), ensure_ascii=False)).replace("__TRACKER__", tracker_html) + "</body>")
+    return html.replace("</body>", enhancement.replace("__LABELS__", json.dumps(labels, ensure_ascii=False)).replace("__KPIS__", json.dumps(spec.get("kpis", []), ensure_ascii=False)).replace("__CALCULATIONS__", json.dumps(calculations or {"kpis": [], "charts": []}, ensure_ascii=False)).replace("__CONTRACTS__", json.dumps(contracts, ensure_ascii=False)).replace("__TRACKER__", tracker_html) + "</body>")
 
 
 def build_project(name: str) -> dict[str, Any]:
     directory = project_dir(name)
     profile = read_json(directory / "output/metadata/dataset-profile.json", None) or profile_project(name)
-    config_path = directory / "config.json"
-    config = read_json(config_path, default_config(name, profile))
-    write_json(config_path, config)
+    config = project_config(name, profile)
+    rules = validate_calculation_rules(config["calculation_rules"])
+    config["calculation_rules"] = rules
+    write_json(directory / "config.json", config)
     spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None) or suggest_spec(name)
     records, _ = load_sources(directory / "input")
+    # The bundle data contract includes the supported derived dimensions used by the spec.
+    normalization_plan = get_normalization_plan(name, profile, records)
+    records, transformation_notices = prepare_analytical_records(records, profile, rules, normalization_plan)
+    calculations = calculate_spec_results(records, spec, profile, rules)
     output = directory / "output"
     output.joinpath("data").mkdir(parents=True, exist_ok=True)
     write_json(output / "data/records.json", records)
@@ -792,25 +1469,32 @@ def build_project(name: str) -> dict[str, Any]:
     assets = output / "dashboard/assets"
     assets.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / "dashboard-automation/assets/logo.png", assets / "logo.png")
-    (output / "dashboard/index.html").write_text(render_dashboard_qa(name, config, spec, profile, records), encoding="utf-8")
+    (output / "dashboard/index.html").write_text(render_dashboard_qa(name, config, spec, profile, records, calculations), encoding="utf-8")
     missing = profile["quality"]["missing_values"]
     identifiers = [field["name"] for field in profile["fields"] if field.get("role") == "identifier"]
     date_issues = [f"{field}: parse ไม่ได้ {detail['unparsed']} ค่า" for field, detail in profile["quality"].get("date_parsing", {}).items() if detail["unparsed"]]
-    checks = [{"name": "Input records", "status": "pass", "detail": f"{len(records)} records processed"}, {"name": "Identifier exclusion", "status": "pass", "detail": f"Excluded from metrics: {', '.join(identifiers) or 'None'}"}, {"name": "Duplicate rows", "status": "warning" if profile["quality"]["exact_duplicate_rows"] else "pass", "detail": str(profile["quality"]["exact_duplicate_rows"])}, {"name": "Missing values", "status": "warning" if any(missing.values()) else "pass", "detail": ", ".join(f"{key}: {value}" for key, value in missing.items() if value) or "None"}, {"name": "Date normalization", "status": "warning" if date_issues else "pass", "detail": ", ".join(date_issues) or "All recognized date values were normalized"}]
+    checks = [{"name": "Input records", "status": "pass", "detail": f"{len(records)} records processed"}, {"name": "Identifier exclusion", "status": "pass", "detail": f"Excluded from metrics: {', '.join(identifiers) or 'None'}"}, {"name": "Duplicate rows", "status": "warning" if profile["quality"]["exact_duplicate_rows"] else "pass", "detail": str(profile["quality"]["exact_duplicate_rows"])}, {"name": "Missing values", "status": "warning" if any(missing.values()) else "pass", "detail": ", ".join(f"{key}: {value}" for key, value in missing.items() if value) or "None"}, {"name": "Date normalization", "status": "warning" if date_issues else "pass", "detail": ", ".join(date_issues) or "All recognized date values were normalized"}, {"name": "Calculation results", "status": "warning" if calculations["errors"] else "pass", "detail": "; ".join(calculations["errors"]) or f"Verified {len(calculations['kpis'])} KPI and {len(calculations['charts'])} chart calculations"}, {"name": "Data normalization", "status": "warning" if transformation_notices else "pass", "detail": "; ".join(f"{item['notice']} ({item['affected_records']} records)" for item in transformation_notices) or "No normalization was required"}]
     qa = {"status": "warning" if any(check["status"] == "warning" for check in checks) else "pass", "checks": checks}
     write_json(output / "qa/qa-report.json", qa)
     (output / "reports").mkdir(parents=True, exist_ok=True)
     (output / "reports/data-quality-report.md").write_text("# Data Quality Report\n\n" + "\n".join(f"- {check['name']}: {check['detail']}" for check in checks) + "\n", encoding="utf-8")
+    (output / "reports/transformation-report.md").write_text("# Transformation Report\n\n" + ("\n".join(f"- {item['notice']}: {item['affected_records']} records" for item in transformation_notices) if transformation_notices else "- No category normalization was required.") + "\n", encoding="utf-8")
     (output / "reports/insight-report.md").write_text("# Insight Questions\n\n" + "\n".join(f"- {item}" for item in spec.get("insight_questions", [])) + "\n", encoding="utf-8")
     write_json(output / "metadata/dashboard-spec.json", spec)
+    write_json(output / "metadata/calculation-results.json", calculations)
     write_json(output / "metadata/dashboard-requirements.json", {"audience": spec.get("audience"), "purpose": spec.get("purpose"), "questions": spec.get("insight_questions", []), "kpis": spec.get("kpis", []), "filters": spec.get("filters", [])})
-    write_json(output / "metadata/run-manifest.json", {"project": name, "timestamp": datetime.now(timezone.utc).isoformat(), "stages": ["profile", "local-ai-spec", "build", "qa"], "status": qa["status"]})
+    write_json(output / "metadata/run-manifest.json", {"project": name, "timestamp": datetime.now(timezone.utc).isoformat(), "stages": ["profile", "semantic-profile", "ai-calculation-tools", "local-ai-spec", "build", "qa"], "status": qa["status"]})
     return {"qa": qa, "dashboard": f"/api/projects/{name}/dashboard", "records": len(records)}
 
 
 @app.get("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
+
+
+@app.get("/api/health")
+def health():
+    return jsonify({"service": "dashboard-factory", "status": "ok", "local_only": True})
 
 
 @app.get("/api/projects")
@@ -856,19 +1540,131 @@ def update_category(name: str):
     return jsonify({"name": name, "category": category})
 
 
+@app.get("/api/projects/<name>/calculation-rules")
+def get_calculation_rules(name: str):
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not profile:
+        return jsonify({"error": "Create a Data Profile before editing calculation rules."}), 400
+    config = project_config(name, profile)
+    return jsonify({"rules": validate_calculation_rules(config["calculation_rules"]), "fields": [field["name"] for field in profile["fields"]], "templates": METRIC_CONTRACT_TEMPLATES})
+
+
+@app.get("/api/calculation-rule-templates")
+def calculation_rule_templates():
+    return jsonify({"templates": METRIC_CONTRACT_TEMPLATES})
+
+
+@app.put("/api/projects/<name>/calculation-rules")
+def update_calculation_rules(name: str):
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not profile:
+        return jsonify({"error": "Create a Data Profile before editing calculation rules."}), 400
+    try:
+        config = project_config(name, profile)
+        payload_rules = (request.get_json(force=True) or {}).get("rules")
+        if not isinstance(payload_rules, dict):
+            raise ValueError("Calculation rules must be an object.")
+        if "metric_contracts" not in payload_rules:
+            payload_rules = {**payload_rules, "metric_contracts": config["calculation_rules"].get("metric_contracts", [])}
+        rules = validate_calculation_rules(payload_rules)
+        validate_metric_contract_fields(rules, profile)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    config["calculation_rules"] = rules
+    write_json(directory / "config.json", config)
+    return jsonify({"rules": rules})
+
+
+@app.post("/api/projects/<name>/calculation-rules/contracts")
+def save_metric_contract(name: str):
+    directory = project_dir(name)
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    if not profile:
+        return jsonify({"error": "Create a Data Profile before adding a metric contract."}), 400
+    try:
+        payload = request.get_json(force=True) or {}
+        candidate = payload.get("contract")
+        if not isinstance(candidate, dict):
+            raise ValueError("Metric contract must be an object.")
+        config = project_config(name, profile)
+        existing = validate_calculation_rules(config["calculation_rules"])
+        contract_id = str(candidate.get("id", "")).strip()
+        previous = next((item for item in existing["metric_contracts"] if item["id"] == contract_id), None)
+        if previous and previous["status"] == "approved":
+            raise ValueError("Approved metric contracts cannot be edited; create a new contract id.")
+        draft = {**candidate, "status": "draft", "version": (previous or {}).get("version", 0) + 1}
+        contracts = [item for item in existing["metric_contracts"] if item["id"] != contract_id] + [draft]
+        rules = validate_calculation_rules({**existing, "metric_contracts": contracts})
+        validate_metric_contract_fields(rules, profile)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    config["calculation_rules"] = rules
+    write_json(directory / "config.json", config)
+    return jsonify({"rules": rules, "contract": next(item for item in rules["metric_contracts"] if item["id"] == contract_id)}), 201
+
+
+@app.post("/api/projects/<name>/calculation-rules/contracts/<contract_id>/approve")
+def approve_metric_contract(name: str, contract_id: str):
+    directory = project_dir(name)
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    if not profile:
+        return jsonify({"error": "Create a Data Profile before approving a metric contract."}), 400
+    reviewer = str((request.get_json(force=True) or {}).get("approved_by", "")).strip()
+    if not reviewer or len(reviewer) > 120:
+        return jsonify({"error": "Enter an approver name of at most 120 characters."}), 400
+    try:
+        config = project_config(name, profile)
+        rules = validate_calculation_rules(config["calculation_rules"])
+        contract = next((item for item in rules["metric_contracts"] if item["id"] == contract_id), None)
+        if not contract:
+            raise ValueError("Metric contract not found.")
+        if contract["status"] == "approved":
+            raise ValueError("Metric contract is already approved.")
+        validate_metric_contract_fields(rules, profile)
+        approved_at = datetime.now(timezone.utc).isoformat()
+        contract.update({"status": "approved", "approved_by": reviewer, "approved_at": approved_at})
+        rules = validate_calculation_rules(rules)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    config["calculation_rules"] = rules
+    write_json(directory / "config.json", config)
+    history = directory / "output/metadata/calculation-rule-versions"
+    history.mkdir(parents=True, exist_ok=True)
+    write_json(history / f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{contract_id}-v{contract['version']}.json", {"project": name, "approved_at": approved_at, "approved_by": reviewer, "contract": contract, "calculation_rules": rules})
+    return jsonify({"rules": rules, "contract": contract})
+
+
 @app.get("/api/projects/<name>")
 def project_details(name: str):
     directory = project_dir(name)
     if not directory.exists():
         return jsonify({"error": "Project not found."}), 404
-    inputs = [{"name": item.name, "size": item.stat().st_size} for item in sorted((directory / "input").iterdir()) if item.is_file() and not item.name.startswith("~$")]
+    input_directory = directory / "input"
+    inputs = [
+        {"name": item.name, "size": item.stat().st_size}
+        for item in sorted(input_directory.iterdir())
+        if item.is_file() and not item.name.startswith("~$")
+    ] if input_directory.exists() else []
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    config = project_config(name, profile) if profile else read_json(directory / "config.json", {})
     return jsonify({
         "name": name,
         "inputs": inputs,
         "built": (directory / "output/dashboard/index.html").exists(),
-        "profile": read_json(directory / "output/metadata/dataset-profile.json", None),
+        "profile": profile,
         "spec": read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None),
         "qa": read_json(directory / "output/qa/qa-report.json", None),
+        "calculation_rules": config.get("calculation_rules"),
     })
 
 
@@ -877,15 +1673,20 @@ def upload_files(name: str):
     directory = project_dir(name)
     if not directory.exists():
         return jsonify({"error": "Project not found."}), 404
+    input_directory = directory / "input"
+    input_directory.mkdir(exist_ok=True)
     files = request.files.getlist("files")
     saved = []
     for uploaded in files:
-        filename = secure_filename(uploaded.filename or "")
-        if not filename:
-            continue
-        if Path(filename).suffix.lower() not in ALLOWED_UPLOAD_SUFFIXES:
+        original_name = uploaded.filename or ""
+        suffix = Path(original_name).suffix.lower()
+        if suffix not in ALLOWED_UPLOAD_SUFFIXES:
             return jsonify({"error": "Only .xlsx, .xlsm, and .csv files can be uploaded."}), 400
-        uploaded.save(directory / "input" / filename)
+        stem = secure_filename(Path(original_name).stem).strip("._")
+        filename = f"{stem or 'upload'}-{uuid4().hex[:8]}{suffix}"
+        if not original_name:
+            continue
+        uploaded.save(input_directory / filename)
         saved.append(filename)
     if not saved:
         return jsonify({"error": "Choose one or more files to upload."}), 400
@@ -896,7 +1697,7 @@ def upload_files(name: str):
 def api_profile(name: str):
     try:
         profile = profile_project(name)
-        config = default_config(name, profile)
+        config = project_config(name, profile)
         write_json(project_dir(name) / "config.json", config)
         return jsonify({"profile": profile, "config": config})
     except (ValueError, FileNotFoundError) as exc:
@@ -910,6 +1711,42 @@ def api_suggest(name: str):
         return jsonify(suggest_spec(name, payload.get("instruction", "")))
     except (ValueError, FileNotFoundError) as exc:
         return jsonify({"error": str(exc)}), 400
+
+
+@app.post("/api/projects/<name>/suggest-jobs")
+def start_suggest_job(name: str):
+    if not project_dir(name).exists():
+        return jsonify({"error": "Project not found."}), 404
+    instruction = str((request.get_json(silent=True) or {}).get("instruction", ""))
+    job_id = uuid4().hex
+    with AI_JOBS_LOCK:
+        AI_JOBS[job_id] = {"project": name, "status": "running", "percent": 0, "stage": "กำลังเริ่มงาน AI", "result": None, "error": None}
+
+    def update(percent: int, stage: str) -> None:
+        with AI_JOBS_LOCK:
+            if job_id in AI_JOBS:
+                AI_JOBS[job_id].update({"percent": percent, "stage": stage})
+
+    def run() -> None:
+        try:
+            result = suggest_spec(name, instruction, update)
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "completed", "percent": 100, "result": result})
+        except Exception as exc:
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "สร้าง specification ไม่สำเร็จ"})
+
+    Thread(target=run, name=f"factory-suggest-{job_id[:8]}", daemon=True).start()
+    return jsonify({"job_id": job_id, "status": "running", "percent": 0}), 202
+
+
+@app.get("/api/ai-jobs/<job_id>")
+def get_ai_job(job_id: str):
+    with AI_JOBS_LOCK:
+        job = AI_JOBS.get(job_id)
+        if not job:
+            return jsonify({"error": "AI job not found or Factory was restarted."}), 404
+        return jsonify(job)
 
 
 @app.post("/api/projects/<name>/improve")
@@ -936,6 +1773,61 @@ def dashboard(name: str):
 @app.get("/api/projects/<name>/dashboard/assets/<path:filename>")
 def dashboard_assets(name: str, filename: str):
     return send_from_directory(project_dir(name) / "output/dashboard/assets", filename)
+
+
+@app.get("/api/projects/<name>/publish-package")
+def publish_package(name: str):
+    """Export review metadata and a no-row-data HTML summary for DataLink publishing."""
+    directory = project_dir(name)
+    spec = read_json(directory / "output/metadata/dashboard-spec.json", None)
+    qa = read_json(directory / "output/qa/qa-report.json", None)
+    manifest = read_json(directory / "output/metadata/run-manifest.json", None)
+    if not spec or not qa or not manifest:
+        return jsonify({"error": "Build and QA must finish before preparing a publish package."}), 400
+    if qa.get("status") not in {"pass", "warning"}:
+        return jsonify({"error": "QA status is not eligible for review."}), 400
+    title = escape(str(spec.get("dashboard_title", name)))
+    purpose = escape(str(spec.get("purpose", "")))
+    html = f'<!doctype html><html lang="th"><head><meta charset="utf-8"><title>{title}</title></head><body><main><h1>{title}</h1><p>{purpose}</p><p>Dashboard นี้จัดการสิทธิ์และสถานะการเผยแพร่โดย DataLink</p></main></body></html>'
+    digest = hashlib.sha256(html.encode("utf-8")).hexdigest()
+    return jsonify({"package_version": 1, "project": name, "generated_at": manifest.get("timestamp"), "qa_status": qa.get("status"), "dashboard_html": html, "sha256": digest, "spec": spec, "run_manifest": manifest})
+
+
+@app.get("/api/projects/<name>/datalink-bundle")
+def datalink_bundle(name: str):
+    """Create a portable, credential-free Dataset import bundle for DataLink."""
+    directory = project_dir(name)
+    spec = read_json(directory / "output/metadata/dashboard-spec.json", None)
+    qa = read_json(directory / "output/qa/qa-report.json", None)
+    run_manifest = read_json(directory / "output/metadata/run-manifest.json", None)
+    data_path = directory / "output/data/records.csv"
+    if not spec or not qa or not run_manifest or not data_path.exists():
+        return jsonify({"error": "Build and QA must finish before preparing a DataLink Bundle."}), 400
+    if qa.get("status") not in {"pass", "warning"}:
+        return jsonify({"error": "QA status is not eligible for import."}), 400
+
+    data = data_path.read_bytes()
+    spec_data = json.dumps(spec, ensure_ascii=False, indent=2).encode("utf-8")
+    qa_data = json.dumps(qa, ensure_ascii=False, indent=2).encode("utf-8")
+    bundle_manifest = {
+        "bundle_version": 1,
+        "project": name,
+        "generated_at": run_manifest.get("timestamp"),
+        "qa_status": qa.get("status"),
+        "files": {
+            "data.csv": {"sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)},
+            "dashboard-spec.json": {"sha256": hashlib.sha256(spec_data).hexdigest(), "size_bytes": len(spec_data)},
+            "qa-report.json": {"sha256": hashlib.sha256(qa_data).hexdigest(), "size_bytes": len(qa_data)},
+        },
+    }
+    archive = BytesIO()
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+        bundle.writestr("manifest.json", json.dumps(bundle_manifest, ensure_ascii=False, indent=2))
+        bundle.writestr("dashboard-spec.json", spec_data)
+        bundle.writestr("qa-report.json", qa_data)
+        bundle.writestr("data.csv", data)
+    archive.seek(0)
+    return send_file(archive, mimetype="application/zip", as_attachment=True, download_name=f"{name}-datalink-bundle.zip")
 
 
 if __name__ == "__main__":

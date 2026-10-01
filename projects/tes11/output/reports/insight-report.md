@@ -1,7 +1,5 @@
 # Insight Questions
 
-- จำนวนรวมของนักศึกษาเพิ่มขึ้นหรือลดลงตามปีอย่างไร?
-- อัตราการจบการศึกษาเปรียบเทียบกับปี 2569 เป็นอย่างไร?
-- นักศึกษาอยู่ในชั้นปีใดบ้างและมีการกระจายอย่างไร?
-- จำนวนการลาออกมีแนวโน้มเพิ่มหรือลดลงตามปีและเดือนหรือไม่?
-- สาเหตุหลักของการลาออกคืออะไร?
+- What is the total sales amount for the period?
+- Which day had the highest sales?
+- How many unique customers made purchases?

@@ -1,136 +1,63 @@
 {
-  "dashboard_title": "สรุปข้อมูลนักศึกษาและการลาออก",
-  "purpose": "ให้ผู้บริหารมองเห็นจำนวนนักศึกษา การจบการศึกษา การลาออกและสาเหตุการลาออกตามปีและเดือน",
-  "audience": "ผู้บริหารระดับคณะและมหาวิทยาลัย",
+  "dashboard_title": "ยอดขายรายวันแดชบอร์ด",
+  "purpose": "สรุปยอดขายต่อวันและลูกค้าต่าง ๆ เพื่อสนับสนุนการตัดสินใจเชิงปฏิบัติ",
+  "audience": "ผู้จัดการฝ่ายขายและผู้บริหารระดับกลาง",
   "kpis": [
     {
-      "name": "จำนวนนักศึกษาทั้งหมดต่อปี",
-      "metric": "unique_student_count",
-      "aggregation": "COUNT(DISTINCT รหัสนักศึกษา)",
-      "formula": "COUNT(DISTINCT รหัสนักศึกษา)",
+      "name": "Total Sales",
+      "metric": "ยอดขาย",
+      "aggregation": "sum",
+      "formula": "SUM(ยอดขาย)",
       "source_fields": [
-        "รหัสนักศึกษา",
-        "_year_be"
+        "ยอดขาย"
       ],
-      "limitations": "ต้องมีรหัสนักศึกษาไม่ซ้ำในแต่ละปีเพื่อให้ผลรวมถูกต้อง",
-      "comparison": {
-        "enabled": false,
-        "period": "previous_period"
-      }
+      "limitations": "Aggregated over all records; no date segmentation"
     },
     {
-      "name": "อัตราการจบการศึกษา (%)",
-      "metric": "record_count",
-      "aggregation": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
-      "formula": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
+      "name": "Average Sales",
+      "metric": "ยอดขาย",
+      "aggregation": "average",
+      "formula": "AVG(ยอดขาย)",
       "source_fields": [
-        "รหัสนักศึกษา",
-        "สถานะ",
-        "_year_be"
+        "ยอดขาย"
       ],
-      "limitations": "หากไม่มีข้อมูลสถานะจบการศึกษาในบางปีจะไม่สามารถคำนวณได้",
-      "comparison": {
-        "enabled": true,
-        "period": "latest_year_vs_previous_year"
-      }
+      "limitations": "Average of sales across 12 records"
+    },
+    {
+      "name": "Distinct Customers",
+      "metric": "ชื่อลูกค้า",
+      "aggregation": "distinct",
+      "formula": "COUNT(DISTINCT ชื่อลูกค้า)",
+      "source_fields": [
+        "ชื่อลูกค้า"
+      ],
+      "limitations": "Count of unique customer names in dataset"
     }
   ],
-  "filters": [
-    "คณะ",
-    "สาขาวิชา"
-  ],
+  "filters": [],
   "display_labels": {
-    "คณะ": "คณะ",
-    "สาขาวิชา": "สาขาวิชา"
+    "วันที่": "วันที่ (พ.ศ.)"
   },
   "charts": [
     {
-      "title": "จำนวนนักศึกษาตามปี",
+      "title": "ยอดขายต่อวัน",
       "type": "bar",
-      "dimension": "_year_be",
-      "metric": "unique_student_count",
-      "aggregation": "COUNT(DISTINCT รหัสนักศึกษา)",
-      "formula": "COUNT(DISTINCT รหัสนักศึกษา)",
+      "dimension": "วันที่",
+      "metric": "ยอดขาย",
+      "aggregation": "sum",
+      "formula": "SUM(ยอดขาย)",
       "source_fields": [
-        "รหัสนักศึกษา",
-        "_year_be"
+        "ยอดขาย",
+        "วันที่"
       ],
-      "limitations": "ต้องมีรหัสนักศึกษาไม่ซ้ำในแต่ละปี"
-    },
-    {
-      "title": "อัตราการจบการศึกษาเปรียบเทียบปี",
-      "type": "line",
-      "dimension": "_year_be",
-      "metric": "record_count",
-      "aggregation": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
-      "formula": "(COUNT(CASE WHEN สถานะ='Graduated' THEN 1 END) / COUNT(DISTINCT รหัสนักศึกษา)) * 100",
-      "source_fields": [
-        "รหัสนักศึกษา",
-        "สถานะ",
-        "_year_be"
-      ],
-      "limitations": "ต้องมีข้อมูลสถานะจบการศึกษาในทุกปีเพื่อเปรียบเทียบ"
-    },
-    {
-      "title": "จำนวนนักศึกษาตามชั้นปี (จากรหัส)",
-      "type": "bar",
-      "dimension": "_academic_year_be",
-      "metric": "unique_student_count",
-      "aggregation": "COUNT(DISTINCT รหัสนักศึกษา)",
-      "formula": "COUNT(DISTINCT รหัสนักศึกษา)",
-      "source_fields": [
-        "รหัสนักศึกษา",
-        "_academic_year_be"
-      ],
-      "limitations": "คำนวณชั้นปีจากรหัสนักศึกษา; หากรูปแบบรหัสเปลี่ยนอาจทำให้คำนวณผิด"
-    },
-    {
-      "title": "จำนวนนักศึกษาลาออกตามปี",
-      "type": "bar",
-      "dimension": "_year_be",
-      "metric": "record_count",
-      "aggregation": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "formula": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "source_fields": [
-        "สถานะ",
-        "_year_be"
-      ],
-      "limitations": "ข้อมูลลาออกมีเพียง 8 รายการ"
-    },
-    {
-      "title": "จำนวนนักศึกษาลาออกตามเดือน",
-      "type": "line",
-      "dimension": "_month_th",
-      "metric": "record_count",
-      "aggregation": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "formula": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "source_fields": [
-        "สถานะ",
-        "_month_th"
-      ],
-      "limitations": "ข้อมูลลาออกมีเพียง 8 รายการ"
-    },
-    {
-      "title": "สาเหตุการลาออกของนักศึกษา",
-      "type": "pie",
-      "dimension": "สาเหตุการลาออก",
-      "metric": "record_count",
-      "aggregation": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "formula": "COUNT(CASE WHEN สถานะ='ลาออก' THEN 1 END)",
-      "source_fields": [
-        "สถานะ",
-        "สาเหตุการลาออก"
-      ],
-      "limitations": "รวมเฉพาะกรณีลาออก; มี 5 สาเหตุหลัก"
+      "limitations": "Sum of sales per date; limited to 12 dates in dataset"
     }
   ],
   "insight_questions": [
-    "จำนวนรวมของนักศึกษาเพิ่มขึ้นหรือลดลงตามปีอย่างไร?",
-    "อัตราการจบการศึกษาเปรียบเทียบกับปี 2569 เป็นอย่างไร?",
-    "นักศึกษาอยู่ในชั้นปีใดบ้างและมีการกระจายอย่างไร?",
-    "จำนวนการลาออกมีแนวโน้มเพิ่มหรือลดลงตามปีและเดือนหรือไม่?",
-    "สาเหตุหลักของการลาออกคืออะไร?"
+    "What is the total sales amount for the period?",
+    "Which day had the highest sales?",
+    "How many unique customers made purchases?"
   ],
   "generated_by": "groq-ai",
-  "last_instruction": "ต้องการให้แสดงผลดังนี้\n1. จำนวนนักศึกษาทั้งหมด แบ่งตามรายปีได้\n2. อัตราการจบการศึกษา เป็นเปอร์เซ็นต์และมีลูกศร KPI เปรียบเทียบกับปีล่าสุด 2569\n3. จำนวนนักศึกษาทั้งหมดแบ่งตามชั้นปี ซึ่งคำนวณชั้นปีจากรหัสนักศึกษา เช่น 6600000 รหัส 66 คือนักศึกษาเข้ามาปี 2566 ในหลักสูตร 4 ปี นักศึกษาจะอยู่ ปี 4 ในสถานะกำลังศึกษา แต่ถ้าเกินก็ปี 5 หรือ 6 ได้\n4. แสดงจำนวนนักศึกษาลาออกแบ่งตามรายปี และรายเดือนได้\n5. แสดงเหตุผลของนักศึกษาที่ลาออก"
+  "last_instruction": "เอาฟิลเตอร์ปีการศึกษาออก ไม่ได้ใช้"
 }

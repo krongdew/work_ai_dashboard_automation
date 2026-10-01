@@ -1,0 +1,21 @@
+{
+  "generated_by": "groq-ai",
+  "source": "metadata_only",
+  "profile_generated_at": "2026-09-30T07:18:55.548229+00:00",
+  "dataset_summary": "Dataset contains 12 records with a single date field named \"วันที่\". Date parsing succeeded for all records. Three derived fields (_year_be, _month_th, _quarter) are present but lack type metadata.",
+  "warnings": [
+    "Derived fields lack type metadata; cannot interpret safely.",
+    "Only one explicit field; limited context for business role."
+  ],
+  "field_interpretations": [
+    {
+      "field": "วันที่",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "date",
+      "confidence": 0.95,
+      "limitations": "No sample values; distinct count 10 of 12 records; derived fields lack type information."
+    }
+  ]
+}

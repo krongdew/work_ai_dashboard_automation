@@ -1,0 +1,20 @@
+{
+  "generated_by": "local-ai",
+  "source": "metadata_only",
+  "profile_generated_at": "2026-10-01T06:39:52.097990+00:00",
+  "dataset_summary": "The dataset contains 12 records with a 'วันที่' (date) field. The date field has 10 distinct values, parsed successfully from mixed formats in Buddhist Era years. There are no unparsed dates.",
+  "warnings": [
+    "No sales or numeric measure fields available for aggregation."
+  ],
+  "field_interpretations": [
+    {
+      "field": "วันที่",
+      "semantic_type": "date",
+      "unit": "day",
+      "aggregation_guidance": "count_distinct",
+      "business_role": "transaction_date",
+      "confidence": 1.0,
+      "limitations": "No sales or numeric measure fields available for aggregation."
+    }
+  ]
+}

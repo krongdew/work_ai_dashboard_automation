@@ -1,0 +1,220 @@
+{
+  "generated_by": "groq-ai",
+  "source": "metadata_only",
+  "profile_generated_at": "2026-09-30T07:17:11.386875+00:00",
+  "dataset_summary": "The dataset contains 2,243 records describing academic information such as credits, majors, exam scores, dates, and Thai‑language attributes. Several fields have many missing values, and most categorical fields have low cardinality. Numeric fields are mostly measures (credits, scores, year‑level) while dates capture exam and academic year information.",
+  "warnings": [
+    "Many numeric fields (e.g., Credits, Required_By_Year) have a high proportion of nulls; aggregating them without handling missing values may distort totals.",
+    "Numeric fields like Credits and Required_By_Year represent non‑additive concepts (requirements, credit counts per course) – summing them across records could double‑count.",
+    "No explicit percentage or rate fields are present, but care is needed if derived percentages are calculated from count‑based categories."
+  ],
+  "field_interpretations": [
+    {
+      "field": "Credits",
+      "semantic_type": "quantity",
+      "unit": "credits",
+      "aggregation_guidance": "sum_when_additive",
+      "business_role": "academic credit count per record",
+      "confidence": 0.7,
+      "limitations": "Only 298 non‑null values; distinct values limited to 4, many missing entries."
+    },
+    {
+      "field": "Major",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "student major or program area",
+      "confidence": 0.8,
+      "limitations": "Low cardinality (3 distinct) and 298 non‑null values; many records lack this information."
+    },
+    {
+      "field": "Required_By_Year",
+      "semantic_type": "quantity",
+      "unit": "year",
+      "aggregation_guidance": "do_not_aggregate",
+      "business_role": "target year for a requirement",
+      "confidence": 0.6,
+      "limitations": "Numeric representation of a year; not additive. 298 non‑null values, 6 distinct."
+    },
+    {
+      "field": "Section",
+      "semantic_type": "identifier",
+      "unit": "",
+      "aggregation_guidance": "count_distinct",
+      "business_role": "section identifier for a class or group",
+      "confidence": 0.6,
+      "limitations": "Only 36 non‑null entries, all with the same value; limited usefulness for aggregation."
+    },
+    {
+      "field": "Sub_Type",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "sub‑type classification within the dataset",
+      "confidence": 0.7,
+      "limitations": "10 distinct values but 298 non‑null; may represent categorical grouping."
+    },
+    {
+      "field": "Text",
+      "semantic_type": "text",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "free‑form text note",
+      "confidence": 0.5,
+      "limitations": "Only 5 non‑null entries, all identical; insufficient data to infer meaning."
+    },
+    {
+      "field": "Type",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "type classification of the record",
+      "confidence": 0.7,
+      "limitations": "6 distinct values with 298 non‑null entries."
+    },
+    {
+      "field": "Year",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "academic year reference",
+      "confidence": 0.8,
+      "limitations": "All 298 non‑null values share the same date; limited variability."
+    },
+    {
+      "field": "คณะ",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "faculty or department (Thai)",
+      "confidence": 0.7,
+      "limitations": "Only 72 non‑null entries, single distinct value."
+    },
+    {
+      "field": "คำนำหน้า",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "personal title prefix (Thai)",
+      "confidence": 0.7,
+      "limitations": "36 non‑null entries with 2 distinct values."
+    },
+    {
+      "field": "ชั้นปี",
+      "semantic_type": "quantity",
+      "unit": "year",
+      "aggregation_guidance": "average_when_comparable",
+      "business_role": "student year level",
+      "confidence": 0.8,
+      "limitations": "1582 non‑null entries, 4 distinct levels; may be used for averaging."
+    },
+    {
+      "field": "ประเภทการรับเข้า",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "admission type (Thai)",
+      "confidence": 0.6,
+      "limitations": "36 non‑null entries, single distinct value."
+    },
+    {
+      "field": "ประเภทการสอบ",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "exam type (Thai)",
+      "confidence": 0.8,
+      "limitations": "1866 non‑null entries, 11 distinct types."
+    },
+    {
+      "field": "ปีการศึกษา",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "academic year (Thai)",
+      "confidence": 0.8,
+      "limitations": "36 non‑null entries, all same date."
+    },
+    {
+      "field": "ปีที่เข้า",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "year of entry (Thai)",
+      "confidence": 0.8,
+      "limitations": "36 non‑null entries, all same date."
+    },
+    {
+      "field": "ผลคะแนน",
+      "semantic_type": "quantity",
+      "unit": "points",
+      "aggregation_guidance": "average_when_comparable",
+      "business_role": "exam score result",
+      "confidence": 0.85,
+      "limitations": "1868 non‑null values with 174 distinct scores; numeric ratio indicates many numeric entries but some may be non‑numeric."
+    },
+    {
+      "field": "วันที่สอบ",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "exam date",
+      "confidence": 0.85,
+      "limitations": "1514 non‑null entries, 188 distinct dates."
+    },
+    {
+      "field": "สถานะเกรด",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "grade status (Thai)",
+      "confidence": 0.7,
+      "limitations": "36 non‑null entries, 2 distinct statuses."
+    },
+    {
+      "field": "หลักสูตร",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "curriculum or program (Thai)",
+      "confidence": 0.8,
+      "limitations": "1546 non‑null entries, 3 distinct curricula."
+    },
+    {
+      "field": "หลักสูตร/สาขา",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "curriculum/branch combination (Thai)",
+      "confidence": 0.7,
+      "limitations": "36 non‑null entries, single distinct value."
+    },
+    {
+      "field": "เกณฑ์มาตรฐาน",
+      "semantic_type": "date",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "standard reference date (Thai)",
+      "confidence": 0.6,
+      "limitations": "1866 non‑null entries but 744 unparsed dates; date parsing incomplete."
+    },
+    {
+      "field": "เทอม",
+      "semantic_type": "quantity",
+      "unit": "term",
+      "aggregation_guidance": "group_only",
+      "business_role": "academic term identifier",
+      "confidence": 0.6,
+      "limitations": "36 non‑null entries, single distinct term."
+    },
+    {
+      "field": "เรียนวิชานี้เป็นครั้งที่",
+      "semantic_type": "quantity",
+      "unit": "",
+      "aggregation_guidance": "do_not_aggregate",
+      "business_role": "attempt count for the course",
+      "confidence": 0.6,
+      "limitations": "36 non‑null entries, all same value."
+    }
+  ]
+}

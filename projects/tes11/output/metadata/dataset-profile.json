@@ -1,180 +1,114 @@
 {
   "project": "tes11",
-  "generated_at": "2026-09-23T05:42:15.517530+00:00",
+  "generated_at": "2026-10-01T01:20:55.548268+00:00",
   "input_files": [
-    "student_records_batch1_clean85.xlsx",
-    "student_records_batch2_clean85.xlsx"
+    "upload-62e26d8c.xlsx"
   ],
-  "records": 40,
+  "records": 12,
   "worksheets": [
     {
-      "file": "student_records_batch1_clean85.xlsx",
-      "sheet": "Students_Batch1",
-      "rows": 20,
-      "columns": 8,
+      "file": "upload-62e26d8c.xlsx",
+      "sheet": "Data",
+      "rows": 12,
+      "columns": 5,
       "fields": [
-        "รหัสนักศึกษา",
-        "ชื่อ_นามสกุล",
-        "คณะ",
-        "สาขาวิชา",
-        "เกรดเฉลี่ย_GPAX",
-        "สถานะ",
-        "วันที่ลาออก",
-        "สาเหตุการลาออก"
-      ]
-    },
-    {
-      "file": "student_records_batch2_clean85.xlsx",
-      "sheet": "Students_Batch2",
-      "rows": 20,
-      "columns": 8,
-      "fields": [
-        "รหัสนักศึกษา",
-        "ชื่อ_นามสกุล",
-        "คณะ",
-        "สาขาวิชา",
-        "เกรดเฉลี่ย_GPAX",
-        "สถานะ",
-        "วันที่ลาออก",
-        "สาเหตุการลาออก"
+        "โทร",
+        "ID",
+        "ยอดขาย",
+        "วันที่",
+        "ชื่อลูกค้า"
       ]
     }
   ],
   "fields": [
     {
-      "name": "คณะ",
-      "type": "category",
-      "role": "category",
-      "non_null": 40,
-      "distinct": 4,
-      "numeric_ratio": 0.0,
-      "examples": [
-        "วิศวกรรมศาสตร์",
-        "วิทยาศาสตร์",
-        "เทคโนโลยีสารสนเทศ",
-        "บริหารธุรกิจ"
-      ]
-    },
-    {
-      "name": "ชื่อ_นามสกุล",
-      "type": "category",
-      "role": "category",
-      "non_null": 40,
-      "distinct": 40,
-      "numeric_ratio": 0.0,
-      "examples": [
-        "นายสมชาย ใจดี",
-        "นางสาววิภา รักเรียน",
-        "นายอนันต์ มั่นคง",
-        "นายกานต์ สดใส",
-        "นางสาวนภา เพียรเรียน"
-      ]
-    },
-    {
-      "name": "รหัสนักศึกษา",
+      "name": "ID",
       "type": "identifier",
       "role": "identifier",
-      "non_null": 40,
-      "distinct": 40,
-      "numeric_ratio": 0.975,
+      "non_null": 12,
+      "distinct": 12,
+      "numeric_ratio": 1.0,
       "examples": [
-        "6601001",
-        "6601002",
-        "6601003 ",
-        "6601004",
-        "6601005"
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
       ]
     },
     {
-      "name": "วันที่ลาออก",
-      "type": "date",
-      "role": "date",
-      "non_null": 8,
-      "distinct": 8,
-      "numeric_ratio": 0.0,
-      "examples": [
-        "2023-09-15",
-        "2023-10-01",
-        "15/11/2023",
-        "2023-12-20",
-        "2024-01-10"
-      ]
-    },
-    {
-      "name": "สถานะ",
+      "name": "ชื่อลูกค้า",
       "type": "category",
       "role": "category",
-      "non_null": 40,
-      "distinct": 4,
-      "numeric_ratio": 0.0,
-      "examples": [
-        "กำลังศึกษา",
-        "ลาออก",
-        "จบการศึกษา",
-        "ลา ออก"
-      ]
-    },
-    {
-      "name": "สาขาวิชา",
-      "type": "category",
-      "role": "category",
-      "non_null": 40,
-      "distinct": 9,
-      "numeric_ratio": 0.0,
-      "examples": [
-        "วิศวกรรมคอมพิวเตอร์",
-        "วิทยาการคอมพิวเตอร์",
-        "เทคโนโลยีสารสนเทศ",
-        "การตลาด",
-        "วิศวกรรมโยธา"
-      ]
-    },
-    {
-      "name": "สาเหตุการลาออก",
-      "type": "category",
-      "role": "category",
-      "non_null": 8,
+      "non_null": 12,
       "distinct": 5,
       "numeric_ratio": 0.0,
       "examples": [
-        "ปัญหาทางการเงิน",
-        "ผลการเรียนไม่ถึงเกณฑ์",
-        "ปัญหาสุขภาพ",
-        "ปัญหาสุขภาาพ",
-        "ย้ายสถานศึกษา"
+        "AAAA",
+        "DDDD",
+        "SSSS",
+        "ฟหกดฟ",
+        "หกดหกด"
       ]
     },
     {
-      "name": "เกรดเฉลี่ย_GPAX",
+      "name": "ยอดขาย",
       "type": "identifier",
       "role": "identifier",
-      "non_null": 39,
-      "distinct": 35,
+      "non_null": 12,
+      "distinct": 11,
       "numeric_ratio": 1.0,
       "examples": [
-        "3.25",
-        "3.8",
-        "2.15",
-        "3.1",
-        "2.95"
+        "1500",
+        "100",
+        "154",
+        "2500",
+        "850"
+      ]
+    },
+    {
+      "name": "วันที่",
+      "type": "date",
+      "role": "date",
+      "non_null": 12,
+      "distinct": 10,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "01-03-2569",
+        "02-03-2569",
+        "03-03-2569",
+        "04-03-2569",
+        "05-03-2569"
+      ]
+    },
+    {
+      "name": "โทร",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 12,
+      "distinct": 12,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "087563512",
+        "087563513",
+        "087563514",
+        "087563515",
+        "087563516"
       ]
     }
   ],
   "quality": {
     "exact_duplicate_rows": 0,
     "missing_values": {
-      "คณะ": 0,
-      "ชื่อ_นามสกุล": 0,
-      "รหัสนักศึกษา": 0,
-      "วันที่ลาออก": 32,
-      "สถานะ": 0,
-      "สาขาวิชา": 0,
-      "สาเหตุการลาออก": 32,
-      "เกรดเฉลี่ย_GPAX": 1
+      "ID": 0,
+      "ชื่อลูกค้า": 0,
+      "ยอดขาย": 0,
+      "วันที่": 0,
+      "โทร": 0
     },
     "date_parsing": {
-      "วันที่ลาออก": {
-        "parsed": 8,
+      "วันที่": {
+        "parsed": 12,
         "unparsed": 0,
         "dominant_format": "normalized mixed date formats"
       }

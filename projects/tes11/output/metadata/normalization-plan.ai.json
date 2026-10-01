@@ -1,0 +1,79 @@
+{
+  "generated_by": "groq-ai",
+  "profile_generated_at": "2026-09-30T07:18:55.548229+00:00",
+  "mappings": [
+    {
+      "field": "วันที่",
+      "source": "08-03-2569",
+      "target": "08-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "10-03-2569",
+      "target": "10-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "01-03-2569",
+      "target": "01-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "02-03-2569",
+      "target": "02-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "03-03-2569",
+      "target": "03-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "04-03-2569",
+      "target": "04-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "05-03-2569",
+      "target": "05-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "06-03-2569",
+      "target": "06-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "07-03-2569",
+      "target": "07-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    },
+    {
+      "field": "วันที่",
+      "source": "09-03-2569",
+      "target": "09-03-2569",
+      "reason": "Exact match; already in Buddhist Era format",
+      "confidence": 1.0
+    }
+  ],
+  "warnings": [
+    "Date format assumed DD-MM-YYYY; verify if this matches source convention."
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "instruction": "",
+  "results": [
+    {
+      "name": "Total_Records",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 0
+    },
+    {
+      "name": "Distinct_Students",
+      "metric": "Student_ID",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 779
+    },
+    {
+      "name": "Sum_Credits",
+      "metric": "Credits",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 868.0
+    },
+    {
+      "name": "Average_Score",
+      "metric": "ผลคะแนน",
+      "aggregation": "average",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 169.7157894736842
+    },
+    {
+      "name": "Count_by_Major",
+      "metric": "Major",
+      "aggregation": "count",
+      "dimension": "Major",
+      "filters": [],
+      "rows": 2243,
+      "value": [
+        {
+          "label": "ภาษาจีน",
+          "value": 0,
+          "rows": 63
+        },
+        {
+          "label": "ภาษาอังกฤษ",
+          "value": 0,
+          "rows": 117
+        },
+        {
+          "label": "ภาษาไทย",
+          "value": 0,
+          "rows": 118
+        },
+        {
+          "label": "ไม่ระบุ",
+          "value": 0,
+          "rows": 1945
+        }
+      ]
+    },
+    {
+      "name": "Distinct_Courses",
+      "metric": "Course_Code",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 232
+    },
+    {
+      "name": "Average_Year_Level",
+      "metric": "ชั้นปี",
+      "aggregation": "average",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 2.4968394437420987
+    },
+    {
+      "name": "Count_by_Exam_Type",
+      "metric": "ประเภทการสอบ",
+      "aggregation": "count",
+      "dimension": "ประเภทการสอบ",
+      "filters": [],
+      "rows": 2243,
+      "value": [
+        {
+          "label": "Duolingo",
+          "value": 0,
+          "rows": 10
+        },
+        {
+          "label": "IEC",
+          "value": 0,
+          "rows": 40
+        },
+        {
+          "label": "IELTS",
+          "value": 0,
+          "rows": 114
+        },
+        {
+          "label": "LAEN 124",
+          "value": 0,
+          "rows": 4
+        },
+        {
+          "label": "MU-ELT",
+          "value": 0,
+          "rows": 1008
+        },
+        {
+          "label": "MU-ELT CBE",
+          "value": 0,
+          "rows": 40
+        },
+        {
+          "label": "MU-ELT IBE",
+          "value": 0,
+          "rows": 18
+        },
+        {
+          "label": "None",
+          "value": 0,
+          "rows": 2
+        },
+        {
+          "label": "Speexx",
+          "value": 0,
+          "rows": 78
+        },
+        {
+          "label": "TOEFL iBT",
+          "value": 0,
+          "rows": 2
+        },
+        {
+          "label": "TOEIC",
+          "value": 0,
+          "rows": 204
+        },
+        {
+          "label": "ไม่ระบุ",
+          "value": 0,
+          "rows": 375
+        },
+        {
+          "label": "ไม่ได้สอบ",
+          "value": 0,
+          "rows": 348
+        }
+      ]
+    },
+    {
+      "name": "Max_Credits",
+      "metric": "Credits",
+      "aggregation": "maximum",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 6.0
+    },
+    {
+      "name": "Min_Score",
+      "metric": "ผลคะแนน",
+      "aggregation": "minimum",
+      "dimension": null,
+      "filters": [],
+      "rows": 2243,
+      "value": 3.5
+    }
+  ]
+}

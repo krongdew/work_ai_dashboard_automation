@@ -1,0 +1,8 @@
+{
+  "generated_by": "local-ai",
+  "profile_generated_at": "2026-09-30T08:04:31.532516+00:00",
+  "mappings": [],
+  "warnings": [
+    "Timestamps_year contains ambiguous year values (e.g., '2507', '2510') which may require manual verification for historical context."
+  ]
+}

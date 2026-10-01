@@ -1,0 +1,159 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet"><title>ยอดขายรวม</title><style>
+:root{--navy:#0B2B5E;--blue:#263988;--gold:#FECD54;--bg:#F4F5F9;--line:#D9DEE8;--muted:#5f6b7c;--green:#0F8F83;--red:#C94A4A}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1F2937;font-family:Prompt,"Noto Sans Thai",Tahoma,sans-serif}main{max-width:1440px;margin:auto;padding:20px clamp(16px,3vw,44px) 48px}header,.panel,.card{background:#fff;border:1px solid var(--line);border-radius:6px}header{display:grid;grid-template-columns:330px 1fr auto;gap:20px;align-items:center;border-top:4px solid var(--gold);padding:16px 22px}.identity{display:flex;align-items:center;gap:13px;color:var(--navy);font-weight:700}.identity img{width:72px;height:72px;object-fit:contain}.identity small,.title p{display:block;color:var(--muted);font-size:12px;font-weight:400}.title{text-align:center}.title p{margin:0}.title h1{margin:5px 0;color:var(--navy);font-family:Prompt,"Noto Serif Thai",serif;font-size:clamp(1.65rem,3vw,2.5rem)}.badge{border:1px solid var(--gold);padding:9px;font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap}.filters,.kpis,.grid{display:grid;gap:14px;margin-top:18px}.filters{grid-template-columns:repeat(auto-fit,minmax(175px,1fr));align-items:end}label{display:grid;gap:6px;color:var(--navy);font-size:12px;font-weight:700}button,.multi{border:1px solid var(--line);background:#fff;border-radius:4px;padding:8px;color:#1F2937;font:inherit}.multi{position:relative;padding:0}.multi summary{padding:8px;cursor:pointer;list-style:none}.multi summary:after{content:'⌄';float:right}.options{position:absolute;z-index:3;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow:auto;background:#fff;border:1px solid var(--line);padding:6px;box-shadow:0 6px 16px #0b2b5e22}.options label{display:flex;align-items:center;gap:7px;padding:5px;color:#1F2937;font-weight:400}.options input{margin:0}button{min-height:38px;cursor:pointer}button:hover,.bar-label.active{border-color:var(--navy);background:#edf2fb}.kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.card{border-top:3px solid var(--navy);padding:15px}.card span{font-size:12px;color:var(--muted);font-weight:700}.card strong{display:block;margin-top:7px;color:var(--navy);font-size:25px}.delta{margin-top:6px;font-size:12px;font-weight:700}.good{color:var(--green)}.bad{color:var(--red)}.neutral{color:var(--muted)}.grid{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}.panel{padding:18px}.panel h2{margin:0 0 12px;color:var(--navy);font:700 17px Prompt,"Noto Serif Thai",serif}.bar-row{display:grid;grid-template-columns:minmax(90px,1fr) 2fr auto;align-items:center;gap:9px;margin:9px 0;font-size:12px}.bar-label{text-align:left;border:0;padding:0;background:transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.track{height:13px;background:#dce2ed}.bar{height:100%;background:var(--mark,var(--blue))}.line{display:flex;align-items:end;height:180px;gap:8px;border-bottom:1px solid var(--line)}.point{flex:1;min-width:18px;background:var(--mark,var(--blue));position:relative;border:0;padding:0}.point span{position:absolute;bottom:calc(100% + 4px);font-size:10px;transform:rotate(-35deg);transform-origin:left bottom;white-space:nowrap}.pie-wrap{display:flex;align-items:center;gap:18px}.pie{width:150px;height:150px;border-radius:50%;flex:none}.legend{font-size:12px;line-height:1.8}.notice{grid-column:1/-1;border-left:3px solid var(--gold);background:#fff9e8;padding:12px;color:#5d4d1d;font-size:13px}.notice ul{margin:5px 0 0;padding-left:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--navy)}.table{overflow:auto;max-height:340px}@media(max-width:860px){header{grid-template-columns:1fr}.title{text-align:left}.badge{width:max-content}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}</style></head><body><main><header><div class="identity"><img src="/api/projects/110/dashboard/assets/logo.png" alt="ตรามหาวิทยาลัยมหิดล"><div>คณะศิลปศาสตร์ มหาวิทยาลัยมหิดล<small>Faculty of Liberal Arts, Mahidol University</small></div></div><div class="title"><p>การวิเคราะห์ผลการดำเนินงาน</p><h1>ยอดขายรวม</h1><p>นับยอดรวมยอดขาย</p></div><div class="badge">QA-AWARE DASHBOARD</div></header><section class="filters"><label>ชื่อลูกค้า<details class="multi"><summary id="filter-0-summary">ทั้งหมด</summary><div class="options" id="filter-0"></div></details></label><label>ปี<details class="multi"><summary id="filter-1-summary">ทั้งหมด</summary><div class="options" id="filter-1"></div></details></label><label>ปีการศึกษา (พ.ศ.)<details class="multi"><summary id="filter-2-summary">ทั้งหมด</summary><div class="options" id="filter-2"></div></details></label><label>เดือน<details class="multi"><summary id="filter-3-summary">ทั้งหมด</summary><div class="options" id="filter-3"></div></details></label><label>ไตรมาส<details class="multi"><summary id="filter-4-summary">ทั้งหมด</summary><div class="options" id="filter-4"></div></details></label><button id="clear" type="button">ล้างตัวกรองทั้งหมด</button></section><section class="kpis" id="kpis"></section><section class="grid"><aside class="notice"><b>ข้อมูลที่ต้องพิจารณาเพิ่มเติม</b><ul><li>ผ่านการตรวจความเหมาะสมของ field ก่อนสร้างกราฟ</li></ul></aside><article class="panel"><h2>ยอดขายรวมตามเดือน</h2><div class="chart" id="chart-0"></div></article><article class="panel"><h2>รายละเอียดข้อมูล</h2><div class="table"><table id="table"></table></div></article></section></main><script>
+const rows=[{"โทร":"087563512","ID":1001,"ยอดขาย":1500,"วันที่":"01-03-2569","ชื่อลูกค้า":"AAAA","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":2,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563513","ID":1002,"ยอดขาย":100,"วันที่":"02-03-2569","ชื่อลูกค้า":"DDDD","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":3,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563514","ID":1003,"ยอดขาย":154,"วันที่":"03-03-2569","ชื่อลูกค้า":"SSSS","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":4,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563515","ID":1004,"ยอดขาย":2500,"วันที่":"04-03-2569","ชื่อลูกค้า":"AAAA","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":5,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563516","ID":1005,"ยอดขาย":850,"วันที่":"05-03-2569","ชื่อลูกค้า":"DDDD","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":6,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563517","ID":1006,"ยอดขาย":150,"วันที่":"06-03-2569","ชื่อลูกค้า":"SSSS","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":7,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563518","ID":1007,"ยอดขาย":159,"วันที่":"07-03-2569","ชื่อลูกค้า":"AAAA","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":8,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563519","ID":1008,"ยอดขาย":565,"วันที่":"08-03-2569","ชื่อลูกค้า":"DDDD","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":9,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563520","ID":1009,"ยอดขาย":7845,"วันที่":"09-03-2569","ชื่อลูกค้า":"SSSS","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":10,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":"087563521","ID":1010,"ยอดขาย":1224,"วันที่":"10-03-2569","ชื่อลูกค้า":"AAAA","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":11,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":123456,"ID":1011,"ยอดขาย":125,"วันที่":"10-03-2569","ชื่อลูกค้า":"ฟหกดฟ","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":12,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"},{"โทร":79879,"ID":1012,"ยอดขาย":150,"วันที่":"08-03-2569","ชื่อลูกค้า":"หกดหกด","_source_file":"upload-60ba03d5.xlsx","_source_sheet":"Data","_source_row":13,"_year_be":2569,"_month_th":"มี.ค.","_quarter":"Q1"}],plans=[{"id": "chart-0", "title": "ยอดขายรวมตามเดือน", "type": "bar", "dimension": "_month_th", "metric": "record_count", "aggregation": "sum", "formula": "SUM(ยอดขาย)", "target": null}],fields=["ID", "ชื่อลูกค้า", "ยอดขาย", "วันที่", "โทร"],filterFields=["ชื่อลูกค้า", "_year_be", "_academic_year_be", "_month_th", "_quarter"],fmt=new Intl.NumberFormat('th-TH',{maximumFractionDigits:2});let chartFilter=null;
+const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');const numericValue=value=>{const match=String(value??'').replaceAll(',','').match(/-?\d+(?:\.\d+)?/);return match?Number(match[0]):0};function aggregate(data,metric){if(metric==='record_count')return data.length;if(metric==='unique_student_count')return new Set(data.map(row=>String(row['รหัสนักศึกษา']??'').trim()).filter(value=>value&&!/^[-\s]*$/.test(value))).size;const values=data.map(row=>numericValue(row[metric])).filter(value=>Number.isFinite(value));if(!values.length)return 0;if(/อัตรา|rate/i.test(metric)){const normalized=values.map(value=>value<=1?value*100:value);return normalized.reduce((sum,value)=>sum+value,0)/normalized.length}return values.reduce((sum,value)=>sum+value,0)}
+filterFields.forEach((field,index)=>{const options=document.querySelector('#filter-'+index),summary=document.querySelector('#filter-'+index+'-summary');[...new Set(rows.map(row=>String(row[field]??'ไม่ระบุ'))) ].sort((a,b)=>a.localeCompare(b,'th',{numeric:true})).forEach((value,itemIndex)=>{const id=`f-${index}-${itemIndex}`;options.insertAdjacentHTML('beforeend',`<label for="${id}"><input id="${id}" type="checkbox" value="${esc(value)}">${esc(value)}</label>`)});options.addEventListener('change',()=>{const values=selectedValues(field,index);summary.textContent=values.size?`${values.size} รายการ`: 'ทั้งหมด';render()})});
+function selectedValues(field,index){return new Set([...document.querySelectorAll('#filter-'+index+' input:checked')].map(input=>input.value))}function visible(){return rows.filter(row=>filterFields.every((field,index)=>{const picked=selectedValues(field,index);return !picked.size||picked.has(String(row[field]??'ไม่ระบุ'))})&&(!chartFilter||String(row[chartFilter.field]??'ไม่ระบุ')===chartFilter.value))}
+function draw(plan,data){const buckets={};data.forEach(row=>{const key=String(row[plan.dimension]??'ไม่ระบุ');(buckets[key]??=[]).push(row)});const items=Object.entries(buckets).map(([label,group])=>[label,aggregate(group,plan.metric)]).sort((a,b)=>plan.type==='line'?a[0].localeCompare(b[0],'th',{numeric:true}):b[1]-a[1]).slice(0,12),max=Math.max(...items.map(item=>item[1]),1),total=items.reduce((sum,item)=>sum+item[1],0)||1,target=document.querySelector('#'+plan.id),colors=['#263988','#0F8F83','#FECD54','#C94A4A','#8094b8','#718c8e','#6B7280'],detail=`Field: ${plan.metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${data.length}`;if(plan.type==='pie'){let run=0;const parts=items.map(([label,value],index)=>{const start=run;run+=value/total*100;return `${colors[index%colors.length]} ${start}% ${run}%`});target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label,value],index)=>`<div style="color:${colors[index%colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value/total*100)}%)</span></div>`).join('')}</div></div>`}else if(plan.type==='line'){target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">`+items.map(([label,value],index)=>`<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index%colors.length]};height:${Math.max(value/max*100,3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('')+'</div>'}else{target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button>`+items.map(([label,value],index)=>`<div class="bar-row"><button class="bar-label" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" title="กรองตาม ${esc(label)}">${esc(label)}</button><div class="track"><div class="bar" style="--mark:${colors[index%colors.length]};width:${Math.max(value/max*100,2)}%"></div></div><b>${fmt.format(value)}</b></div>`).join('')||'<span class="neutral">ไม่พบข้อมูล</span>'}target.querySelectorAll('[data-field]').forEach(button=>button.onclick=()=>{chartFilter={field:button.dataset.field,value:button.dataset.value};render()})}
+function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filter(row=>row._year_be),year=Math.max(...yearRows.map(row=>Number(row._year_be)),0),current=aggregate(yearRows.filter(row=>Number(row._year_be)===year),metric),previous=aggregate(yearRows.filter(row=>Number(row._year_be)===year-1),metric),change=previous?((current-previous)/Math.abs(previous)*100):null;document.querySelector('#kpis').innerHTML=`<article class="card"><span>จำนวนนักศึกษาที่ระบุรหัส</span><strong>${fmt.format(aggregate(data,'unique_student_count'))}</strong><div class="delta neutral">COUNT(DISTINCT รหัสนักศึกษา)</div></article><article class="card"><span>จำนวนรายการ</span><strong>${fmt.format(data.length)}</strong><div class="delta neutral">${chartFilter?'กรองจากกราฟ: '+esc(chartFilter.value):'ข้อมูลตามตัวกรอง'}</div></article><article class="card"><span>อัตราจบเฉลี่ย</span><strong>${fmt.format(aggregate(data,'อัตราการจบตามวงรอบ'))}%</strong><div class="delta ${change===null?'neutral':change>=0?'good':'bad'}">${change===null?'ไม่มีฐานเปรียบเทียบ':`${change>=0?'▲':'▼'} ${fmt.format(Math.abs(change))}% เทียบปีก่อน`}</div></article>`;plans.forEach(plan=>draw(plan,data));document.querySelector('#table').innerHTML='<thead><tr>'+fields.map(field=>`<th>${esc(field)}</th>`).join('')+'</tr></thead><tbody>'+data.slice(0,100).map(row=>'<tr>'+fields.map(field=>`<td>${esc(row[field])}</td>`).join('')+'</tr>').join('')+'</tbody>'}document.querySelector('#clear').onclick=()=>{chartFilter=null;filterFields.forEach((field,index)=>{document.querySelectorAll('#filter-'+index+' input').forEach(input=>input.checked=false);document.querySelector('#filter-'+index+'-summary').textContent='ทั้งหมด'});render()};render();
+</script><style>
+.chart{position:relative}.axis-label{color:#5f6b7c;font-size:11px;font-weight:600}.axis-y{margin:4px 0}.axis-x{text-align:center;margin-top:7px}.bar-scale{display:flex;justify-content:space-between;margin-left:32%;padding-top:4px;border-top:1px solid #b8c3d6;color:#5f6b7c;font-size:10px}.line{position:relative;align-items:end!important;background:repeating-linear-gradient(to top,transparent 0,transparent 24%,#d9dee8 24%,#d9dee8 25%);padding-bottom:26px}.target-line{position:absolute;left:0;right:0;border-top:2px dashed #C94A4A;pointer-events:none}.target-line span{position:absolute;right:0;bottom:3px;padding:1px 4px;background:#fff;color:#C94A4A;font-size:10px;font-weight:700}.target-marker{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed #C94A4A;pointer-events:none}.target-marker span{position:absolute;top:-18px;left:-2px;white-space:nowrap;padding:1px 4px;background:#fff;color:#C94A4A;font-size:10px;font-weight:700}.point{overflow:visible!important}.point span{bottom:-24px!important;transform:none!important;left:50%;translate:-50% 0;max-width:54px;overflow:hidden;text-overflow:ellipsis;text-align:center}.point .point-value{position:absolute;bottom:calc(100% + 5px);left:50%;translate:-50% 0;color:#1F2937;font-size:10px;font-weight:700;white-space:nowrap}.calc{position:absolute;right:0;top:-38px;min-height:auto;padding:4px 7px;font-size:10px;color:#0B2B5E}.calc-detail{margin:0 0 10px;padding:8px 10px;background:#f4f5f9;border-left:3px solid #FECD54;color:#1F2937;font-size:11px;line-height:1.55}.review-tools{display:flex;justify-content:flex-end;margin:-4px 0 10px}.review-tools button{min-height:auto;padding:5px 8px;font-size:11px}.review-row{background:#fff8e8}.review-note{font-size:11px;color:#9a6700;font-weight:600}.tracker-panel{border-top:3px solid #FECD54}.tracker-panel ul{margin:0;padding-left:18px;font-size:12px;line-height:1.7}.tracker-panel p{font-size:12px;color:#5f6b7c}@media(min-width:1080px){.detail-panel{grid-column:span 2}.tracker-panel{grid-column:span 1}}@media(max-width:1079px){.detail-panel,.tracker-panel{grid-column:auto}}
+</style><script>
+(() => {
+    let reviewOnly = false;
+    const labels = {"ชื่อลูกค้า": "ชื่อลูกค้า", "โทร": "โทร", "วันที่": "วันที่", "ID": "ID", "_academic_year_be": "ปีการศึกษา (พ.ศ.)", "_year_be": "ปี", "record_count": "จำนวนรายการ", "unique_student_count": "จำนวนนักศึกษา", "ยอดขาย": "ยอดขาย", "_month_th": "เดือน", "_quarter": "ไตรมาส"};
+    const plannedKpis = [{"name": "ยอดขายรวม", "metric": "ยอดขาย", "aggregation": "sum", "formula": "SUM(ยอดขาย)", "source_fields": ["ยอดขาย"], "limitations": "ไม่มีข้อมูลเกี่ยวกับยอดขายในไฟล์ที่ให้มา ไม่สามารถคำนวณได้", "comparison": {"enabled": false, "period": "latest_year_vs_previous_year"}}];
+    const verifiedCalculations = {"kpis": [{"name": "ยอดขายรวม", "metric": "ยอดขาย", "aggregation": "sum", "dimension": null, "filters": [], "rows": 12, "value": 15322.0}], "charts": [{"name": "ยอดขายรวมตามเดือน", "metric": "ยอดขาย", "aggregation": "sum", "dimension": "_month_th", "filters": [], "rows": 12, "value": [{"label": "มี.ค.", "value": 15322.0, "rows": 12}]}], "errors": []};
+    const metricContracts = {};
+    const esc = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    const problem = row => Object.entries(row).some(([field, value]) => !field.startsWith('_') && (value === null || value === '' || value === '-' || value === 'N/A' || value === '#VALUE!')) || !row._year_be || Number(String(row['จำนวนนักศึกษาในรุ่น'] ?? '').replace(/[^0-9.-]/g,'')) < 0;
+    function decorate() {
+        document.querySelectorAll('.chart').forEach(chart => {
+            const plan = plans.find(item => item.id === chart.id);
+            if (!plan) return;
+            if (plan.type !== 'pie' && !chart.querySelector('.axis-y')) {
+                const value = group => typeof aggregate === 'function' ? aggregate(group, plan.metric) : 0;
+                const buckets = {};
+                (typeof visible === 'function' ? visible() : rows).forEach(row => (buckets[String(row[plan.dimension] ?? 'ไม่ระบุ')] ??= []).push(row));
+                const max = Math.max(...Object.values(buckets).map(value), 1);
+                chart.insertAdjacentHTML('afterbegin', `<div class="axis-label axis-y">แกน Y: ${esc(labels[plan.dimension] || plan.dimension)}</div>`);
+                chart.insertAdjacentHTML('beforeend', `<div class="bar-scale"><span>0</span><span>${fmt.format(max / 2)}</span><span>${fmt.format(max)}</span></div><div class="axis-label axis-x">แกน X: ${esc(labels[plan.metric] || plan.metric)}</div>`);
+            }
+            if (plan.type === 'line') chart.querySelectorAll('.point').forEach(point => {
+                if (point.querySelector('.point-value')) return;
+                const [label, value] = (point.title || '').split(': ');
+                const text = point.querySelector('span');
+                if (text) text.textContent = label || text.textContent;
+                point.insertAdjacentHTML('afterbegin', `<b class="point-value">${esc(value || '')}</b>`);
+            });
+            if (plan.type === 'line' && plan.target && !chart.querySelector('.target-line')) {
+                const values = rows.map(row => aggregate([row], plan.metric));
+                const maximum = Math.max(...values, Number(plan.target.value), 1);
+                const position = Math.min(Number(plan.target.value) / maximum * 100, 100);
+                chart.querySelector('.line')?.insertAdjacentHTML('beforeend', `<div class="target-line" style="bottom:calc(26px + ${position}%)"><span>${esc(plan.target.label)}: ${fmt.format(plan.target.value)}</span></div>`);
+            }
+            if (plan.type === 'bar' && plan.target && !chart.querySelector('.target-marker')) {
+                const rows = [...chart.querySelectorAll('.bar-row')];
+                const values = rows.map(row => Number(row.querySelector('b')?.textContent.replaceAll(',', '')) || 0);
+                const maximum = Math.max(...values, Number(plan.target.value), 1);
+                const targetRow = rows.find(row => row.querySelector('.bar-label')?.dataset.value === String(plan.target.year_be));
+                targetRow?.querySelector('.track')?.insertAdjacentHTML('beforeend', `<span class="target-marker" style="left:${Math.min(Number(plan.target.value) / maximum * 100, 100)}%"><span>${esc(plan.target.label)}: ${fmt.format(plan.target.value)}</span></span>`);
+            }
+            const calc = chart.querySelector('.calc');
+            if (calc && calc.dataset.bound !== 'true') {
+                calc.dataset.bound = 'true';
+                calc.removeAttribute('title');
+                calc.addEventListener('click', event => {
+                    event.preventDefault();
+                    const existing = chart.querySelector('.calc-detail');
+                    if (existing) return existing.remove();
+                    const shown = typeof visible === 'function' ? visible().length : rows.length;
+                    chart.insertAdjacentHTML('afterbegin', `<div class="calc-detail"><b>วิธีคำนวณ</b><br>ข้อมูล: ${esc(labels[plan.metric] || plan.metric)} | จัดกลุ่ม: ${esc(labels[plan.dimension] || plan.dimension)}<br>สูตร: ${esc(plan.formula)}<br>แถวข้อมูลที่ใช้: ${shown} | ข้อจำกัด: ใช้เฉพาะข้อมูลตามตัวกรองปัจจุบัน</div>`);
+                });
+            }
+        });
+        const table = document.querySelector('#table');
+        if (table && !document.querySelector('.review-tools')) {
+            table.closest('.panel').classList.add('detail-panel');
+            table.parentElement.insertAdjacentHTML('beforebegin', '<div class="review-tools"><button type="button" id="review-toggle">แสดงเฉพาะข้อมูลต้องตรวจสอบ</button></div>');
+            document.querySelector('#review-toggle').addEventListener('click', () => { reviewOnly = !reviewOnly; applyReview(); });
+        }
+        const grid = document.querySelector('.grid');
+        if (grid && !document.querySelector('.tracker-panel')) grid.insertAdjacentHTML('beforeend', '<article class="panel tracker-panel"><h2>ประเด็นที่ต้องติดตาม</h2><p>รายการที่ต้องตรวจสอบหรือยืนยันกับข้อมูลต้นทาง</p><ul><li>ไม่พบประเด็นเชิงโครงสร้างจากการตรวจอัตโนมัติ</li></ul></article>');
+        applyReview();
+    }
+    function applyReview() {
+        const table = document.querySelector('#table');
+        if (!table) return;
+        const shown = typeof visible === 'function' ? visible() : rows;
+        [...table.querySelectorAll('tbody tr')].forEach((row, index) => {
+            const flagged = problem(shown[index] || {});
+            row.classList.toggle('review-row', flagged);
+            row.title = flagged ? 'ต้องตรวจสอบ: พบค่าว่าง/ค่าไม่ถูกต้อง/ค่าไม่ผ่านการจัดกลุ่ม' : '';
+            row.style.display = reviewOnly && !flagged ? 'none' : '';
+        });
+        const button = document.querySelector('#review-toggle');
+        if (button) button.textContent = reviewOnly ? 'แสดงข้อมูลทั้งหมด' : 'แสดงเฉพาะข้อมูลต้องตรวจสอบ';
+    }
+    document.addEventListener('click', event => {
+        const mark = event.target.closest('[data-field]');
+        if (!mark) return;
+        event.stopImmediatePropagation();
+        const next = {field: mark.dataset.field, value: mark.dataset.value};
+        chartFilter = chartFilter && chartFilter.field === next.field && chartFilter.value === next.value ? null : next;
+        render();
+        queueMicrotask(decorate);
+    }, true);
+    document.addEventListener('change', () => queueMicrotask(decorate), true);
+    document.addEventListener('click', event => {
+        if (event.target.id === 'clear') queueMicrotask(decorate);
+    }, true);
+    function formulaPlan(plan) {
+        const formula = String(plan.formula || '');
+        const match = formula.match(/(count\s*\(\s*distinct|count|sum|avg|average|min|max)\s*\(\s*([^\)]+)\s*\)/i);
+        const token = match ? match[1].toLowerCase().replaceAll(' ', '') : String(plan.aggregation || '').toLowerCase();
+        const metric = match ? (match[2].trim() === '*' ? 'record_count' : match[2].trim()) : plan.metric;
+        const aggregation = token.includes('distinct') ? 'distinct' : token === 'avg' || token === 'average' || token.includes('percent') ? 'average' : token === 'min' ? 'minimum' : token === 'max' ? 'maximum' : token === 'count' ? 'count' : 'sum';
+        const filters = [...formula.matchAll(/([^=\s]+)\s*=\s*['"]([^'"]+)['"]/g)].map(match => ({field: match[1].trim(), value: match[2].trim()}));
+        return {metric, aggregation, filters};
+    }
+    function planRows(data, plan) { const info = formulaPlan(plan); return data.filter(row => info.filters.every(filter => String(row[filter.field] ?? '').trim() === filter.value)); }
+    function planAggregate(data, plan) {
+        const info = formulaPlan(plan);
+        if (info.metric.startsWith('contract:')) {
+            const contract = metricContracts[info.metric.slice(9)];
+            if (!contract) return 0;
+            const sum = field => data.reduce((total, row) => total + numericValue(row[field]), 0);
+            if (contract.type === 'profit') return sum(contract.revenue_field) - sum(contract.expense_field);
+            if (contract.type === 'category_share') return data.length ? data.filter(row => String(row[contract.category_field] ?? '').trim() === contract.category_value).length / data.length * Number(contract.scale) : 0;
+            const denominator = sum(contract.denominator_field);
+            return denominator ? sum(contract.numerator_field) / denominator * Number(contract.scale) : 0;
+        }
+        if (info.metric === 'record_count') return data.length;
+        if (info.aggregation === 'distinct') return new Set(data.map(row => String(row[info.metric] ?? '').trim()).filter(Boolean)).size;
+        const values = data.map(row => numericValue(row[info.metric])).filter(Number.isFinite);
+        if (!values.length) return 0;
+        if (info.aggregation === 'count') return values.length;
+        if (info.aggregation === 'average') return values.reduce((sum, value) => sum + value, 0) / values.length;
+        if (info.aggregation === 'minimum') return Math.min(...values);
+        if (info.aggregation === 'maximum') return Math.max(...values);
+        return values.reduce((sum, value) => sum + value, 0);
+    }
+    const baseDraw = draw;
+    draw = function (plan, data) {
+        const constrained = planRows(data, plan);
+        const buckets = {};
+        constrained.forEach(row => (buckets[String(row[plan.dimension] ?? 'ไม่ระบุ')] ??= []).push(row));
+        const items = Object.entries(buckets).map(([label, group]) => [label, planAggregate(group, plan)]).sort((left, right) => plan.type === 'line' ? String(left[0]).localeCompare(String(right[0]), 'th', {numeric: true}) : right[1] - left[1]).slice(0, 12);
+        const max = Math.max(...items.map(item => item[1]), 1), total = items.reduce((sum, item) => sum + item[1], 0) || 1;
+        const target = document.querySelector('#' + plan.id), colors = ['#263988','#0F8F83','#FECD54','#C94A4A','#8094b8','#718c8e','#6B7280'];
+        const detail = `Field: ${formulaPlan(plan).metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${constrained.length}`;
+        if (plan.type === 'pie') { let run = 0; const parts = items.map(([label, value], index) => { const start = run; run += value / total * 100; return `${colors[index % colors.length]} ${start}% ${run}%`; }); target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label, value], index) => `<div style="color:${colors[index % colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value / total * 100)}%)</span></div>`).join('')}</div></div>`; }
+        else if (plan.type === 'line') target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">` + items.map(([label, value], index) => `<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index % colors.length]};height:${Math.max(value / max * 100, 3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('') + '</div>';
+        else target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button>` + items.map(([label, value], index) => `<div class="bar-row"><button class="bar-label" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" title="กรองตาม ${esc(label)}">${esc(label)}</button><div class="track"><div class="bar" style="width:${Math.max(value / max * 100, 2)}%;background:${colors[index % colors.length]}"></div></div><b>${fmt.format(value)}</b></div>`).join('') || '<p class="empty">ไม่พบข้อมูล</p>';
+    };
+    const baseRender = render;
+    render = function () {
+        baseRender();
+        const filtered = visible();
+        document.querySelector('#kpis').innerHTML = plannedKpis.slice(0, 6).map(kpi => {
+            const rowsForKpi = planRows(filtered, kpi), verified = !filterFields.some((field, index) => selectedValues(field, index).size) && !chartFilter ? verifiedCalculations.kpis.find(item => item.name === kpi.name) : null;
+            const value = verified && typeof verified.value === 'number' ? verified.value : planAggregate(rowsForKpi, kpi);
+            return `<article class="card"><span>${esc(kpi.name)}</span><strong>${fmt.format(value)}</strong><div class="delta neutral">${esc(kpi.formula || '')} | ${fmt.format(rowsForKpi.length)} แถว</div></article>`;
+        }).join('') || '<article class="card"><span>ไม่พบ KPI ที่ผ่านการตรวจ</span></article>';
+        queueMicrotask(decorate);
+    };
+    render();
+    decorate();
+})();
+</script></body></html>

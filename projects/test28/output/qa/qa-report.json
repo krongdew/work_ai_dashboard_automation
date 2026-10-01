@@ -1,0 +1,30 @@
+{
+  "status": "warning",
+  "checks": [
+    {
+      "name": "Input records",
+      "status": "pass",
+      "detail": "60 records processed"
+    },
+    {
+      "name": "Identifier exclusion",
+      "status": "pass",
+      "detail": "Excluded from metrics: program_id, student_id"
+    },
+    {
+      "name": "Duplicate rows",
+      "status": "pass",
+      "detail": "0"
+    },
+    {
+      "name": "Missing values",
+      "status": "warning",
+      "detail": "resign_reason: 50"
+    },
+    {
+      "name": "Date normalization",
+      "status": "warning",
+      "detail": "year: parse ไม่ได้ 60 ค่า"
+    }
+  ]
+}

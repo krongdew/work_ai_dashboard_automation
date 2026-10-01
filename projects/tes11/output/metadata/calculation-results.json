@@ -1,0 +1,87 @@
+{
+  "kpis": [
+    {
+      "name": "Total Sales",
+      "metric": "ยอดขาย",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 12,
+      "value": 15322.0
+    },
+    {
+      "name": "Average Sales",
+      "metric": "ยอดขาย",
+      "aggregation": "average",
+      "dimension": null,
+      "filters": [],
+      "rows": 12,
+      "value": 1276.8333333333333
+    }
+  ],
+  "charts": [
+    {
+      "name": "ยอดขายต่อวัน",
+      "metric": "ยอดขาย",
+      "aggregation": "sum",
+      "dimension": "วันที่",
+      "filters": [],
+      "rows": 12,
+      "value": [
+        {
+          "label": "01-03-2569",
+          "value": 1500.0,
+          "rows": 1
+        },
+        {
+          "label": "02-03-2569",
+          "value": 100.0,
+          "rows": 1
+        },
+        {
+          "label": "03-03-2569",
+          "value": 154.0,
+          "rows": 1
+        },
+        {
+          "label": "04-03-2569",
+          "value": 2500.0,
+          "rows": 1
+        },
+        {
+          "label": "05-03-2569",
+          "value": 850.0,
+          "rows": 1
+        },
+        {
+          "label": "06-03-2569",
+          "value": 150.0,
+          "rows": 1
+        },
+        {
+          "label": "07-03-2569",
+          "value": 159.0,
+          "rows": 1
+        },
+        {
+          "label": "08-03-2569",
+          "value": 715.0,
+          "rows": 2
+        },
+        {
+          "label": "09-03-2569",
+          "value": 7845.0,
+          "rows": 1
+        },
+        {
+          "label": "10-03-2569",
+          "value": 1349.0,
+          "rows": 2
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Distinct Customers: Calculation tool request contains an unsupported metric or aggregation."
+  ]
+}

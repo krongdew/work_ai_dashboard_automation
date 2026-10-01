@@ -1,0 +1,88 @@
+{
+  "audience": "University senior management and faculty administrators.",
+  "purpose": "Provide senior academic leadership with overview of student enrollment, graduation outcomes, language requirement compliance, and attrition reasons to support strategic planning.",
+  "questions": [
+    "How many students are currently enrolled and how has this number changed year‑over‑year?",
+    "What proportion of students graduate each year and is the trend improving?",
+    "Are students meeting English and HSK language requirements, and are there changes over time?",
+    "What are the main reasons for student attrition and how significant are they?",
+    "How does the attrition rate compare to the overall student population each year?"
+  ],
+  "kpis": [
+    {
+      "name": "Total Students",
+      "metric": "unique_student_count",
+      "aggregation": "COUNT(DISTINCT student_id)",
+      "formula": "COUNT(DISTINCT student_id)",
+      "source_fields": [
+        "student_id"
+      ],
+      "limitations": "Assumes student_id uniquely identifies each student; dataset covers only selected faculty.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Graduation Rate",
+      "metric": "is_graduate",
+      "aggregation": "AVG",
+      "formula": "AVG(CASE WHEN is_graduate='Yes' THEN 1 ELSE 0 END) * 100",
+      "source_fields": [
+        "is_graduate"
+      ],
+      "limitations": "Rate calculated as percentage of students marked as graduate; missing or ambiguous values treated as non‑graduate.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "English Requirement Compliance",
+      "metric": "english_requirement_status",
+      "aggregation": "AVG",
+      "formula": "AVG(CASE WHEN english_requirement_status='Met' THEN 1 ELSE 0 END) * 100",
+      "source_fields": [
+        "english_requirement_status"
+      ],
+      "limitations": "Binary status assumed; records with null treated as non‑compliant.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "HSK Requirement Compliance",
+      "metric": "hsk_requirement_status",
+      "aggregation": "AVG",
+      "formula": "AVG(CASE WHEN hsk_requirement_status='Met' THEN 1 ELSE 0 END) * 100",
+      "source_fields": [
+        "hsk_requirement_status"
+      ],
+      "limitations": "Three possible statuses; only 'Met' counted as compliant.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Attrition Rate",
+      "metric": "resign_reason",
+      "aggregation": "AVG",
+      "formula": "AVG(CASE WHEN resign_reason IS NOT NULL THEN 1 ELSE 0 END) * 100",
+      "source_fields": [
+        "resign_reason",
+        "student_id"
+      ],
+      "limitations": "Only 10 records have resign_reason; rate may be unstable due to small sample size.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "_year_be",
+    "student_status"
+  ]
+}

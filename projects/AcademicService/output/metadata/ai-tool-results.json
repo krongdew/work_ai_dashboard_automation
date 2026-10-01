@@ -1,0 +1,505 @@
+{
+  "instruction": "",
+  "results": [
+    {
+      "name": "Total Record Count",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [],
+      "rows": 1796,
+      "value": 0
+    },
+    {
+      "name": "Distinct Document Numbers",
+      "metric": "Doc number",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 1796,
+      "value": 1455
+    },
+    {
+      "name": "Records per Service Type",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": "ServiceType",
+      "filters": [],
+      "rows": 1796,
+      "value": [
+        {
+          "label": "ด้านการบริการวิชาการ",
+          "value": 0,
+          "rows": 1173
+        },
+        {
+          "label": "ด้านการวิจัย",
+          "value": 0,
+          "rows": 121
+        },
+        {
+          "label": "ด้านการศึกษา",
+          "value": 0,
+          "rows": 243
+        },
+        {
+          "label": "ด้านอื่น ๆ",
+          "value": 0,
+          "rows": 259
+        }
+      ]
+    },
+    {
+      "name": "Records per Month",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": "Month",
+      "filters": [],
+      "rows": 1796,
+      "value": [
+        {
+          "label": "กรกฎาคม",
+          "value": 0,
+          "rows": 170
+        },
+        {
+          "label": "กันยายน",
+          "value": 0,
+          "rows": 122
+        },
+        {
+          "label": "กุมภาพันธ์",
+          "value": 0,
+          "rows": 125
+        },
+        {
+          "label": "ตุลาคม",
+          "value": 0,
+          "rows": 103
+        },
+        {
+          "label": "ธันวาคม",
+          "value": 0,
+          "rows": 113
+        },
+        {
+          "label": "พฤศจิกายน",
+          "value": 0,
+          "rows": 132
+        },
+        {
+          "label": "พฤษภาคม",
+          "value": 0,
+          "rows": 181
+        },
+        {
+          "label": "มกราคม",
+          "value": 0,
+          "rows": 190
+        },
+        {
+          "label": "มิถุนายน",
+          "value": 0,
+          "rows": 178
+        },
+        {
+          "label": "มีนาคม",
+          "value": 0,
+          "rows": 129
+        },
+        {
+          "label": "สิงหาคม",
+          "value": 0,
+          "rows": 192
+        },
+        {
+          "label": "เมษายน",
+          "value": 0,
+          "rows": 161
+        }
+      ]
+    },
+    {
+      "name": "Distinct Faculty Approval Numbers",
+      "metric": "FacultyApprovalNumber",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 1796,
+      "value": 1529
+    },
+    {
+      "name": "Records per Affiliation",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": "Affiliation",
+      "filters": [],
+      "rows": 1796,
+      "value": [
+        {
+          "label": "การจัดการการท่องเที่ยว",
+          "value": 0,
+          "rows": 166
+        },
+        {
+          "label": "ภาษาจีน (หลักสูตรนานาชาติ)",
+          "value": 0,
+          "rows": 121
+        },
+        {
+          "label": "ภาษาศาสตร์ประยุกต์",
+          "value": 0,
+          "rows": 41
+        },
+        {
+          "label": "ภาษาอังกฤษ",
+          "value": 0,
+          "rows": 476
+        },
+        {
+          "label": "ภาษาไทย",
+          "value": 0,
+          "rows": 723
+        },
+        {
+          "label": "หมวดศึกษาทั่วไป",
+          "value": 0,
+          "rows": 269
+        }
+      ]
+    },
+    {
+      "name": "Distinct Unique Student Count Values",
+      "metric": "unique_student_count",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 1796,
+      "value": 0
+    },
+    {
+      "name": "Records per Location",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": "Location",
+      "filters": [],
+      "rows": 1796,
+      "value": [
+        {
+          "label": "1. ศาลากลางจังหวัดกระบี่ 2. ศาลากลางจังหวัดศรีสะเกษ 3. ศาลากลางจังหวัดชัยภูมิ",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "3/1 อาคารสิริวรปัญญา มหาวิทยาลัยราชภัฏนครปฐม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "304 ชั้น 3 อาคารคณะศิลปนาฏดุริยางค์ สถาบันบัณฑิตพัฒนศิลป์",
+          "value": 0,
+          "rows": 4
+        },
+        {
+          "label": "CITU 509-510 วิทยาลัยนวัฒกรรม ชั้น 5",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Chulalongkorn University",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "College of Foreign Languages & Literature, National Chengchi University, Taiwan",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Creanovation Space ชั้น 2 หอสมุด และคลังความรู้มหาวิทยาลัยมหิดล",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Facebook Live",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Faculty of Dentistry .Mahidol Univeersity",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Google Thailand Training Center",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Hankuk University of Foreign Studies",
+          "value": 0,
+          "rows": 2
+        },
+        {
+          "label": "I Conluxe Hall ชั้น 1 ศูนย์การค้าไอคอนสยาม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "IDP Education Services Company Limited",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "IMPACT FORUM เมืองทองธานี",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Knowledge Capsule ชั้น 2 อาคาร ศปก.ทบ.(เดิม) กอ.รมน. สวนรื่นฤดี",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "L-104",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "MS-TEAM",
+          "value": 0,
+          "rows": 2
+        },
+        {
+          "label": "MaSHARES Co-working Space มหาวิทยาลัยมหิดล ศาลายา",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Mahidol-Macquarie Centre for International Education (MCIE) room, Aditayathorn Building, Mahidol University International College (Salaya Campus)",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Online (Reviewer)",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Poland",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Shanghai Jiao Tong University",
+          "value": 0,
+          "rows": 4
+        },
+        {
+          "label": "Siripanna Vi lla Resort and Spa Chiangmai จังหวัดเชียงใหม่",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Sookmyung Women's University Seoul, Republic of Korea",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "TCDC Bangkok",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Thailand and Online via Zoom",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "The Eastin Grand Hotel, Phayathai Bangkok Thailand",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "The Siam Tea Room, Asiatique The Riverfront Branch กรุงเทพฯ",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "The Tanyong Meeting moom",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Twin Lotus Hotel, จังหวัดนครศรีธรรมราช",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Uhamka",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "United Kingdom",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "University of California Los Angeles, USA",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "Unknown",
+          "value": 0,
+          "rows": 155
+        },
+        {
+          "label": "Vietna Ministre of Industry and Trade Industrial University of Ho Chi Minh City (IUH)",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "WebEx Learning Platform",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "hanghai Jiao Tong University และ Fudan University สาธารณรัฐประชาชนจีน",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "online virtual",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "www.facebook.com/aj Wiriyah ให้กับห้องเรียน อารมณ์ดี",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรมทรัพย์สินทางปัญญา กระทรวงพาณิชย์",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรมประชาสัมพันธ์",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรมส่งเสริมวัฒธนธรรม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรมส่งเสริมวัฒนธรรม เลขที่ 14 ถนนเทียมร่วมมิตร เขตห้วยขวาง กทม. 10310",
+          "value": 0,
+          "rows": 4
+        },
+        {
+          "label": "กรมส่งเสริมวัฒรธรรม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรมส่งเสรืมวัฒนธรรม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กระทรวงการอุดมศึกษา วิทยาศาสตร์ วิจัย และนวัตกรรม",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรุงปักกิ่ง - นครเทียนจิน สาธารณรัฐประชาชนจีน",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กรุงเทพมหานคร",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กลุ่มสาระการเรียนรู้ภาษาไทย สำนักงานเขตพื้นที่การศึกษามัธยมศึกษากรุงเทพมหานคร",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "กองบริหารงานทั่วไป งานสื่อสารองค์กร สำนักงานอธิการบดี มหาวิทยาลัยมหิดล",
+          "value": 0,
+          "rows": 2
+        }
+      ]
+    },
+    {
+      "name": "Distinct Invite From Values",
+      "metric": "InviteFrom",
+      "aggregation": "distinct",
+      "dimension": null,
+      "filters": [],
+      "rows": 1796,
+      "value": 835
+    },
+    {
+      "name": "Records per Year",
+      "metric": "ID",
+      "aggregation": "count",
+      "dimension": "Timestamps_year",
+      "filters": [],
+      "rows": 1796,
+      "value": [
+        {
+          "label": "2507",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "2510",
+          "value": 0,
+          "rows": 1
+        },
+        {
+          "label": "2564",
+          "value": 0,
+          "rows": 15
+        },
+        {
+          "label": "2565",
+          "value": 0,
+          "rows": 311
+        },
+        {
+          "label": "2566",
+          "value": 0,
+          "rows": 428
+        },
+        {
+          "label": "2567",
+          "value": 0,
+          "rows": 414
+        },
+        {
+          "label": "2568",
+          "value": 0,
+          "rows": 361
+        },
+        {
+          "label": "2569",
+          "value": 0,
+          "rows": 264
+        },
+        {
+          "label": "2572",
+          "value": 0,
+          "rows": 1
+        }
+      ]
+    }
+  ]
+}

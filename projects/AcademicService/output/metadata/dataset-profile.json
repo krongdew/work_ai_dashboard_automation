@@ -1,0 +1,379 @@
+{
+  "project": "AcademicService",
+  "generated_at": "2026-09-30T08:04:31.532516+00:00",
+  "input_files": [
+    "AcademicServiceInformation-8c874aaf.xlsx"
+  ],
+  "records": 1796,
+  "worksheets": [
+    {
+      "file": "AcademicServiceInformation-8c874aaf.xlsx",
+      "sheet": "Data_AllYear",
+      "rows": 1796,
+      "columns": 19,
+      "fields": [
+        "ID",
+        "Date",
+        "Month",
+        "Timestamps_year",
+        "Affiliation",
+        "Doc number",
+        "Date Doc",
+        "InviteFrom",
+        "object",
+        "Correction_text_Service Date",
+        "Service Date",
+        "Time.1",
+        "Time.2",
+        "Location",
+        "InvitedPersonnel",
+        "FacultyApprovalNumber",
+        "Dated 2",
+        "Note",
+        "ServiceType"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "Affiliation",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 6,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ภาษาศาสตร์ประยุกต์",
+        "การจัดการการท่องเที่ยว",
+        "ภาษาอังกฤษ",
+        "ภาษาไทย",
+        "ภาษาจีน (หลักสูตรนานาชาติ)"
+      ]
+    },
+    {
+      "name": "Correction_text_Service Date",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 1122,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "29 พฤศจิกายน พ.ศ. 2565",
+        "16-17 ม.ค. 66",
+        "27-28 เมษายน 2566",
+        "19 พฤษภาคม พ.ศ. 2565",
+        "31 สิงหาคม พ.ศ. 2565"
+      ]
+    },
+    {
+      "name": "Date",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 846,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-11-21T00:00:00",
+        "2022-12-06T00:00:00",
+        "2023-03-23T00:00:00",
+        "2022-05-11T00:00:00",
+        "2022-06-29T00:00:00"
+      ]
+    },
+    {
+      "name": "Date Doc",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 846,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-11-21T00:00:00",
+        "2022-12-06T00:00:00",
+        "2023-03-23T00:00:00",
+        "2022-05-11T00:00:00",
+        "2022-06-29T00:00:00"
+      ]
+    },
+    {
+      "name": "Dated 2",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 514,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-11-23T00:00:00",
+        "2023-01-05T00:00:00",
+        "2023-03-31T00:00:00",
+        "2022-05-20T00:00:00",
+        "2022-07-12T00:00:00"
+      ]
+    },
+    {
+      "name": "Doc number",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 1456,
+      "numeric_ratio": 0.002,
+      "examples": [
+        "อว78.0119/1294",
+        "Unknown",
+        "อว 78.0119/260",
+        "อว.78.07/02701",
+        "อว.78/4613"
+      ]
+    },
+    {
+      "name": "FacultyApprovalNumber",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 1530,
+      "numeric_ratio": 0.001,
+      "examples": [
+        "อว 78.35/-",
+        "อว.78.35/0055",
+        "อว.78.35/1580",
+        "อว.78.35/2650",
+        "อว.78.35/3529"
+      ]
+    },
+    {
+      "name": "ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 1796,
+      "distinct": 1796,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ASI-001",
+        "ASI-002",
+        "ASI-003",
+        "ASI-004",
+        "ASI-005"
+      ]
+    },
+    {
+      "name": "InviteFrom",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 849,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "กองพัฒนาคุณภา สำนักงานอธิการบดี มหาวิทยาลัยมหิดล",
+        "Universitr Manchester",
+        "กองพัฒนาคุณภาพ สำนักงานอธิการบดี มหาวิทยาลัยมหิดล",
+        "คณะแพทย์ศิริราชพยาบาล มหาวิทยาลัยมหิดล สถานการแพทย์แผนไทยประยุกต์",
+        "กองวิเทศสัมพันธ์ มหาวิทยาลัยมหิดล"
+      ]
+    },
+    {
+      "name": "InvitedPersonnel",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 97,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "อาจารย์ ดร.กรศิริ บุญประกอบ",
+        "Prof.Dr. Seongha Rhee",
+        "ผู้ช่วยศาสตราจารย์ ดร.สุธาทิพย์ ถิรคุณโกวิท",
+        "ผู้ช่วยศาสตราจารย์ ดร.อภิวิชญ์ เลี้ยงอิสสระ",
+        "อาจารย์ ดร.ฉันฐรัฐ หงส์บุญไตร"
+      ]
+    },
+    {
+      "name": "Location",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 1109,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ออนไลน์",
+        "United Kingdom",
+        "Unknown",
+        "ผ่านระบบ Zoom meeting",
+        "อาคารพัฒนดล คณะสิ่งแวดล้อมและทรพยากรศาสตร์ มหาวิทยาลัยมหิดล ศาลายา"
+      ]
+    },
+    {
+      "name": "Month",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 12,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "พฤศจิกายน",
+        "ธันวาคม",
+        "มีนาคม",
+        "พฤษภาคม",
+        "มิถุนายน"
+      ]
+    },
+    {
+      "name": "Note",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 38,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PDF",
+        "PDF (ลงนามออนไลน์)",
+        "เลขที่ 2263",
+        "เลขที่ 2474",
+        "PDF (ลงนามออนไลน์) มีหนังสือตอบกลับที่ อว78.35/5816 ลว. 21/12/2566"
+      ]
+    },
+    {
+      "name": "Service Date",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 1135,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "29/11/2565 0:00:00",
+        "16-17 ม.ค. 66",
+        "27-28 เมษายน 2566",
+        "19/5/2565 0:00:00",
+        "31/8/2565 0:00:00"
+      ]
+    },
+    {
+      "name": "ServiceType",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 4,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ด้านอื่น ๆ ",
+        "ด้านการบริการวิชาการ",
+        "ด้านการศึกษา",
+        "ด้านการวิจัย"
+      ]
+    },
+    {
+      "name": "Time.1",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 323,
+      "numeric_ratio": 0.024,
+      "examples": [
+        "09.00-16.30",
+        "8.00-16.00",
+        "13.00-15.00",
+        "11.00-16.00",
+        "08.45-19.00"
+      ]
+    },
+    {
+      "name": "Time.2",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 19,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "None",
+        " 09.00-12.00",
+        " 08.00-13.00 น.",
+        " 14.05-14.20",
+        " 18.00-20.00"
+      ]
+    },
+    {
+      "name": "Timestamps_year",
+      "type": "date",
+      "role": "date",
+      "non_null": 1796,
+      "distinct": 9,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2565",
+        "2566",
+        "2567",
+        "2568",
+        "2569"
+      ]
+    },
+    {
+      "name": "object",
+      "type": "category",
+      "role": "category",
+      "non_null": 1796,
+      "distinct": 1555,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ขออนุมัติให้ผู้ลงทะเบียนเข้าร่วมมหกรรมคุณภาพมหาวิทยาลัยมหิดล ประจำปี 2565 (ร่วมกิจกรรมโดยไม่ถือเป็นวันลา)",
+        "The 2th tnternational Workshop on the Role of Pragmatics in cyclic language Change",
+        "ขออนุมัติบุคลากรเป็นกรรมการตรวจประเมินคุณภาพการศึกษาระดับหลักสูตรตามเกณฑ์ AUN-QA มหาวิทยาลัยมหิดล ประจำปี 2566",
+        "เชิญประชุมวางแผนการสอนนักศึกษาหลักสุตรการแพทย์แผนไทยประยุกต์บัณฑิต ชั้นปีที่ 2 ปีการศึกษา 2565",
+        "ขอความอนุเคราะห์บุคลากรในหน่วยงานของท่านร่วมเป็นคณะกรรมาการคัดเลือกเรียงความและตัดสินการแข่งขัน กล่าวสุนทรพจน์"
+      ]
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 0,
+    "missing_values": {
+      "Affiliation": 0,
+      "Correction_text_Service Date": 0,
+      "Date": 0,
+      "Date Doc": 0,
+      "Dated 2": 0,
+      "Doc number": 0,
+      "FacultyApprovalNumber": 0,
+      "ID": 0,
+      "InviteFrom": 0,
+      "InvitedPersonnel": 0,
+      "Location": 0,
+      "Month": 0,
+      "Note": 0,
+      "Service Date": 0,
+      "ServiceType": 0,
+      "Time.1": 0,
+      "Time.2": 0,
+      "Timestamps_year": 0,
+      "object": 0
+    },
+    "date_parsing": {
+      "Correction_text_Service Date": {
+        "parsed": 1498,
+        "unparsed": 298,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Date": {
+        "parsed": 1796,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Date Doc": {
+        "parsed": 1796,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Dated 2": {
+        "parsed": 1796,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Service Date": {
+        "parsed": 1498,
+        "unparsed": 298,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Timestamps_year": {
+        "parsed": 1796,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

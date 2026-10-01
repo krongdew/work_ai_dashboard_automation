@@ -1,0 +1,46 @@
+{
+  "audience": "University management and academic planners.",
+  "purpose": "Monitor and compare academic year targets across categories and programs to support strategic planning.",
+  "questions": [
+    "Is the total target increasing compared to the previous academic year?",
+    "Which category contributes the most to the overall target?",
+    "How does each program's target share change over time?",
+    "Are there any programs with declining target levels year-over-year?"
+  ],
+  "kpis": [
+    {
+      "name": "Total Target",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "SUM",
+      "formula": "SUM(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)"
+      ],
+      "limitations": "Small dataset (10 records); targets may represent program-level goals and summing across categories could double-count if programs overlap.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Average Target per Program",
+      "metric": "Target (เป้าหมาย)",
+      "aggregation": "AVG",
+      "formula": "AVG(Target (เป้าหมาย))",
+      "source_fields": [
+        "Target (เป้าหมาย)",
+        "Program (หลักสูตร)"
+      ],
+      "limitations": "Average across programs; assumes each program target is comparable.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "Academic_Year (ปีการศึกษา)สำหรับฟิว",
+    "Category (ประเภท)",
+    "Program (หลักสูตร)"
+  ]
+}

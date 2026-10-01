@@ -4,12 +4,100 @@ Multi-project AI dashboard automation for VS Code + GitHub Copilot Agent.
 
 ## เปิดใช้ระบบ
 
+### Local AI (LM Studio)
+
+Dashboard specification generator ใช้ LM Studio ผ่าน OpenAI-compatible local
+server ได้โดยไม่ต้องใช้ Groq API key หรือส่ง metadata ออกนอกเครื่อง
+
+1. ใน LM Studio โหลด `Qwen/Qwen3-8B-GGUF` แบบ `Q4_K_M` แล้วไปที่
+	**Developer > Start Server** โดยใช้พอร์ต `1234`.
+2. สร้าง `data_factory/.env` จาก `local-ai/.env.example` แล้วตั้งค่า
+	`AI_PROVIDER=local` และ `LMSTUDIO_MODEL` ให้ตรงกับชื่อที่หน้า
+	**Developer > Models** แสดง.
+3. ติดตั้ง dependency และทดสอบการเชื่อมต่อ:
+
+```powershell
+Set-Location D:\pactices\MULA_DataLink_php\data_factory
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r local-ai\requirements.txt
+python local-ai\test_lmstudio.py
+```
+
+เมื่อผลทดสอบแสดง `Local AI response received` ให้สร้าง specification ได้ดังนี้:
+
+```powershell
+python local-ai\generate_dashboard_spec.py `
+  --profile projects\CASS\output\metadata\dataset-profile.json `
+  --output projects\CASS\output\metadata\dashboard-spec.local-ai.json
+```
+
+ไม่จำเป็นต้องกำหนด `GROQ_API_KEY` เมื่อใช้ workflow นี้. รักษา `.env` ไว้นอก Git
+และตรวจผลลัพธ์ `.local-ai.json` กับข้อมูลจริงก่อนนำไปใช้.
+
+เมื่อสร้าง spec ผ่าน Factory UI ระบบจะสร้าง
+`semantic-profile.local-ai.json` เพิ่มจาก `dataset-profile.json` ด้วย AI ใช้เฉพาะ
+metadata ที่ลดข้อมูลแล้วเพื่อเสนอความหมายของคอลัมน์ หน่วย และแนวทาง aggregation;
+ผลนี้เป็นคำแนะนำและต้องผ่าน data rules กับการตรวจ field ของระบบก่อนใช้สร้าง KPI
+หรือกราฟ เมื่อ Data Profile เปลี่ยน ระบบจะสร้าง Semantic Profile ใหม่อัตโนมัติ.
+
+การสร้างและแก้ไข dashboard ใช้ AI workflow เดียวกันทั้ง Local AI และ Groq: AI ขอ
+ผล aggregate แบบจำกัดจากเครื่อง, Python คำนวณจากข้อมูลจริง, แล้ว AI ใช้ผลนั้นสร้าง
+หรือแก้ specification. ตั้งค่าปีการศึกษา รูปแบบรหัสนักศึกษา GPAX risk และคำสั่ง
+การคำนวณต่อ project ได้จากหน้าจอ **กฎการคำนวณ**. ดูโครงสร้าง, วิธีแก้ dashboard,
+และแผนการพัฒนาต่อที่ [AI Calculation Workflow](docs/ai-calculation-workflow.md).
+
+หน้าจอ **Metric Rule Library** มี template สำหรับอัตราสำเร็จการศึกษา กำไร
+อัตราส่วน และสัดส่วนหมวดหมู่. ต้องระบุ field mapping, บันทึกเป็น draft และให้ผู้
+ตรวจสอบอนุมัติก่อน; ระบบใช้เฉพาะกฎที่ approved และเก็บ snapshot version ไว้ใน
+`output/metadata/calculation-rule-versions/` ของ project.
+
+ก่อนสร้าง dashboard ระบบสร้าง analytical copy โดยไม่แก้ไฟล์ต้นฉบับ และใช้ AI เสนอ
+mapping สำหรับ category/date value ที่ซ้ำกันอย่างชัดเจน เช่น `ช` -> `ชาย`. Mapping
+ที่ไม่แน่ใจจะเป็น Notice ใน QA แทนการปรับข้อมูลเอง; สรุปปี วันที่ และตัวกรองบน
+dashboard แสดงเป็น พ.ศ. เสมอ.
+
+### สลับ Local AI และ Groq
+
+กำหนด provider ที่ `data_factory/.env` แล้ว restart Factory UI ทุกครั้งที่เปลี่ยนค่า:
+
+```dotenv
+# ใช้โมเดลใน LM Studio
+AI_PROVIDER=local
+
+# หรือใช้ Groq
+AI_PROVIDER=groq
+GROQ_API_KEY=your_groq_key
+```
+
+ค่าอื่นของทั้งสอง provider เก็บไว้ใน `.env` เดียวกันได้; ระบบจะอ่านเฉพาะค่าของ
+provider ที่เลือก และจะบันทึก `generated_by` ใน dashboard specification เป็น
+`local-ai` หรือ `groq-ai` เพื่อบอกแหล่งที่สร้างผลลัพธ์.
+
+### Groq API
+
 1. สร้าง Groq API key แล้วกำหนด `GROQ_API_KEY`, `GROQ_MODEL=openai/gpt-oss-120b` และ `GROQ_FALLBACK_MODEL=llama-3.3-70b-versatile` ใน environment หรือ `.env` ที่ไม่ commit.
-2. เปิด Terminal ที่โฟลเดอร์ repository และรัน:
+2. ติดตั้ง Python 3.11+ และเลือกตัวเลือก **Add Python to PATH** ระหว่างติดตั้ง. เปิด Terminal ที่โฟลเดอร์ repository, สร้าง virtual environment และติดตั้ง dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python factory-ui/app.py
+```
+
+บน macOS หรือ Linux ใช้:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install -r requirements.txt
 python factory-ui/app.py
+
+deactivate
+Set-Location D:\pactices\MULA_DataLink_php\data_factory
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python factory-ui\app.py
 ```
 
 3. เปิด `http://127.0.0.1:5050` แล้วสร้างหรือเลือก project, อัปโหลดข้อมูล,
@@ -81,9 +169,4 @@ git push
 GitHub Pages จะ deploy อัตโนมัติหลัง push ไฟล์ dashboard
 
 มาตรฐานที่ระบบสร้างให้:
-- Mahidol Faculty theme และตรามหาวิทยาลัยใน header
-- animation ตอนเปิดหน้า โดยรองรับการลดการเคลื่อนไหวของระบบ
-- คลิกแท่งกราฟเพื่อ cross-filter KPI, กราฟ และตาราง แล้วล้างได้
-- เลือกปีงบประมาณเพื่อดู KPI เทียบปีก่อนด้วยลูกศรและเปอร์เซ็นต์
-- แยก 3 แท็บ: บริการมีรายได้, บริการวิชาการแบบไม่ได้รายได้, และเปรียบเทียบงบประมาณ
 # data_agentic_private

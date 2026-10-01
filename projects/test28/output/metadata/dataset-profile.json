@@ -1,0 +1,303 @@
+{
+  "project": "test28",
+  "generated_at": "2026-10-01T01:14:21.351111+00:00",
+  "input_files": [
+    "masked-c656f1a5.xlsx"
+  ],
+  "records": 60,
+  "worksheets": [
+    {
+      "file": "masked-c656f1a5.xlsx",
+      "sheet": "Data",
+      "rows": 60,
+      "columns": 18,
+      "fields": [
+        "year",
+        "faculty",
+        "title_th",
+        "entry_year",
+        "program_id",
+        "student_id",
+        "fullname_en",
+        "fullname_th",
+        "is_graduate",
+        "lastname_th",
+        "firstname_th",
+        "program_name",
+        "resign_reason",
+        "student_status",
+        "education_level",
+        "is_followed_structure",
+        "hsk_requirement_status",
+        "english_requirement_status"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "education_level",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ปริญญาตรี"
+      ]
+    },
+    {
+      "name": "english_requirement_status",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ไม่ผ่าน",
+        "ผ่าน"
+      ]
+    },
+    {
+      "name": "entry_year",
+      "type": "date",
+      "role": "date",
+      "non_null": 60,
+      "distinct": 5,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2564",
+        "2565",
+        "2566",
+        "2567",
+        "2568"
+      ]
+    },
+    {
+      "name": "faculty",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "คณะศิลปศาสตร์"
+      ]
+    },
+    {
+      "name": "firstname_th",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 20,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "กิ******",
+        "พร*****",
+        "ธน**",
+        "สุ*****",
+        "วร***"
+      ]
+    },
+    {
+      "name": "fullname_en",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Mr******",
+        "Ms******"
+      ]
+    },
+    {
+      "name": "fullname_th",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "นา******"
+      ]
+    },
+    {
+      "name": "hsk_requirement_status",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "-",
+        "ไม่ผ่าน",
+        "ผ่าน"
+      ]
+    },
+    {
+      "name": "is_followed_structure",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "No",
+        "Yes"
+      ]
+    },
+    {
+      "name": "is_graduate",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "No",
+        "Yes"
+      ]
+    },
+    {
+      "name": "lastname_th",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 18,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "แส****",
+        "ศร****",
+        "บุ***",
+        "อิ******",
+        "สิ******"
+      ]
+    },
+    {
+      "name": "program_id",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 60,
+      "distinct": 6,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ICT01",
+        "ENG01",
+        "BUS01",
+        "THAI01",
+        "CHN01"
+      ]
+    },
+    {
+      "name": "program_name",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 6,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ICT",
+        "English",
+        "Business English",
+        "Thai",
+        "Chinese"
+      ]
+    },
+    {
+      "name": "resign_reason",
+      "type": "category",
+      "role": "category",
+      "non_null": 10,
+      "distinct": 4,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ปั******",
+        "ย้******",
+        "เห******",
+        "ผล******"
+      ]
+    },
+    {
+      "name": "student_id",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 60,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "UG******"
+      ]
+    },
+    {
+      "name": "student_status",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 4,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "กำ******",
+        "สำ******",
+        "ลา***",
+        "พ้******"
+      ]
+    },
+    {
+      "name": "title_th",
+      "type": "category",
+      "role": "category",
+      "non_null": 60,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "นา*",
+        "นา****"
+      ]
+    },
+    {
+      "name": "year",
+      "type": "number",
+      "role": "measure",
+      "non_null": 60,
+      "distinct": 5,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "5",
+        "4",
+        "3",
+        "2",
+        "1"
+      ]
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 0,
+    "missing_values": {
+      "education_level": 0,
+      "english_requirement_status": 0,
+      "entry_year": 0,
+      "faculty": 0,
+      "firstname_th": 0,
+      "fullname_en": 0,
+      "fullname_th": 0,
+      "hsk_requirement_status": 0,
+      "is_followed_structure": 0,
+      "is_graduate": 0,
+      "lastname_th": 0,
+      "program_id": 0,
+      "program_name": 0,
+      "resign_reason": 50,
+      "student_id": 0,
+      "student_status": 0,
+      "title_th": 0,
+      "year": 0
+    },
+    "date_parsing": {
+      "entry_year": {
+        "parsed": 60,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "audience": "คณะกรรมการการศึกษา, ผู้บริหาร, ที่ปรึกษานักศึกษา",
+  "purpose": "ประเมินความพร้อมการสำเร็จการศึกษาและระบุระดับความเสี่ยงของนักศึกษา",
+  "questions": [
+    "นักศึกษากี่คนมีความเสี่ยงระดับสูง/กลาง/ต่ำ?",
+    "สาเหตุหลักของความเสี่ยงคืออะไร?",
+    "แนวโน้มเครดิตรวมต่อปีการศึกษามีการเปลี่ยนแปลงอย่างไร?",
+    "สัดส่วนนักศึกษาที่ผ่าน English มีเท่าไหร่ตามหลักสูตร?",
+    "ข้อมูลคุณภาพของ Required_By_Year มีผลต่อการประเมินความเสี่ยงอย่างไร?"
+  ],
+  "kpis": [
+    {
+      "name": "จำนวนนักศึกษาทั้งหมด",
+      "metric": "Student_ID",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT Student_ID)",
+      "source_fields": [
+        "Student_ID"
+      ],
+      "limitations": "ต้องมีค่า Student_ID ที่ไม่ซ้ำ",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "นักศึกษาที่เครดิตไม่ครบตามที่ต้องการ",
+      "metric": "Credits",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT CASE WHEN Credits < RequiredCredits THEN Student_ID END)",
+      "source_fields": [
+        "Credits",
+        "RequiredCredits",
+        "Student_ID"
+      ],
+      "limitations": "ใช้ Credits จาก Fact_Credit_Allocation ที่ Is_Credit_Count = TRUE; สมมติว่ามีการกรองไว้แล้ว",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "นักศึกษาที่มีสถานะเกรด F/U/W ค้าง",
+      "metric": "สถานะเกรด",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT CASE WHEN สถานะเกรด IN ('F','U','W') THEN Student_ID END)",
+      "source_fields": [
+        "สถานะเกรด",
+        "Student_ID"
+      ],
+      "limitations": "ต้องมีการบันทึกสถานะเกรดอย่างถูกต้อง",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "นักศึกษาที่ผ่านเกณฑ์ English",
+      "metric": "Eng_status",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT CASE WHEN Eng_status = 'Pass' THEN Student_ID END)",
+      "source_fields": [
+        "Eng_status",
+        "Student_ID"
+      ],
+      "limitations": "Eng_status ต้องมีค่า 'Pass' แสดงการผ่าน",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "จำนวนข้อมูลที่มีปัญหาคุณภาพ (Required_By_Year ไม่ครบ)",
+      "metric": "Required_By_Year",
+      "aggregation": "COUNT",
+      "formula": "COUNT(CASE WHEN Required_By_Year IS NULL THEN 1 END)",
+      "source_fields": [
+        "Required_By_Year"
+      ],
+      "limitations": "Required_By_Year มีค่าที่ไม่สามารถแปลงเป็นปีได้"
+    }
+  ],
+  "filters": [
+    "หลักสูตร",
+    "classType",
+    "Year"
+  ]
+}

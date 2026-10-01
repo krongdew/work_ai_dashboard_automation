@@ -1,0 +1,9 @@
+{
+  "generated_by": "groq-ai",
+  "profile_generated_at": "2026-09-30T07:17:11.386875+00:00",
+  "mappings": [],
+  "warnings": [
+    "Year, ปีการศึกษา, and ปีที่เข้า fields contain values with a trailing decimal (e.g., \"2566.0\"); they represent Buddhist Era years but the format may be ambiguous for downstream processing.",
+    "The field \"เกณฑ์มาตรฐาน\" is labeled as a date role but its values are numeric thresholds, not dates."
+  ]
+}

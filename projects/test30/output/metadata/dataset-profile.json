@@ -1,0 +1,1014 @@
+{
+  "project": "test30",
+  "generated_at": "2026-09-30T08:40:23.535181+00:00",
+  "input_files": [
+    "mockup_data-2a128347.xlsx"
+  ],
+  "records": 2243,
+  "worksheets": [
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Dim_Students",
+      "rows": 36,
+      "columns": 12,
+      "fields": [
+        "รหัสนักศึกษา",
+        "คำนำหน้า",
+        "ชื่อจริง",
+        "นามสกุล",
+        "คณะ",
+        "หลักสูตร/สาขา",
+        "ปีที่เข้า",
+        "รหัสอาจารย์ที่ปรึกษา",
+        "ประเภทการรับเข้า",
+        "Is_Work_And_Travel",
+        "เบอร์โทร",
+        "HSK"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Dim_Advisors",
+      "rows": 0,
+      "columns": 3,
+      "fields": [
+        "Advisor_ID",
+        "Advisor_Name",
+        "Phone_Number"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Fact_Enrollments",
+      "rows": 36,
+      "columns": 15,
+      "fields": [
+        "Enrollment_ID",
+        "รหัสนักศึกษา",
+        "ชื่อ-นามสกุล",
+        "ชั้นปี",
+        "คณะ",
+        "สถานะเกรด",
+        "Section",
+        "รหัสวิชา",
+        "ชื่อวิชา",
+        "ปีการศึกษา",
+        "เทอม",
+        "เรียนวิชานี้เป็นครั้งที่",
+        "เกรดแปลงOSW",
+        "แต้มระดับคะแนน",
+        "หมายเหตุ"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Fact_Exam_Logs",
+      "rows": 934,
+      "columns": 11,
+      "fields": [
+        "Student_ID",
+        "ชื่อ-สกุล",
+        "หลักสูตร",
+        "ชั้นปี",
+        "วันที่สอบ",
+        "ประเภทการสอบ",
+        "เกณฑ์มาตรฐาน",
+        "ผลคะแนน",
+        "Eng_status",
+        "HSK_Status",
+        "HSK_Exam_Date"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Fact_Exam_HSK",
+      "rows": 934,
+      "columns": 11,
+      "fields": [
+        "Student_ID",
+        "ชื่อ-สกุล",
+        "หลักสูตร",
+        "ชั้นปี",
+        "วันที่สอบ",
+        "ประเภทการสอบ",
+        "เกณฑ์มาตรฐาน",
+        "ผลคะแนน",
+        "Eng_status",
+        "HSK_Status",
+        "HSK_Exam_Date"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Dim_Curriculum_Plan",
+      "rows": 298,
+      "columns": 27,
+      "fields": [
+        "ID",
+        "Major",
+        "Course_Code",
+        "Course_Name_TH",
+        "Course_Name_EN",
+        "Credits",
+        "Type",
+        "Sub_Type",
+        "Required_By_Year",
+        "Year",
+        "column_11",
+        "column_12",
+        "column_13",
+        "column_14",
+        "column_15",
+        "column_16",
+        "column_17",
+        "column_18",
+        "column_19",
+        "column_20",
+        "column_21",
+        "column_22",
+        "column_23",
+        "column_24",
+        "column_25",
+        "column_26",
+        "column_27"
+      ]
+    },
+    {
+      "file": "mockup_data-2a128347.xlsx",
+      "sheet": "Fact_Dropouts",
+      "rows": 5,
+      "columns": 3,
+      "fields": [
+        "Student_ID",
+        "Text",
+        "รหัสนักศึกษาที่ลาออก"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "Advisor_ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Advisor_Name",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Course_Code",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 298,
+      "distinct": 232,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "MUGE 100",
+        "LAEN 100",
+        "LAEN 101",
+        "LATH 100",
+        "LAEP 100"
+      ]
+    },
+    {
+      "name": "Course_Name_EN",
+      "type": "category",
+      "role": "category",
+      "non_null": 298,
+      "distinct": 232,
+      "numeric_ratio": 0.054,
+      "examples": [
+        "General Education for Human Development",
+        "English Structure for Reading and Writing",
+        "Listening and Speaking for Communication",
+        "Art of Using Thai Language in Communication",
+        "Cultures of English-Speaking Countries"
+      ]
+    },
+    {
+      "name": "Course_Name_TH",
+      "type": "category",
+      "role": "category",
+      "non_null": 298,
+      "distinct": 229,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "การศึกษาทั่วไปเพื่อการพัฒนามนุษย์*",
+        "โครงสร้างภาษาอังกฤษสำหรับการอ่านและเขียน",
+        "การฟังและพูดเพื่อการสื่อสาร",
+        "ศิลปะการใช้ภาษาไทยเพื่อการสื่อสาร",
+        "วัฒนธรรมของประเทศที่พูดภาษาอังกฤษ"
+      ]
+    },
+    {
+      "name": "Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 298,
+      "distinct": 4,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "3.0",
+        "6.0",
+        "2.0",
+        "4.0"
+      ]
+    },
+    {
+      "name": "Eng_status",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Enrollment_ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 36,
+      "distinct": 36,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1.0",
+        "2.0",
+        "3.0",
+        "4.0",
+        "5.0"
+      ]
+    },
+    {
+      "name": "HSK",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "HSK_Exam_Date",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "HSK_Status",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 298,
+      "distinct": 298,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "SubJect001",
+        "SubJect002",
+        "SubJect003",
+        "SubJect004",
+        "SubJect005"
+      ]
+    },
+    {
+      "name": "Is_Work_And_Travel",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Major",
+      "type": "category",
+      "role": "category",
+      "non_null": 298,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ภาษาอังกฤษ",
+        "ภาษาไทย",
+        "ภาษาจีน"
+      ]
+    },
+    {
+      "name": "Phone_Number",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Required_By_Year",
+      "type": "number",
+      "role": "measure",
+      "non_null": 298,
+      "distinct": 6,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1.0",
+        "2.0",
+        "3.0",
+        "4.0",
+        "2,3"
+      ]
+    },
+    {
+      "name": "Section",
+      "type": "number",
+      "role": "measure",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1.0"
+      ]
+    },
+    {
+      "name": "Student_ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 1551,
+      "distinct": 778,
+      "numeric_ratio": 0.997,
+      "examples": [
+        "6470695.0",
+        "6470703.0",
+        "6470708.0",
+        "6570008.0",
+        "6570009.0"
+      ]
+    },
+    {
+      "name": "Sub_Type",
+      "type": "category",
+      "role": "category",
+      "non_null": 298,
+      "distinct": 10,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศึกษาทั่วไป",
+        "กลุ่มวิชาภาษา",
+        "วิชาบังคับ",
+        "วิชาเลือก-ทักษะภาษา",
+        "วิชาเลือก-วรรณคดี"
+      ]
+    },
+    {
+      "name": "Text",
+      "type": "category",
+      "role": "category",
+      "non_null": 5,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Text"
+      ]
+    },
+    {
+      "name": "Type",
+      "type": "category",
+      "role": "category",
+      "non_null": 298,
+      "distinct": 6,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศึกษาทั่วไป",
+        "กลุ่มวิชาภาษา",
+        "วิชาบังคับ",
+        "วิชาเลือก",
+        "วิชาโท"
+      ]
+    },
+    {
+      "name": "Year",
+      "type": "date",
+      "role": "date",
+      "non_null": 298,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2566.0"
+      ]
+    },
+    {
+      "name": "column_11",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_12",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_13",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_14",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_15",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_16",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_17",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_18",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_19",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_20",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_21",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_22",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_23",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_24",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_25",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_26",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_27",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "คณะ",
+      "type": "category",
+      "role": "category",
+      "non_null": 72,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "LA"
+      ]
+    },
+    {
+      "name": "คำนำหน้า",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "น.ส.",
+        "นาย"
+      ]
+    },
+    {
+      "name": "ชั้นปี",
+      "type": "number",
+      "role": "measure",
+      "non_null": 1582,
+      "distinct": 4,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2.0",
+        "4.0",
+        "3.0",
+        "1.0"
+      ]
+    },
+    {
+      "name": "ชื่อ-นามสกุล",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 36,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "น.ส. เกวลิน สินธุเจริญ",
+        "น.ส. ชนิศา มิลินทากาศ",
+        "น.ส. ชลกร นวลละออง",
+        "น.ส. ณัฐณรินทร์ รังษีวงศ์",
+        "น.ส. ณิชากร คำเต่ย"
+      ]
+    },
+    {
+      "name": "ชื่อ-สกุล",
+      "type": "category",
+      "role": "category",
+      "non_null": 1546,
+      "distinct": 773,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "นายธราเทพ วรนารถ",
+        "น.ส.ณัฐชยา มั่นเหมาะ",
+        "นายบวรวงศ์ ปิยะศีลขันธ์",
+        "น.ส.ณัฐณิชา อนัญญาเขต",
+        "น.ส.ธนาภา ศรีพนมธร"
+      ]
+    },
+    {
+      "name": "ชื่อจริง",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 36,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "เกวลิน",
+        "ชนิศา",
+        "ชลกร",
+        "ณัฐณรินทร์",
+        "ณิชากร"
+      ]
+    },
+    {
+      "name": "ชื่อวิชา",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "จิตวิทยาบุคลิกภาพ"
+      ]
+    },
+    {
+      "name": "นามสกุล",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 36,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "สินธุเจริญ",
+        "มิลินทากาศ",
+        "นวลละออง",
+        "รังษีวงศ์",
+        "คำเต่ย"
+      ]
+    },
+    {
+      "name": "ประเภทการรับเข้า",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "การรับแบบPortfolio (TCAS รอบที่ 1)"
+      ]
+    },
+    {
+      "name": "ประเภทการสอบ",
+      "type": "category",
+      "role": "category",
+      "non_null": 1866,
+      "distinct": 11,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "LAEN 124",
+        "MU-ELT",
+        "TOEIC",
+        "IELTS",
+        "TOEFL iBT"
+      ]
+    },
+    {
+      "name": "ปีการศึกษา",
+      "type": "date",
+      "role": "date",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2569.0"
+      ]
+    },
+    {
+      "name": "ปีที่เข้า",
+      "type": "date",
+      "role": "date",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2567.0"
+      ]
+    },
+    {
+      "name": "ผลคะแนน",
+      "type": "number",
+      "role": "measure",
+      "non_null": 1868,
+      "distinct": 174,
+      "numeric_ratio": 0.814,
+      "examples": [
+        "78.0",
+        "54.0",
+        "65.0",
+        "63.0",
+        "805.0"
+      ]
+    },
+    {
+      "name": "รหัสนักศึกษา",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 72,
+      "distinct": 36,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "6770006.0",
+        "6770010.0",
+        "6770012.0",
+        "6770017.0",
+        "6770018.0"
+      ]
+    },
+    {
+      "name": "รหัสนักศึกษาที่ลาออก",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 5,
+      "distinct": 5,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ชื่อ-นามสกุล",
+        "สาขาวิชา",
+        "ประเภทการรับเข้า TCAS",
+        "ปีที่พ้นสภาพ (เช่น ปี 2 (2567))",
+        "สาเหตุการลาออก"
+      ]
+    },
+    {
+      "name": "รหัสวิชา",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "LAPS 102"
+      ]
+    },
+    {
+      "name": "รหัสอาจารย์ที่ปรึกษา",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "วันที่สอบ",
+      "type": "date",
+      "role": "date",
+      "non_null": 1514,
+      "distinct": 188,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2569-05-12T00:00:00",
+        "2568-11-25T00:00:00",
+        "2568-09-13T00:00:00",
+        "2569-05-09T00:00:00",
+        "2564-12-01T00:00:00"
+      ]
+    },
+    {
+      "name": "สถานะเกรด",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "A",
+        "B+"
+      ]
+    },
+    {
+      "name": "หมายเหตุ",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "หลักสูตร",
+      "type": "category",
+      "role": "category",
+      "non_null": 1546,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศิลปศาสตรบัณฑิต สาขาวิชาภาษาอังกฤษ",
+        "ศิลปศาสตรบัณฑิต สาขาวิชาภาษาจีน (หลักสูตรนานาชาติ)",
+        "ศิลปศาสตรบัณฑิต สาขาวิชาภาษาไทย"
+      ]
+    },
+    {
+      "name": "หลักสูตร/สาขา",
+      "type": "category",
+      "role": "category",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศิลปศาสตรบัณฑิต สาขาวิชาภาษาอังกฤษ"
+      ]
+    },
+    {
+      "name": "เกณฑ์มาตรฐาน",
+      "type": "date",
+      "role": "date",
+      "non_null": 1866,
+      "distinct": 8,
+      "numeric_ratio": 0.814,
+      "examples": [
+        "65.0",
+        "84.0",
+        "600.0",
+        "5.0",
+        "64.0"
+      ]
+    },
+    {
+      "name": "เกรดแปลงOSW",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "เทอม",
+      "type": "number",
+      "role": "measure",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1.0"
+      ]
+    },
+    {
+      "name": "เบอร์โทร",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "เรียนวิชานี้เป็นครั้งที่",
+      "type": "number",
+      "role": "measure",
+      "non_null": 36,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1.0"
+      ]
+    },
+    {
+      "name": "แต้มระดับคะแนน",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 949,
+    "missing_values": {
+      "Advisor_ID": 2243,
+      "Advisor_Name": 2243,
+      "Course_Code": 1945,
+      "Course_Name_EN": 1945,
+      "Course_Name_TH": 1945,
+      "Credits": 1945,
+      "Eng_status": 2243,
+      "Enrollment_ID": 2207,
+      "HSK": 2243,
+      "HSK_Exam_Date": 2243,
+      "HSK_Status": 2243,
+      "ID": 1945,
+      "Is_Work_And_Travel": 2243,
+      "Major": 1945,
+      "Phone_Number": 2243,
+      "Required_By_Year": 1945,
+      "Section": 2207,
+      "Student_ID": 692,
+      "Sub_Type": 1945,
+      "Text": 2238,
+      "Type": 1945,
+      "Year": 1945,
+      "column_11": 2243,
+      "column_12": 2243,
+      "column_13": 2243,
+      "column_14": 2243,
+      "column_15": 2243,
+      "column_16": 2243,
+      "column_17": 2243,
+      "column_18": 2243,
+      "column_19": 2243,
+      "column_20": 2243,
+      "column_21": 2243,
+      "column_22": 2243,
+      "column_23": 2243,
+      "column_24": 2243,
+      "column_25": 2243,
+      "column_26": 2243,
+      "column_27": 2243,
+      "คณะ": 2171,
+      "คำนำหน้า": 2207,
+      "ชั้นปี": 661,
+      "ชื่อ-นามสกุล": 2207,
+      "ชื่อ-สกุล": 697,
+      "ชื่อจริง": 2207,
+      "ชื่อวิชา": 2207,
+      "นามสกุล": 2207,
+      "ประเภทการรับเข้า": 2207,
+      "ประเภทการสอบ": 377,
+      "ปีการศึกษา": 2207,
+      "ปีที่เข้า": 2207,
+      "ผลคะแนน": 375,
+      "รหัสนักศึกษา": 2171,
+      "รหัสนักศึกษาที่ลาออก": 2238,
+      "รหัสวิชา": 2207,
+      "รหัสอาจารย์ที่ปรึกษา": 2243,
+      "วันที่สอบ": 729,
+      "สถานะเกรด": 2207,
+      "หมายเหตุ": 2243,
+      "หลักสูตร": 697,
+      "หลักสูตร/สาขา": 2207,
+      "เกณฑ์มาตรฐาน": 377,
+      "เกรดแปลงOSW": 2243,
+      "เทอม": 2207,
+      "เบอร์โทร": 2243,
+      "เรียนวิชานี้เป็นครั้งที่": 2207,
+      "แต้มระดับคะแนน": 2243
+    },
+    "date_parsing": {
+      "Year": {
+        "parsed": 298,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "ปีการศึกษา": {
+        "parsed": 36,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "ปีที่เข้า": {
+        "parsed": 36,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "วันที่สอบ": {
+        "parsed": 1514,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "เกณฑ์มาตรฐาน": {
+        "parsed": 1122,
+        "unparsed": 744,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

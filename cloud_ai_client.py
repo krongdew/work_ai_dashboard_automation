@@ -3,12 +3,13 @@ from __future__ import annotations
 import json
 import os
 import time
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from groq import Groq
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().with_name(".env"))
 
 MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 FALLBACK_MODEL = os.getenv("GROQ_FALLBACK_MODEL", "llama-3.3-70b-versatile")

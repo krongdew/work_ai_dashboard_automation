@@ -1,0 +1,30 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "name": "Input records",
+      "status": "pass",
+      "detail": "12 records processed"
+    },
+    {
+      "name": "Identifier exclusion",
+      "status": "pass",
+      "detail": "Excluded from metrics: ID, ยอดขาย, โทร"
+    },
+    {
+      "name": "Duplicate rows",
+      "status": "pass",
+      "detail": "0"
+    },
+    {
+      "name": "Missing values",
+      "status": "pass",
+      "detail": "None"
+    },
+    {
+      "name": "Date normalization",
+      "status": "pass",
+      "detail": "All recognized date values were normalized"
+    }
+  ]
+}

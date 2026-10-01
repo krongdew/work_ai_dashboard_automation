@@ -1,0 +1,246 @@
+{
+  "dashboard_title": "Date Analysis Dashboard",
+  "purpose": "Analyze date-related data to understand trends and patterns across different periods.",
+  "audience": "Management and analysts who need insights into temporal data distribution.",
+  "kpis": [
+    {
+      "name": "Total Records",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [
+        "วันที่"
+      ],
+      "limitations": "Counts all records, including duplicates if not properly filtered.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Unique Dates",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(DISTINCT วันที่)",
+      "source_fields": [
+        "วันที่"
+      ],
+      "limitations": "Counts distinct dates, but may not reflect actual unique events if multiple records share the same date.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Distinct Months",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(DISTINCT _month_th)",
+      "source_fields": [
+        "_month_th"
+      ],
+      "limitations": "Counts distinct months, but does not account for the number of records per month.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Distinct Years",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(DISTINCT _year_be)",
+      "source_fields": [
+        "_year_be"
+      ],
+      "limitations": "Counts distinct years, but does not account for the number of records per year.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Distinct Quarters",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(DISTINCT _quarter)",
+      "source_fields": [
+        "_quarter"
+      ],
+      "limitations": "Counts distinct quarters, but does not account for the number of records per quarter.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Records in March 2569",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE _month_th = 'มีนาคม' AND _year_be = '2569'",
+      "source_fields": [
+        "_month_th",
+        "_year_be"
+      ],
+      "limitations": "Counts records in March 2569, but does not account for other months or years.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Records in First Quarter 2569",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE _year_be = '2569' AND _quarter = '1'",
+      "source_fields": [
+        "_year_be",
+        "_quarter"
+      ],
+      "limitations": "Counts records in the first quarter of 2569, but does not account for other quarters or years.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Records in January to March 2569",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE _year_be = '2569' AND (_month_th = 'มกราคม' OR _month_th = 'กุมภาพันธ์' OR _month_th = 'มีนาคม')",
+      "source_fields": [
+        "_year_be",
+        "_month_th"
+      ],
+      "limitations": "Counts records in January to March 2569, but does not account for other months or years.",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "_year_be",
+    "_month_th",
+    "_quarter"
+  ],
+  "charts": [
+    {
+      "title": "Monthly Distribution of Records",
+      "type": "bar",
+      "dimension": "_month_th",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [
+        "_month_th"
+      ],
+      "limitations": "Counts records per month, but does not account for other dimensions.",
+      "target": {
+        "value": 0,
+        "label": "มี.ค.",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "Yearly Distribution of Records",
+      "type": "bar",
+      "dimension": "_year_be",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [
+        "_year_be"
+      ],
+      "limitations": "Counts records per year, but does not account for other dimensions.",
+      "target": {
+        "value": 0,
+        "label": "2569",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "Quarterly Distribution of Records",
+      "type": "bar",
+      "dimension": "_quarter",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [
+        "_quarter"
+      ],
+      "limitations": "Counts records per quarter, but does not account for other dimensions.",
+      "target": {
+        "value": 0,
+        "label": "Q1",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "Records in March 2569 by Year",
+      "type": "bar",
+      "dimension": "_year_be",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE _month_th = 'มีนาคม'",
+      "source_fields": [
+        "_year_be",
+        "_month_th"
+      ],
+      "limitations": "Counts records in March by year, but does not account for other months or years.",
+      "target": {
+        "value": 0,
+        "label": "2569",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "Records in First Quarter 2569 by Year",
+      "type": "bar",
+      "dimension": "_year_be",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE _quarter = '1'",
+      "source_fields": [
+        "_year_be",
+        "_quarter"
+      ],
+      "limitations": "Counts records in the first quarter by year, but does not account for other quarters or years.",
+      "target": {
+        "value": 0,
+        "label": "2569",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "Records in January to March 2569 by Year",
+      "type": "bar",
+      "dimension": "_year_be",
+      "metric": "วันที่",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE (_month_th = 'มกราคม' OR _month_th = 'กุมภาพันธ์' OR _month_th = 'มีนาคม')",
+      "source_fields": [
+        "_year_be",
+        "_month_th"
+      ],
+      "limitations": "Counts records in January to March by year, but does not account for other months or years.",
+      "target": {
+        "value": 0,
+        "label": "2569",
+        "year_be": 2569
+      }
+    }
+  ],
+  "insight_questions": [
+    "What is the distribution of records across different months?",
+    "How many records were recorded in March 2569?",
+    "What is the trend in record counts over time?",
+    "Which quarter had the highest number of records?"
+  ],
+  "display_labels": {
+    "_year_be": "ปี",
+    "_month_th": "เดือน",
+    "_quarter": "ไตรมาส"
+  },
+  "generated_by": "local-ai"
+}

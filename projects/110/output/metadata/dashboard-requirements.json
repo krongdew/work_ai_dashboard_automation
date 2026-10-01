@@ -1,0 +1,24 @@
+{
+  "audience": "ผู้จัดการฝ่ายขาย",
+  "purpose": "นับยอดรวมยอดขาย",
+  "questions": [
+    "ไม่มีข้อมูลเกี่ยวกับยอดขายในไฟล์ที่ให้มา จึงไม่สามารถตอบคำถามเชิงวิเคราะห์ใด ๆ ได้"
+  ],
+  "kpis": [
+    {
+      "name": "ยอดขายรวม",
+      "metric": "ยอดขาย",
+      "aggregation": "sum",
+      "formula": "SUM(ยอดขาย)",
+      "source_fields": [
+        "ยอดขาย"
+      ],
+      "limitations": "ไม่มีข้อมูลเกี่ยวกับยอดขายในไฟล์ที่ให้มา ไม่สามารถคำนวณได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": []
+}
