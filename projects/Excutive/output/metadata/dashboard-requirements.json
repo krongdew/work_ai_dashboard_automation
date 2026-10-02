@@ -1,0 +1,76 @@
+{
+  "audience": "ผู้บริหารคณะ",
+  "purpose": "ติดตามภาพรวมการศึกษา วิเทศน์ วิจัย บุคลากร และการลงทุนจากข้อมูลที่มี",
+  "questions": [
+    "นักศึกษาปัจจุบันกระจายตามหลักสูตร ชั้นปี และช่องทางรับเข้าอย่างไร",
+    "การเคลื่อนย้ายขาเข้า/ขาออกกระจุกที่ประเทศหรือคู่ความร่วมมือใด",
+    "ผลงานวิจัยและทะเบียนนักวิจัยมีภาพรวมอย่างไร",
+    "บุคลากรปัจจุบันกระจายตามสายงานและตำแหน่งอย่างไร",
+    "มูลค่าทรัพย์สินและผลตอบแทนลงทุนล่าสุดเป็นเท่าใด"
+  ],
+  "kpis": [
+    {
+      "name": "นักศึกษาตามตัวกรอง",
+      "formula": "COUNT(student records matching all selected filters)",
+      "source_fields": [
+        "entry_year",
+        "entry_month",
+        "entry_fiscal_year",
+        "study_year",
+        "program"
+      ]
+    },
+    {
+      "name": "ชั้นปี (คำนวณ)",
+      "formula": "ปีการศึกษา 2569 - ปีที่เข้าศึกษา + 1; values above 4 are labeled เกิน 4 ปี",
+      "source_fields": [
+        "entry_year",
+        "student ID prefix only when entry_year is unavailable"
+      ],
+      "limitation": "เลขนักศึกษาใช้เฉพาะคำนวณ fallback และไม่ถูกส่งออก"
+    },
+    {
+      "name": "Inbound/Outbound mobility",
+      "formula": "COUNT(mobility records) by direction",
+      "source_fields": [
+        "direction",
+        "partner_country",
+        "partner_university"
+      ]
+    },
+    {
+      "name": "ผลงานตีพิมพ์",
+      "formula": "COUNT(research-summary records)",
+      "source_fields": [
+        "year",
+        "type"
+      ]
+    },
+    {
+      "name": "บุคลากรปัจจุบัน",
+      "formula": "COUNT(personnel-summary records)",
+      "source_fields": [
+        "status",
+        "work_line",
+        "position"
+      ]
+    },
+    {
+      "name": "มูลค่าทรัพย์สินสุทธิล่าสุด",
+      "formula": "Latest net_asset_value by report_date",
+      "source_fields": [
+        "report_date",
+        "net_asset_value"
+      ]
+    }
+  ],
+  "filters": [
+    "เลือกมุมมองงาน",
+    "เลือกหลายปีที่เข้าศึกษาพร้อมกัน",
+    "เลือกหลายเดือนที่เข้าศึกษาพร้อมกัน",
+    "เลือกหลายปีงบประมาณที่เข้าพร้อมกัน",
+    "เลือกหลายชั้นปีพร้อมกัน",
+    "คลิกวงกลมเพื่อ cross-filter",
+    "ล้างตัวกรองทั้งหมด"
+  ]
+}

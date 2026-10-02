@@ -1,0 +1,580 @@
+{
+  "project": "executive",
+  "theme": "mahidol-faculty",
+  "generated_at": "2026-10-02T15:29:50.064801+07:00",
+  "input_files": [
+    "1.Current Students _ Admissions .xlsx",
+    "2.Current Graduate Student.xlsx",
+    "3.Mobility Overview.xlsx",
+    "4.Research Publication Performance.xlsx",
+    "5.Workforce _ Personnel Overview .xlsx",
+    "การลงทุน_ฐานใหม่.xlsx"
+  ],
+  "worksheets": [
+    {
+      "file": "1.Current Students _ Admissions .xlsx",
+      "worksheets": [
+        {
+          "name": "edu_student_current",
+          "rows": 787,
+          "columns": 12,
+          "header": [
+            "รหัสนักศึกษา",
+            "ระดับการศึกษา",
+            "คณะ",
+            "รหัสหลักสูตร",
+            "หลักสูตร",
+            "ปีที่เข้าศึกษา",
+            "ชั้นปี",
+            "ระบบการสอบเข้า",
+            "สถานภาพการเป็นนักศึกษา",
+            "วันที่เข้าศึกษา",
+            "วันที่สำเร็จการศึกษา",
+            "เหตุผลที่ออกจากการศึกษา"
+          ],
+          "null_cells": 4128
+        },
+        {
+          "name": "edu_R012_Program",
+          "rows": 39,
+          "columns": 29,
+          "header": [
+            "record_id",
+            "academic_year",
+            "admission_round_raw",
+            "admission_round",
+            "round_name",
+            "program_key",
+            "program_name_short",
+            "admission_project",
+            "project_name",
+            "announced_quota",
+            "applicants",
+            "paid",
+            "unpaid",
+            "documents_complete",
+            "eligible_applicants",
+            "interview_passed_main",
+            "interview_passed_reserve",
+            "mu_tcas_main_confirmed",
+            "mu_tcas_main_not_confirmed",
+            "mu_tcas_main_waived",
+            "mu_tcas_reserve_confirmed",
+            "mu_tcas_reserve_not_confirmed",
+            "mu_tcas_reserve_waived",
+            "clearinghouse_submitted",
+            "post_clearinghouse",
+            "enrollment_confirmed"
+          ],
+          "null_cells": 27983
+        }
+      ]
+    },
+    {
+      "file": "2.Current Graduate Student.xlsx",
+      "worksheets": [
+        {
+          "name": "Form Responses 1",
+          "rows": 2,
+          "columns": 10,
+          "header": [
+            "Timestamp",
+            "ปีที่เข้าศึกษา",
+            "รหัสนักศึกษา",
+            "ชื่อเรื่อง / ชื่อผลงาน",
+            "publication_status",
+            "ประเภทผลงาน",
+            "ระดับ",
+            "Doi Link",
+            "ที่ปรึกษา",
+            "ประเทศ"
+          ],
+          "null_cells": 531
+        },
+        {
+          "name": "dim_student",
+          "rows": 69,
+          "columns": 21,
+          "header": [
+            "student_id",
+            "entry_year",
+            "program_name",
+            "education_level",
+            "education_planned",
+            "program_type",
+            "english_requirement_status",
+            "qe_status",
+            "thesis_status",
+            "bachelor_degree",
+            "major_group",
+            "graduate_year",
+            "fullname_professor",
+            "student_status",
+            "evaluate_academic_year",
+            "student_email",
+            "student_phone"
+          ],
+          "null_cells": 19698
+        },
+        {
+          "name": "fact_enrollment",
+          "rows": 69,
+          "columns": 26,
+          "header": [
+            "enrollment_id",
+            "student_id",
+            "academic_year",
+            "enrollment_status"
+          ],
+          "null_cells": 1884
+        },
+        {
+          "name": "dim_publication",
+          "rows": 21,
+          "columns": 29,
+          "header": [
+            "publication_id",
+            "grad_year",
+            "student_id",
+            "publication_title_th",
+            "publication_title_en",
+            "publication_status",
+            "publication_type",
+            "publication_type_level",
+            "doi_linik",
+            "advisor",
+            "country"
+          ],
+          "null_cells": 1463201
+        }
+      ]
+    },
+    {
+      "file": "3.Mobility Overview.xlsx",
+      "worksheets": [
+        {
+          "name": "Inbound_Mobility",
+          "rows": 75,
+          "columns": 20,
+          "header": [
+            "academic_year",
+            "gender",
+            "nationality",
+            "partner_country",
+            "partner_university",
+            "partner_country 2",
+            "mou_level",
+            "mobility_type",
+            "duration_raw",
+            "start_date",
+            "start_date(M)",
+            "start_date(Y)",
+            "end_date",
+            "end_date(M)",
+            "end_date(Y)",
+            "education_level",
+            "study_year",
+            "activity_type",
+            "degree_detail",
+            "activity_detail"
+          ],
+          "null_cells": 240
+        },
+        {
+          "name": "Outbound_Mobility",
+          "rows": 72,
+          "columns": 30,
+          "header": [
+            "academic_year",
+            "gender",
+            "nationality",
+            "home_country",
+            "partner_university",
+            "partner_country",
+            "mou_level",
+            "mobility_type",
+            "duration_raw",
+            "start_date",
+            "start_date(M)",
+            "start_date(Y)",
+            "end_date",
+            "end_date(M)",
+            "end_date(Y)",
+            "education_level",
+            "study_year",
+            "activity_type",
+            "degree_detail",
+            "activity_detail"
+          ],
+          "null_cells": 826
+        }
+      ]
+    },
+    {
+      "file": "4.Research Publication Performance.xlsx",
+      "worksheets": [
+        {
+          "name": "ผลงานการตีพิมพ์",
+          "rows": 243,
+          "columns": null,
+          "header": [
+            "ลำดับ",
+            "ปี",
+            "ประเภท",
+            "ผู้แต่งทั้งหมด",
+            "ผู้แต่งในคณะ (ทั้งหมด)",
+            "ผู้แต่งในคณะ",
+            "ชื่อวารสาร",
+            "ชื่อเรื่อง",
+            "LinkFulltext",
+            "ปีที่",
+            "ฉบับที่",
+            "หน้าที่",
+            "ฐานข้อมูล",
+            "ผลงานตีพิมพ์",
+            "ฐานข้อมูลที่วารสารนี้ปรากฏอยู่",
+            "ระดับการตีพิมพ์",
+            "ระดับ TOP 10",
+            "ระดับ TOP1",
+            "ผู้วิจัยร่วมชาวต่างชาติ",
+            "ระดับการตีพิมพ์_DB"
+          ],
+          "null_cells": 15174
+        },
+        {
+          "name": "รายชื่อนักวิจัยในคณะ",
+          "rows": 83,
+          "columns": null,
+          "header": [
+            "ลำดับ",
+            "รายชื่อนักวิจัย",
+            "สังกัด"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "ค่าเป้าหมาย",
+          "rows": 29,
+          "columns": null,
+          "header": [
+            "ปี",
+            "ระดับของการตีพิมพ์",
+            "ค่าเป้าหมาย"
+          ],
+          "null_cells": 24941
+        },
+        {
+          "name": "ชีต9",
+          "rows": 9,
+          "columns": null,
+          "header": [
+            "Form 1.4/2567"
+          ],
+          "null_cells": 23
+        }
+      ]
+    },
+    {
+      "file": "5.Workforce _ Personnel Overview .xlsx",
+      "worksheets": [
+        {
+          "name": "ข้อมูลบุคลากร",
+          "rows": 175,
+          "columns": 10,
+          "header": [
+            "สถานะบุคลากร",
+            "รหัสบุคลากร SAP",
+            "ตำแหน่งงาน",
+            "ประเภทบุคลากร",
+            "งานกลุ่ม",
+            "UserDepartment",
+            "วันที่เริ่มปฏิบัติงาน",
+            "เบอร์โทรศัพท์ภายในคณะฯ",
+            "เบอร์โทรศัพท์",
+            "ประเภทสายงาน"
+          ],
+          "null_cells": 4944
+        },
+        {
+          "name": "จำนวนบุคลากร",
+          "rows": 4571,
+          "columns": 11,
+          "header": [
+            "สถานะบุคลากร",
+            "รหัสบุคลากร SAP",
+            "วันที่เริ่มปฏิบัติงาน",
+            "วันที่พ้นสภาพ",
+            "ประเภทสายงาน",
+            "ตำแหน่ง",
+            "ประเภทบุคลากร",
+            "Year",
+            "Month",
+            "Active",
+            "Non-active"
+          ],
+          "null_cells": 55237
+        },
+        {
+          "name": "Month",
+          "rows": 13,
+          "columns": 4,
+          "header": [
+            "No",
+            "Month",
+            "Month_Short",
+            "Quarter"
+          ],
+          "null_cells": 4
+        },
+        {
+          "name": "Department",
+          "rows": 25,
+          "columns": 3,
+          "header": [
+            "ลำดับ",
+            "งานกลุ่ม",
+            "UserDepartment"
+          ],
+          "null_cells": 2922
+        },
+        {
+          "name": "ตำแหน่งสายวิชาการ",
+          "rows": 6,
+          "columns": 2,
+          "header": [
+            "ลำดับ",
+            "ตำแหน่ง"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "ผู้ช่วยสอน",
+          "rows": 39,
+          "columns": 11,
+          "header": [
+            "สถานะบุคลากร",
+            "รหัสบุคลากร SAP",
+            "ชื่อภาษาไทย",
+            "วันที่เริ่มปฏิบัติงาน",
+            "วันที่พ้นสภาพ",
+            "ประเภทสายงาน",
+            "ตำแหน่ง",
+            "Year",
+            "Month",
+            "Active",
+            "Non-active"
+          ],
+          "null_cells": 26
+        },
+        {
+          "name": "เพิ่มข้อมูล_ตำแหน่งทางวิชาการ",
+          "rows": 140,
+          "columns": 8,
+          "header": [
+            "รหัสบุคลากร SAP",
+            "ประเภทบุคลากร",
+            "เลขที่คำสั่ง",
+            "วันเดือนปี",
+            "สายงาน",
+            "ตำแหน่งทางวิชาการ",
+            "ตำแหน่งทางวิชาชีพ",
+            "สาขา"
+          ],
+          "null_cells": 769
+        },
+        {
+          "name": "_ตำแหน่งทางวิชาการ",
+          "rows": 142,
+          "columns": 7,
+          "header": [
+            "รหัสบุคลากร SAP",
+            "ประเภทบุคลากร",
+            "เลขที่คำสั่ง",
+            "สายงาน",
+            "ตำแหน่งทางวิชาการ",
+            "ตำแหน่งทางวิชาชีพ",
+            "สาขา"
+          ],
+          "null_cells": 1683
+        }
+      ]
+    },
+    {
+      "file": "การลงทุน_ฐานใหม่.xlsx",
+      "worksheets": [
+        {
+          "name": "01_Source_Index",
+          "rows": 35,
+          "columns": 11,
+          "header": [
+            "วันที่รายงาน",
+            "ReportDate_AD",
+            "DateKey",
+            "ปี พ.ศ.",
+            "เดือน",
+            "เดือนลำดับ",
+            "ปี-เดือน",
+            "ไฟล์",
+            "จำนวน Performance Rows",
+            "จำนวน Asset Rows",
+            "Summary Parsed"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "INV_สรุปรายเดือน",
+          "rows": 35,
+          "columns": 14,
+          "header": [
+            "วันที่รายงาน",
+            "ReportDate_AD",
+            "DateKey",
+            "ปี พ.ศ.",
+            "เดือน",
+            "เดือนลำดับ",
+            "ปี-เดือน",
+            "จำนวนหน่วย",
+            "จำนวนมูลค่าทรัพย์สินสุทธิ",
+            "มูลค่าทรัพย์สินสุทธิต่อหน่วย",
+            "ผลตอบแทนช่วงรายงาน %",
+            "Return_Period_Start",
+            "Return_Period_End",
+            "Source_File"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "INV_ผลตอบแทน",
+          "rows": 309,
+          "columns": 24,
+          "header": [
+            "วันที่รายงาน",
+            "ReportDate_AD",
+            "DateKey",
+            "ปี พ.ศ.",
+            "เดือน",
+            "เดือนลำดับ",
+            "ปี-เดือน",
+            "Client Code",
+            "Client_Name",
+            "Client_Name_Raw",
+            "PM (%)",
+            "BenchMark",
+            "Dividend",
+            "Dividend_Type",
+            "6 เดือน",
+            "12 เดือน",
+            "24 เดือน",
+            "36 เดือน",
+            "48 เดือน",
+            "60 เดือน",
+            "ตั้งแต่เริ่มต้น",
+            "Performance_Period_Start",
+            "Performance_Period_End",
+            "Source_File"
+          ],
+          "null_cells": 1076
+        },
+        {
+          "name": "INV_สินทรัพย์",
+          "rows": 301,
+          "columns": 25,
+          "header": [
+            "วันที่รายงาน",
+            "ReportDate_AD",
+            "DateKey",
+            "ปี พ.ศ.",
+            "เดือน",
+            "เดือนลำดับ",
+            "ปี-เดือน",
+            "Asset Code",
+            "Instrument_Ref",
+            "Instrument_Type",
+            "Currency_Code",
+            "Risk_Group",
+            "Asset_Category",
+            "Asset_Subcategory",
+            "Coupon",
+            "Yield_PriceCost",
+            "ราคาทุนตัดจำหน่าย",
+            "Clean Value",
+            "ดอกเบี้ยค้างรับ",
+            "XI_XD_Amortize",
+            "Yield_PriceMarket",
+            "ราคาตลาด",
+            "กำไรขาดทุนที่ยังไม่เกิดขึ้น",
+            "% ของทรัพย์สิน",
+            "Source_File"
+          ],
+          "null_cells": 102
+        },
+        {
+          "name": "INV_ปฏิทิน",
+          "rows": 37,
+          "columns": 8,
+          "header": [
+            "DateKey",
+            "ปี พ.ศ.",
+            "เดือน",
+            "เดือนลำดับ",
+            "ไตรมาส",
+            "ปี-เดือน",
+            "MonthEnd_AD",
+            "Has_Source"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "INV_Client",
+          "rows": 12,
+          "columns": 2,
+          "header": [
+            "Client Code",
+            "Client_Name"
+          ],
+          "null_cells": 0
+        },
+        {
+          "name": "INV_Asset",
+          "rows": 14,
+          "columns": 5,
+          "header": [
+            "Asset Code",
+            "Risk_Group",
+            "Asset_Category",
+            "Asset_Subcategory",
+            "Default_Ref"
+          ],
+          "null_cells": 0
+        }
+      ]
+    }
+  ],
+  "analytical_datasets": [
+    {
+      "name": "education-summary.csv",
+      "records": 786
+    },
+    {
+      "name": "graduate-summary.csv",
+      "records": 68
+    },
+    {
+      "name": "mobility-summary.csv",
+      "records": 145
+    },
+    {
+      "name": "research-summary.csv",
+      "records": 242
+    },
+    {
+      "name": "personnel-summary.csv",
+      "records": 174
+    },
+    {
+      "name": "investment-monthly-summary.csv",
+      "records": 34
+    }
+  ],
+  "privacy": "Direct student IDs, SAP IDs, telephone numbers, names, and free-text source details are excluded from analytical exports."
+}

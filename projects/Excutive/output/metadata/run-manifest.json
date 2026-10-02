@@ -1,0 +1,32 @@
+{
+  "project": "executive",
+  "run_id": "executive-20261002T152950",
+  "input_files": [
+    "1.Current Students _ Admissions .xlsx",
+    "2.Current Graduate Student.xlsx",
+    "3.Mobility Overview.xlsx",
+    "4.Research Publication Performance.xlsx",
+    "5.Workforce _ Personnel Overview .xlsx",
+    "การลงทุน_ฐานใหม่.xlsx"
+  ],
+  "stages": [
+    "DISCOVER",
+    "PROFILE",
+    "QUALITY",
+    "ANALYZE",
+    "REQUIREMENTS",
+    "DESIGN",
+    "TRANSFORM",
+    "BUILD",
+    "QA",
+    "INSIGHTS",
+    "DELIVER"
+  ],
+  "status": "READY WITH LIMITATIONS",
+  "warnings": [
+    "Source files were read without modification",
+    "Data identifiers excluded from outputs"
+  ],
+  "critical_errors": [],
+  "timestamp": "2026-10-02T15:29:50.086800+07:00"
+}

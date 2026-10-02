@@ -158,7 +158,14 @@ Do not put sensitive raw data into a public repository.
 3. ตรวจสถานะใน `projects/CASS/output/qa/qa-report.json`
 	หากมี critical error จะเป็น `NOT READY` และไม่ควรใช้ตัวเลขตัดสินใจ
 	จนกว่าจะตรวจสอบข้อมูลต้นทาง
-4. เมื่อผลลัพธ์พร้อมเผยแพร่ ให้ push dashboard ที่สร้างใหม่:
+4. รันคำสั่งนี้เพื่อสร้าง DataLink Bundle และ Publish Package ของ HTML output เดิม:
+
+```powershell
+python projects\CASS\working\create_datalink_bundle.py
+```
+
+5. ใน DataLink Dashboard Library ให้นำเข้า `projects/CASS/output/CASS-DataLink-Bundle.zip`, อนุมัติ Dataset และอนุมัติ Dashboard version ใหม่ก่อนเปิดใช้งาน. Bundle มี HTML output เดิมอยู่แล้ว จึงแสดง tab, chart, filter และธีม CASS ครบโดยไม่ต้องนำเข้า Publish Package เพิ่ม.
+6. เมื่อผลลัพธ์พร้อมเผยแพร่ ให้ push dashboard ที่สร้างใหม่:
 
 ```bash
 git add projects/CASS

@@ -1,0 +1,357 @@
+{
+  "dashboard_title": "CASS Operational & Service Excellence",
+  "renderer": "cass-operational-service-excellence",
+  "purpose": "Monitor operational services, non-income academic services, and budget registers from the CASS source datasets.",
+  "audience": "CASS executives and operational staff",
+  "insight_questions": [
+    "How do operational service outcomes change across fiscal years?",
+    "How do non-income academic services support participants and social benefit?",
+    "How do revenue, expense, and profit compare in the budget registers?"
+  ],
+  "display_labels": {
+    "fiscal_year": "ปีงบประมาณ",
+    "quarter": "ไตรมาส",
+    "project_type": "ประเภทโครงการ",
+    "service_group": "กลุ่มผู้รับบริการ",
+    "unit": "สังกัด",
+    "project_name": "โครงการ",
+    "revenue": "รายได้",
+    "expense": "รายจ่าย",
+    "reported_profit": "กำไร",
+    "actual_participants": "ผู้เข้าร่วมจริง",
+    "satisfaction": "ความพึงพอใจ",
+    "format": "รูปแบบ",
+    "participants": "ผู้เข้าร่วม",
+    "budget": "งบประมาณ",
+    "social_benefit": "ประโยชน์ต่อสังคม"
+  },
+  "tabs": [
+    {
+      "key": "income",
+      "label": "บริการมีรายได้",
+      "fixed_filters": {
+        "dashboard_section": [
+          "income"
+        ]
+      },
+      "filters": [
+        "fiscal_year",
+        "quarter",
+        "project_type",
+        "service_group",
+        "unit"
+      ],
+      "kpis": [
+        {
+          "name": "รายได้",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "revenue"
+          ]
+        },
+        {
+          "name": "กำไรตามแหล่งข้อมูล",
+          "metric": "reported_profit",
+          "aggregation": "sum",
+          "formula": "SUM(reported_profit)",
+          "source_fields": [
+            "reported_profit"
+          ]
+        },
+        {
+          "name": "รายจ่าย",
+          "metric": "expense",
+          "aggregation": "sum",
+          "formula": "SUM(expense)",
+          "source_fields": [
+            "expense"
+          ]
+        },
+        {
+          "name": "ผู้เข้าร่วมจริง",
+          "metric": "actual_participants",
+          "aggregation": "sum",
+          "formula": "SUM(actual_participants)",
+          "source_fields": [
+            "actual_participants"
+          ]
+        },
+        {
+          "name": "ความพึงพอใจเฉลี่ย",
+          "metric": "satisfaction",
+          "aggregation": "average",
+          "formula": "AVG(satisfaction)",
+          "source_fields": [
+            "satisfaction"
+          ]
+        }
+      ],
+      "charts": [
+        {
+          "title": "แนวโน้มรายได้ตามปีงบประมาณ",
+          "type": "line",
+          "dimension": "fiscal_year",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "fiscal_year",
+            "revenue"
+          ]
+        },
+        {
+          "title": "แนวโน้มกำไรตามปีงบประมาณ",
+          "type": "line",
+          "dimension": "fiscal_year",
+          "metric": "reported_profit",
+          "aggregation": "sum",
+          "formula": "SUM(reported_profit)",
+          "source_fields": [
+            "fiscal_year",
+            "reported_profit"
+          ]
+        },
+        {
+          "title": "รายได้ตามประเภทโครงการ",
+          "type": "bar",
+          "dimension": "project_type",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "project_type",
+            "revenue"
+          ]
+        },
+        {
+          "title": "รายได้ตามกลุ่มบริการ",
+          "type": "bar",
+          "dimension": "service_group",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "service_group",
+            "revenue"
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "title": "รายละเอียดบริการมีรายได้",
+          "fields": [
+            "fiscal_year",
+            "project_name",
+            "project_type",
+            "service_group",
+            "revenue",
+            "expense",
+            "reported_profit",
+            "actual_participants",
+            "satisfaction"
+          ],
+          "limit": 250
+        }
+      ]
+    },
+    {
+      "key": "community",
+      "label": "บริการวิชาการแบบไม่ได้รายได้",
+      "fixed_filters": {
+        "dashboard_section": [
+          "community"
+        ]
+      },
+      "filters": [
+        "fiscal_year"
+      ],
+      "kpis": [
+        {
+          "name": "กิจกรรม",
+          "metric": "record_count",
+          "aggregation": "count",
+          "formula": "COUNT(*)"
+        },
+        {
+          "name": "ผู้เข้าร่วม",
+          "metric": "participants",
+          "aggregation": "sum",
+          "formula": "SUM(participants)",
+          "source_fields": [
+            "participants"
+          ]
+        },
+        {
+          "name": "งบประมาณ",
+          "metric": "budget",
+          "aggregation": "sum",
+          "formula": "SUM(budget)",
+          "source_fields": [
+            "budget"
+          ]
+        },
+        {
+          "name": "ค่าใช้จ่าย",
+          "metric": "expense",
+          "aggregation": "sum",
+          "formula": "SUM(expense)",
+          "source_fields": [
+            "expense"
+          ]
+        },
+        {
+          "name": "ความพึงพอใจเฉลี่ย",
+          "metric": "satisfaction",
+          "aggregation": "average",
+          "formula": "AVG(satisfaction)",
+          "source_fields": [
+            "satisfaction"
+          ]
+        }
+      ],
+      "charts": [
+        {
+          "title": "ผู้เข้าร่วมตามปีงบประมาณ",
+          "type": "bar",
+          "dimension": "fiscal_year",
+          "metric": "participants",
+          "aggregation": "sum",
+          "formula": "SUM(participants)",
+          "source_fields": [
+            "fiscal_year",
+            "participants"
+          ]
+        },
+        {
+          "title": "ผลกระทบทางสังคม",
+          "type": "bar",
+          "dimension": "social_benefit",
+          "metric": "record_count",
+          "aggregation": "count",
+          "formula": "COUNT(*)",
+          "source_fields": [
+            "social_benefit"
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "title": "รายละเอียดกิจกรรม",
+          "fields": [
+            "fiscal_year",
+            "project_name",
+            "format",
+            "participants",
+            "budget",
+            "expense",
+            "social_benefit",
+            "satisfaction"
+          ],
+          "limit": 100
+        }
+      ]
+    },
+    {
+      "key": "budget",
+      "label": "เปรียบเทียบงบประมาณ",
+      "fixed_filters": {
+        "dashboard_section": [
+          "budget"
+        ]
+      },
+      "filters": [
+        "fiscal_year",
+        "project_type"
+      ],
+      "kpis": [
+        {
+          "name": "รายการ",
+          "metric": "record_count",
+          "aggregation": "count",
+          "formula": "COUNT(*)"
+        },
+        {
+          "name": "รายได้",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "revenue"
+          ]
+        },
+        {
+          "name": "รายจ่าย",
+          "metric": "expense",
+          "aggregation": "sum",
+          "formula": "SUM(expense)",
+          "source_fields": [
+            "expense"
+          ]
+        },
+        {
+          "name": "กำไร",
+          "metric": "reported_profit",
+          "aggregation": "sum",
+          "formula": "SUM(reported_profit)",
+          "source_fields": [
+            "reported_profit"
+          ]
+        },
+        {
+          "name": "ผู้เข้าร่วม",
+          "metric": "actual_participants",
+          "aggregation": "sum",
+          "formula": "SUM(actual_participants)",
+          "source_fields": [
+            "actual_participants"
+          ]
+        }
+      ],
+      "charts": [
+        {
+          "title": "รายได้ตามปีงบประมาณ",
+          "type": "bar",
+          "dimension": "fiscal_year",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "fiscal_year",
+            "revenue"
+          ]
+        },
+        {
+          "title": "รายได้ตามประเภทบริการ",
+          "type": "bar",
+          "dimension": "project_type",
+          "metric": "revenue",
+          "aggregation": "sum",
+          "formula": "SUM(revenue)",
+          "source_fields": [
+            "project_type",
+            "revenue"
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "title": "รายละเอียดทะเบียนคุมงบ",
+          "fields": [
+            "fiscal_year",
+            "project_name",
+            "project_type",
+            "source_sheet",
+            "revenue",
+            "expense",
+            "reported_profit",
+            "actual_participants",
+            "satisfaction"
+          ],
+          "limit": 100
+        }
+      ]
+    }
+  ]
+}
