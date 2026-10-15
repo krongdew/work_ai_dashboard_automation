@@ -7,3 +7,5 @@ projects/*/input/*
 local-ai/demo_profile.json
 local-ai/dashboard-spec.json
 __pycache__/
+.lan/
+lan/dist/

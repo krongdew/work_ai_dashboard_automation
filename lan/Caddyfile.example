@@ -1,0 +1,7 @@
+# Replace BOTH occurrences of 192.168.1.10 with this host's reserved LAN IP.
+# Run: caddy run --config Caddyfile
+https://192.168.1.10:8443 {
+    bind 192.168.1.10
+    tls internal
+    reverse_proxy 127.0.0.1:5051
+}

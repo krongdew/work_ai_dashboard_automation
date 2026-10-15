@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import csv
+from contextvars import copy_context
 import hashlib
 from html import escape
 from io import BytesIO
 import json
+import os
 import re
 import shutil
 import sys
@@ -14,10 +16,10 @@ from uuid import uuid4
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from threading import Lock, Thread
+from threading import BoundedSemaphore, Lock, Thread
 from typing import Any, Callable
 
-from flask import Flask, jsonify, request, send_file, send_from_directory
+from flask import Flask, jsonify, request, send_file, send_from_directory, g
 from werkzeug.utils import secure_filename
 from openpyxl import load_workbook
 
@@ -30,17 +32,68 @@ DATA_RULES = ROOT / "rules" / "data-rules.md"
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(LOCAL_AI))
 
+from output_language import POLICY_VERSION, require_supported_text
+from lan_service import CURRENT_OWNER, install_lan, model_identity
+
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024
 ALLOWED_UPLOAD_SUFFIXES = {".xlsx", ".xlsm", ".csv"}
 AI_JOBS: dict[str, dict[str, Any]] = {}
 AI_JOBS_LOCK = Lock()
+install_lan(app, ROOT)
+PROJECT_WRITE_LOCKS: dict[tuple, Lock] = {}
+LAN_AI_SLOTS = BoundedSemaphore(8)
+
+
+@app.before_request
+def protect_lan_project_writes():
+    if not app.config.get("FACTORY_LAN") or not CURRENT_OWNER.get() or request.method in {"GET", "HEAD", "OPTIONS"}:
+        return None
+    if request.is_json:
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify(error="JSON body must be an object"), 400
+        if "instruction" in payload and (not isinstance(payload["instruction"], str) or len(payload["instruction"]) > 12000):
+            return jsonify(error="Instruction must be text of at most 12000 characters"), 400
+    name = (request.view_args or {}).get("name")
+    if name:
+        with AI_JOBS_LOCK:
+            if any(job.get("owner") == CURRENT_OWNER.get() and job["project"] == name and job["status"] == "running" for job in AI_JOBS.values()):
+                return jsonify(error="AI is working on this project. Wait before making changes."), 409
+            lock = PROJECT_WRITE_LOCKS.setdefault((CURRENT_OWNER.get(), name), Lock())
+        if not lock.acquire(blocking=False):
+            return jsonify(error="This project is busy. Please retry."), 409
+        g.project_write_lock = lock
+    if request.endpoint in {"api_suggest", "api_improve", "api_build"}:
+        if not LAN_AI_SLOTS.acquire(blocking=False):
+            return jsonify(error="AI capacity is full. Please retry later."), 429
+        g.lan_ai_slot = True
+
+
+@app.teardown_request
+def release_project_write_lock(_error):
+    if getattr(g, "lan_ai_slot", False):
+        LAN_AI_SLOTS.release()
+        del g.lan_ai_slot
+    lock = getattr(g, "project_write_lock", None)
+    if lock is not None:
+        lock.release()
+        del g.project_write_lock
+
+
+def projects_root() -> Path:
+    owner = CURRENT_OWNER.get()
+    if owner is None:
+        if app.config.get("FACTORY_LAN"):
+            raise ValueError("LAN project access requires authentication")
+        return PROJECTS
+    return Path(app.config["FACTORY_LAN_PROJECTS"]) / owner
 
 
 def project_dir(name: str) -> Path:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", name):
         raise ValueError("Project name must use letters, digits, hyphens, or underscores.")
-    return PROJECTS / name
+    return projects_root() / name
 
 
 def read_json(path: Path, fallback: Any) -> Any:
@@ -248,6 +301,45 @@ def project_config(name: str, profile: dict[str, Any]) -> dict[str, Any]:
     config["calculation_rules"]["student_id"] = {**defaults["calculation_rules"]["student_id"], **(config["calculation_rules"].get("student_id") or {})}
     config["calculation_rules"]["risk"] = {**defaults["calculation_rules"]["risk"], **(config["calculation_rules"].get("risk") or {})}
     return config
+
+
+def dashboard_requirement_template(profile: dict[str, Any], config: dict[str, Any]) -> str:
+    """Create a short, metadata-grounded starting brief without calling an AI model."""
+    fields = profile.get("fields", [])
+    excluded = re.compile(r"(^|[_\s])(id|email|e-mail|name|surname|document|number|code)([_\s]|$)|รหัส|อีเมล|ชื่อ|นามสกุล|เลข", re.IGNORECASE)
+    safe_categories = [
+        str(field["name"])
+        for field in fields
+        if field.get("role") == "category"
+        and 2 <= int(field.get("distinct") or 0) <= 50
+        and not str(field.get("name", "")).startswith("column_")
+        and not excluded.search(str(field.get("name", "")))
+    ]
+    measures = [str(field["name"]) for field in fields if field.get("role") == "measure"]
+    dates = [str(field["name"]) for field in fields if field.get("role") == "date"]
+    audience = str(config.get("audience") or "ผู้บริหารและผู้ปฏิบัติงาน")
+    lines = [
+        f"สร้าง Dashboard สรุปสำหรับ{audience} โดยใช้เฉพาะฟิลด์ที่มีอยู่ในชุดข้อมูลนี้",
+        "ห้ามแสดงชื่อ นามสกุล อีเมล รหัส เลขเอกสาร หรือข้อมูลระบุตัวบุคคลใน KPI กราฟ ตัวกรอง และตารางรายละเอียด",
+        "ให้มี KPI จำนวนรายการทั้งหมด",
+    ]
+    for measure in measures[:2]:
+        lines.append(f"เพิ่ม KPI ผลรวม {measure} โดยรวมเฉพาะค่าตัวเลข และไม่นับค่า '-' หรือค่าว่าง")
+    if dates:
+        lines.append(f"เพิ่มกราฟแนวโน้มจำนวนรายการตาม {dates[0]} เฉพาะค่าที่แปลงวันที่ได้")
+    for category in safe_categories[:3]:
+        is_high_cardinality = any(field.get("name") == category and int(field.get("distinct") or 0) > 10 for field in fields)
+        lines.append(f"เพิ่มกราฟแท่งเปรียบเทียบจำนวนรายการตาม {category}" + (" (แสดง 10 อันดับแรก)" if is_high_cardinality else ""))
+    filters = ([dates[0]] if dates else []) + safe_categories[:5]
+    if filters:
+        lines.append("เพิ่มตัวกรอง " + ", ".join(filters))
+    lines.extend([
+        "ให้เลือกตารางรายละเอียดเฉพาะฟิลด์ที่ไม่ใช่ข้อมูลระบุตัวบุคคล และใช้สำหรับตรวจสอบรายการเท่านั้น",
+        "ระบุข้อจำกัดของข้อมูล เช่น ค่าว่าง ค่า '-' และวันที่หรือค่าตัวเลขที่แปลงไม่ได้ต้องไม่ถูกรวมในการคำนวณ",
+    ])
+    if config.get("language") == "th":
+        lines.append("ใช้ป้ายกำกับภาษาไทย และแสดงปี พ.ศ. เมื่อฟิลด์วันที่รองรับ")
+    return "\n".join(lines)
 
 
 def validate_calculation_rules(value: Any) -> dict[str, Any]:
@@ -1134,7 +1226,9 @@ def analysis_bundle_schema() -> dict[str, Any]:
 
 
 def analysis_bundle_cache_key(profile: dict[str, Any], instruction: str, provider: str) -> str:
-    payload = {"profile_generated_at": profile.get("generated_at"), "instruction": instruction, "provider": provider}
+    payload = {"profile_generated_at": profile.get("generated_at"), "instruction": instruction, "provider": provider,
+               "language_policy": POLICY_VERSION,
+               "model": model_identity() or (os.getenv("LMSTUDIO_MODEL", "openai/gpt-oss-20b") if provider == "local" else os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"))}
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
 
@@ -1453,9 +1547,11 @@ def build_project(name: str) -> dict[str, Any]:
     config["calculation_rules"] = rules
     write_json(directory / "config.json", config)
     spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None) or suggest_spec(name)
+    require_supported_text(spec)
     records, _ = load_sources(directory / "input")
     # The bundle data contract includes the supported derived dimensions used by the spec.
     normalization_plan = get_normalization_plan(name, profile, records)
+    require_supported_text(normalization_plan)
     records, transformation_notices = prepare_analytical_records(records, profile, rules, normalization_plan)
     calculations = calculate_spec_results(records, spec, profile, rules)
     output = directory / "output"
@@ -1494,13 +1590,15 @@ def index():
 
 @app.get("/api/health")
 def health():
-    return jsonify({"service": "dashboard-factory", "status": "ok", "local_only": True})
+    return jsonify({"service": "dashboard-factory", "status": "ok", "local_only": not app.config.get("FACTORY_LAN"), "mode": "lan" if app.config.get("FACTORY_LAN") else "local"})
 
 
 @app.get("/api/projects")
 def list_projects():
     result = []
-    for directory in sorted(PROJECTS.iterdir()):
+    directory_root = projects_root()
+    directory_root.mkdir(parents=True, exist_ok=True)
+    for directory in sorted(directory_root.iterdir()):
         if not directory.is_dir() or directory.name.startswith("_"):
             continue
         spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", {})
@@ -1713,6 +1811,17 @@ def api_suggest(name: str):
         return jsonify({"error": str(exc)}), 400
 
 
+@app.post("/api/projects/<name>/requirement-template")
+def api_requirement_template(name: str):
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not profile:
+        return jsonify({"error": "Create a Data Profile before generating a requirement template."}), 400
+    return jsonify({"instruction": dashboard_requirement_template(profile, project_config(name, profile))})
+
+
 @app.post("/api/projects/<name>/suggest-jobs")
 def start_suggest_job(name: str):
     if not project_dir(name).exists():
@@ -1720,7 +1829,18 @@ def start_suggest_job(name: str):
     instruction = str((request.get_json(silent=True) or {}).get("instruction", ""))
     job_id = uuid4().hex
     with AI_JOBS_LOCK:
-        AI_JOBS[job_id] = {"project": name, "status": "running", "percent": 0, "stage": "กำลังเริ่มงาน AI", "result": None, "error": None}
+        owner = CURRENT_OWNER.get()
+        if app.config.get("FACTORY_LAN") and sum(job["status"] == "running" for job in AI_JOBS.values()) >= 8:
+            return jsonify({"error": "AI queue is busy. Please try again later."}), 429
+        if any(job.get("owner") == owner and job["project"] == name and job["status"] == "running" for job in AI_JOBS.values()):
+            return jsonify({"error": "AI is already working on this project."}), 409
+        if app.config.get("FACTORY_LAN") and not LAN_AI_SLOTS.acquire(blocking=False):
+            return jsonify({"error": "AI capacity is full. Please retry later."}), 429
+        # Keep recent progress without accumulating every completed spec indefinitely.
+        for old_id in list(AI_JOBS):
+            if len(AI_JOBS) > 100 and AI_JOBS[old_id]["status"] != "running":
+                del AI_JOBS[old_id]
+        AI_JOBS[job_id] = {"owner": owner, "project": name, "status": "running", "percent": 0, "stage": "กำลังเริ่มงาน AI", "result": None, "error": None}
 
     def update(percent: int, stage: str) -> None:
         with AI_JOBS_LOCK:
@@ -1735,8 +1855,12 @@ def start_suggest_job(name: str):
         except Exception as exc:
             with AI_JOBS_LOCK:
                 AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "สร้าง specification ไม่สำเร็จ"})
+        finally:
+            if app.config.get("FACTORY_LAN"):
+                LAN_AI_SLOTS.release()
 
-    Thread(target=run, name=f"factory-suggest-{job_id[:8]}", daemon=True).start()
+    context = copy_context()
+    Thread(target=lambda: context.run(run), name=f"factory-suggest-{job_id[:8]}", daemon=True).start()
     return jsonify({"job_id": job_id, "status": "running", "percent": 0}), 202
 
 
@@ -1744,7 +1868,7 @@ def start_suggest_job(name: str):
 def get_ai_job(job_id: str):
     with AI_JOBS_LOCK:
         job = AI_JOBS.get(job_id)
-        if not job:
+        if not job or job.get("owner") != CURRENT_OWNER.get():
             return jsonify({"error": "AI job not found or Factory was restarted."}), 404
         return jsonify(job)
 
@@ -1831,4 +1955,6 @@ def datalink_bundle(name: str):
 
 
 if __name__ == "__main__":
+    if app.config.get("FACTORY_LAN"):
+        raise SystemExit("Use lan/serve.py for LAN mode; the debug server is local-development only.")
     app.run(host="127.0.0.1", port=5050, debug=True)

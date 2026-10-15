@@ -1,0 +1,797 @@
+{
+  "project": "test1410",
+  "generated_at": "2026-10-15T03:32:44.803348+00:00",
+  "input_files": [
+    "DevWorkForce-1ba28918.xlsx"
+  ],
+  "records": 654,
+  "worksheets": [
+    {
+      "file": "DevWorkForce-1ba28918.xlsx",
+      "sheet": "DevWorkForce",
+      "rows": 528,
+      "columns": 33,
+      "fields": [
+        "ID",
+        "Email",
+        "Personnel Type",
+        "Work Group",
+        "Affiliation",
+        "NameTitle",
+        "Name",
+        "Surname",
+        "Position",
+        "TypeofDevelopment",
+        "Document number",
+        "Date Doc",
+        "Course/Activity/Project Name",
+        "Organizations projects",
+        "Location",
+        "Date Start Project",
+        "Date End Project",
+        "Time",
+        "Hour",
+        "NumberApproved",
+        "DateApproved",
+        "FiscalYear",
+        "DateReport",
+        "DateRecepitReport",
+        "Cost",
+        "DocNumberBudget",
+        "DateDocBudget",
+        "FundingSources",
+        "column_29",
+        "column_30",
+        "column_31",
+        "column_32",
+        "column_33"
+      ]
+    },
+    {
+      "file": "DevWorkForce-1ba28918.xlsx",
+      "sheet": "ชื่อ",
+      "rows": 126,
+      "columns": 12,
+      "fields": [
+        "อีเมล",
+        "คำนำหน้าชื่อ",
+        "ชื่อภาษาไทย",
+        "นามสกุลภาษาไทย",
+        "คำนำหน้าชื่อENG",
+        "ชื่อภาษาอังกฤษ",
+        "นามสกุลภาษาอังกฤษ",
+        "ตำแหน่งงาน",
+        "อีเมล 2",
+        "ประเภทบุคลากร",
+        "งานกลุ่ม",
+        "UserDepartment"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "name": "Affiliation",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 32,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "สาขาวิชาภาษาไทย",
+        "สาขาวิชาภาษาอังกฤษ",
+        "สาขาวิชาภาษาศาสตร์ประยุกต์ (หลักสูตรนานาชาติ)",
+        "สาขาวิชาการจัดการการท่องเที่ยวเชิงสุขภาพ ธรรมชาติ และวัฒนธรรม",
+        "สาขาวิชาภาษาจีน (หลักสูตรนานาชาติ)"
+      ]
+    },
+    {
+      "name": "Cost",
+      "type": "number",
+      "role": "measure",
+      "non_null": 528,
+      "distinct": 79,
+      "numeric_ratio": 0.998,
+      "examples": [
+        "500",
+        "2500",
+        "42000",
+        "95000",
+        "48000"
+      ]
+    },
+    {
+      "name": "Course/Activity/Project Name",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 184,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ประชุมวิชาการ มานุษยวิทยา 65",
+        "อบรมหลักสูตร \"AUN - QA Implementation and Gap Analysis vsrsion 4 รุ่นที่ 8 \"",
+        "โครงการพัฒนานักบริหารระดับกลาง มหาวิทยาลัยมหิดล รุ่นที่ 21 (MU-EDP#21)",
+        "โครงการฝึกอบรมเพื่อการเสริมสร้างผู้บริหารระดับสูง หลักสูตร Advanced Management Program (AMP) รุ่นที่ 5",
+        "นำเสนอผลงาน เรื่อง Laughter and Affective Common Ground : How to get acquainted with a stranger in Covid-19 conversations in Thai"
+      ]
+    },
+    {
+      "name": "Date Doc",
+      "type": "date",
+      "role": "date",
+      "non_null": 528,
+      "distinct": 135,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-06-27T00:00:00",
+        "2022-06-23T00:00:00",
+        "2022-09-22T00:00:00",
+        "2022-06-22T00:00:00",
+        "2022-10-11T00:00:00"
+      ]
+    },
+    {
+      "name": "Date End Project",
+      "type": "date",
+      "role": "date",
+      "non_null": 528,
+      "distinct": 171,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-07-20T00:00:00",
+        "2022-09-16T00:00:00",
+        "2022-09-15T00:00:00",
+        "2022-12-22T00:00:00",
+        "2023-02-04T00:00:00"
+      ]
+    },
+    {
+      "name": "Date Start Project",
+      "type": "date",
+      "role": "date",
+      "non_null": 528,
+      "distinct": 170,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-06-25T00:00:00",
+        "2022-09-15T00:00:00",
+        "2022-10-31T00:00:00",
+        "2022-10-17T00:00:00",
+        "2023-07-09T00:00:00"
+      ]
+    },
+    {
+      "name": "DateApproved",
+      "type": "date",
+      "role": "date",
+      "non_null": 522,
+      "distinct": 132,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-07-25T00:00:00",
+        "2022-11-07T00:00:00",
+        "2022-10-04T00:00:00",
+        "2022-10-17T00:00:00",
+        "2023-02-15T00:00:00"
+      ]
+    },
+    {
+      "name": "DateDocBudget",
+      "type": "date",
+      "role": "date",
+      "non_null": 527,
+      "distinct": 24,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "-",
+        "2022-10-05T00:00:00",
+        "2023-10-05T00:00:00",
+        "2023-10-12T00:00:00",
+        "2023-12-10T00:00:00"
+      ]
+    },
+    {
+      "name": "DateRecepitReport",
+      "type": "category",
+      "role": "category",
+      "non_null": 523,
+      "distinct": 32,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "-",
+        "2024-09-10T00:00:00",
+        "2023-05-09T00:00:00",
+        "2023-08-31T00:00:00",
+        "2024-07-08T00:00:00"
+      ]
+    },
+    {
+      "name": "DateReport",
+      "type": "category",
+      "role": "category",
+      "non_null": 523,
+      "distinct": 37,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "2022-08-01T00:00:00",
+        "-",
+        "2024-09-02T00:00:00",
+        "2023-05-01T00:00:00",
+        "2023-08-28T00:00:00"
+      ]
+    },
+    {
+      "name": "DocNumberBudget",
+      "type": "category",
+      "role": "category",
+      "non_null": 511,
+      "distinct": 18,
+      "numeric_ratio": 0.568,
+      "examples": [
+        "-",
+        "3500001923",
+        "3500001924",
+        "3500002131",
+        "3500002151"
+      ]
+    },
+    {
+      "name": "Document number",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 152,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "วธ.0700/ว.492",
+        "อว78.35/2398",
+        "อว.78/ว70014",
+        "อว78.32/1099",
+        "-"
+      ]
+    },
+    {
+      "name": "Email",
+      "type": "category",
+      "role": "category",
+      "non_null": 522,
+      "distinct": 115,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "yingyot.kac@mahidol.ac.th",
+        "panicha.nit@mahidol.ac.th",
+        "anchalee.pup@mahidol.ac.th",
+        "nathakarn.nan@mahidol.ac.th",
+        "salisa.vid@mahidol.ac.th"
+      ]
+    },
+    {
+      "name": "FiscalYear",
+      "type": "date",
+      "role": "date",
+      "non_null": 528,
+      "distinct": 6,
+      "numeric_ratio": 0.989,
+      "examples": [
+        "2565",
+        "2566",
+        "2567",
+        "2568",
+        "-"
+      ]
+    },
+    {
+      "name": "FundingSources",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 11,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ทุนอุดหนุนการพัฒนาคณาจารย์ ไปอบรม ประชุมทางวิชาการ หรือสัมมนาทางวิชาการ ในประเทศและต่างประเทศ ",
+        "คณะศิลปศาสตร์ มหาวิทยาลัยมหิดล",
+        "ทุนอุดหนุนบุคลากรไปนำเสนอผลงานทางวิชาการในประเทศและต่างประเทศ",
+        "-",
+        "ทุนฝึกอบรมของศูนย์ภาษาซีมีโอ เรลค์ (SEAMEO RELC) ประจำปีงบประมาณ 2567 (SEAMEO RELC Scholarship for C113: Advanced Specialist Certificate in Language Assessment)"
+      ]
+    },
+    {
+      "name": "Hour",
+      "type": "number",
+      "role": "measure",
+      "non_null": 526,
+      "distinct": 31,
+      "numeric_ratio": 0.903,
+      "examples": [
+        "-",
+        "6.5",
+        "7",
+        "6",
+        "3"
+      ]
+    },
+    {
+      "name": "ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 528,
+      "distinct": 528,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "Dev-WF-001",
+        "Dev-WF-002",
+        "Dev-WF-003",
+        "Dev-WF-004",
+        "Dev-WF-005"
+      ]
+    },
+    {
+      "name": "Location",
+      "type": "category",
+      "role": "category",
+      "non_null": 526,
+      "distinct": 159,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศูนย์มานุษยวิทยาสิรินธร กรุงเทพฯ",
+        "Zoom Meeting",
+        "รูปแบบผสมผสาน Online และ Onsite ณ ศูนย์ประชุมและอาคารจอดรถมหิดลสิทธาคาร มหิดลสิทธาคาร โรงแรมแคนทารี อยุธยา จังหวัดพระนครศรีอยุธยา และศึกษาดูงาน ณ มหาวิทยาลัยแม่ฟ้าหลวง และมูลนิธิแม่ฟ้าหลวง ในพระบรมราชูปถัมภ์ จังหวัดเชียงราย",
+        "วิทยาลัยการจัดการ มหาวิทยาลัยมหิดล ห้อง 603 ชั้น 6 อาคารมิว ถนนวิภาวดีรังสิต",
+        "Universite Libre de Bruxelles ประเทศ Belgium"
+      ]
+    },
+    {
+      "name": "Name",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 117,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ยิ่งยศ",
+        "ปณิชา",
+        "อัญชลี",
+        "ณัฐกาญจน์",
+        "ศฬิษา"
+      ]
+    },
+    {
+      "name": "NameTitle",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 14,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ผู้ช่วยศาสตราจารย์ ดร.",
+        "อาจารย์ ดร.",
+        "อาจารย์",
+        "Professor. Ph.D",
+        "ผู้ช่วยศาสตราจารย์"
+      ]
+    },
+    {
+      "name": "NumberApproved",
+      "type": "category",
+      "role": "category",
+      "non_null": 526,
+      "distinct": 152,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "อว 78.35/2776",
+        "อว 78.35/2638",
+        "อว 78.35/4046",
+        "อว 78.35/4208",
+        "อว 78.35/0776"
+      ]
+    },
+    {
+      "name": "Organizations projects",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 116,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ศูนย์มานุษยวิทยาสิรินธร",
+        "ทปว. ที่ประชุมอธิการบดีแห่งประเทศไทย",
+        "งานสร้างเสริมศักยภาพและพัฒนาทรัพยากรบุคคล \nกองทรัพยากรบุคคล",
+        "วิทยาลัยการจัดการ มหาวิทยาลัยมหิดล",
+        "18th International Pragmatics Conference"
+      ]
+    },
+    {
+      "name": "Personnel Type",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "สายวิชาการ",
+        "สายบริหาร",
+        "สายสนับสนุน"
+      ]
+    },
+    {
+      "name": "Position",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 44,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "อาจารย์",
+        "หัวหน้างานแผนและพัฒนาคุณภาพ",
+        "หัวหน้างานการศึกษาและนวัตกรรมการเรียนรู้",
+        "นักวิชาการศึกษา (ปฏิบัติหน้าที่เลขานุการคณบดี",
+        "นิติกรคณะศิลปศาสตร์"
+      ]
+    },
+    {
+      "name": "Surname",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 126,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "กันจินะ",
+        "นิติสกุลวุฒิ",
+        "ภู่ผะกา",
+        "นาคนวล",
+        "วิทยาศรัย"
+      ]
+    },
+    {
+      "name": "Time",
+      "type": "category",
+      "role": "category",
+      "non_null": 525,
+      "distinct": 34,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "-",
+        "09.00-16.30",
+        "09.00-17.00",
+        "09.00-16.00",
+        "09.00-12.00"
+      ]
+    },
+    {
+      "name": "TypeofDevelopment",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 4,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "อื่นๆ",
+        "การบริหาร",
+        "การเรียนการสอน",
+        "การวิจัย"
+      ]
+    },
+    {
+      "name": "UserDepartment",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 23,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "สาขาวิชาการจัดการการท่องเที่ยวเชิงสุขภาพ ธรรมชาติ และวัฒนธรรม",
+        "สาขาวิชาภาษาอังกฤษ",
+        "หมวดวิชาศึกษาทั่วไป",
+        "สาขาวิชาภาษาศาสตร์ประยุกต์ (นานาชาติ)",
+        "สาขาวิชาภาษาไทย"
+      ]
+    },
+    {
+      "name": "Work Group",
+      "type": "category",
+      "role": "category",
+      "non_null": 528,
+      "distinct": 11,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "หลักสูตรศิลปศาสตรบัณฑิต",
+        "หลักสูตรปรัชญาดุษฎีบัณฑิต",
+        "หลักสูตรศิลปศาสตรมหาบัณฑิต",
+        "งานแผนและพัฒนาคุณภาพ",
+        "งานการศึกษาและนวัตกรรมการเรียนรู้"
+      ]
+    },
+    {
+      "name": "column_29",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_30",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_31",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_32",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "column_33",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "คำนำหน้าชื่อ",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 11,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ผศ.ดร.",
+        "รศ.ดร.",
+        "อ.",
+        "อ.ดร.",
+        "ผศ."
+      ]
+    },
+    {
+      "name": "คำนำหน้าชื่อENG",
+      "type": "category",
+      "role": "category",
+      "non_null": 123,
+      "distinct": 9,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ASST. PROF.",
+        "ASSOC. PROF.",
+        "MISS",
+        "MR.",
+        "MRS."
+      ]
+    },
+    {
+      "name": "งานกลุ่ม",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 10,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "หลักสูตรศิลปศาสตรมหาบัณฑิต",
+        "หลักสูตรศิลปศาสตรบัณฑิต",
+        "หมวดวิชาศึกษาทั่วไป",
+        "งานบริหารและธุรการ",
+        "งานการศึกษาและนวัตกรรมการเรียนรู้"
+      ]
+    },
+    {
+      "name": "ชื่อภาษาอังกฤษ",
+      "type": "category",
+      "role": "category",
+      "non_null": 123,
+      "distinct": 123,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "WEERANAN",
+        "THANAYUS",
+        "PHIKULKARN",
+        "URAIPORN",
+        "CHANTARATH"
+      ]
+    },
+    {
+      "name": "ชื่อภาษาไทย",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 126,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "วีรานันท์",
+        "ธนายุส",
+        "พิกุลกานต์",
+        "อุไรพร",
+        "ฉันฐรัช"
+      ]
+    },
+    {
+      "name": "ตำแหน่งงาน",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 24,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "อาจารย์",
+        "พนักงานสถานที่",
+        "พนักงานทั่วไป",
+        "พนักงานขับรถยนตร์",
+        "ผู้ปฏิบัติบริหาร"
+      ]
+    },
+    {
+      "name": "นามสกุลภาษาอังกฤษ",
+      "type": "category",
+      "role": "category",
+      "non_null": 123,
+      "distinct": 122,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "DAMRONGSAKUL",
+        "THANATHITI",
+        "RUCHIRABHA",
+        "WETSORANASUTEE",
+        "HONGBOONTRI"
+      ]
+    },
+    {
+      "name": "นามสกุลภาษาไทย",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 124,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ดำรงสกุล",
+        "ธนธิติ",
+        "รุจิราภา",
+        "เวทสรณสุธี",
+        "หงษ์บุญไตร"
+      ]
+    },
+    {
+      "name": "ประเภทบุคลากร",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 6,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "พนักงานมหาวิทยาลัย",
+        "ข้าราชการ",
+        "ลูกจ้างเงินรายได้",
+        "พนักงานส่วนงาน",
+        "ลูกจ้างเงินงบประมาณ"
+      ]
+    },
+    {
+      "name": "อีเมล",
+      "type": "category",
+      "role": "category",
+      "non_null": 126,
+      "distinct": 126,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "weeranan.dar@mahidol.edu",
+        "thanayus.tha@mahidol.edu",
+        "phikulkarn.ruc@mahidol.edu",
+        "uraiporn.weo@mahidol.edu",
+        "chantarath.hon@mahidol.edu"
+      ]
+    },
+    {
+      "name": "อีเมล 2",
+      "type": "category",
+      "role": "category",
+      "non_null": 121,
+      "distinct": 121,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "weeranan.dar@mahidol.ac.th",
+        "thanayus.tha@mahidol.ac.th",
+        "phikulkarn.ruc@mahidol.ac.th",
+        "uraiporn.weo@mahidol.ac.th",
+        "chantarath.hon@mahidol.ac.th"
+      ]
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 0,
+    "missing_values": {
+      "Affiliation": 126,
+      "Cost": 126,
+      "Course/Activity/Project Name": 126,
+      "Date Doc": 126,
+      "Date End Project": 126,
+      "Date Start Project": 126,
+      "DateApproved": 132,
+      "DateDocBudget": 127,
+      "DateRecepitReport": 131,
+      "DateReport": 131,
+      "DocNumberBudget": 143,
+      "Document number": 126,
+      "Email": 132,
+      "FiscalYear": 126,
+      "FundingSources": 126,
+      "Hour": 128,
+      "ID": 126,
+      "Location": 128,
+      "Name": 126,
+      "NameTitle": 126,
+      "NumberApproved": 128,
+      "Organizations projects": 126,
+      "Personnel Type": 126,
+      "Position": 126,
+      "Surname": 126,
+      "Time": 129,
+      "TypeofDevelopment": 126,
+      "UserDepartment": 528,
+      "Work Group": 126,
+      "column_29": 654,
+      "column_30": 654,
+      "column_31": 654,
+      "column_32": 654,
+      "column_33": 654,
+      "คำนำหน้าชื่อ": 528,
+      "คำนำหน้าชื่อENG": 531,
+      "งานกลุ่ม": 528,
+      "ชื่อภาษาอังกฤษ": 531,
+      "ชื่อภาษาไทย": 528,
+      "ตำแหน่งงาน": 528,
+      "นามสกุลภาษาอังกฤษ": 531,
+      "นามสกุลภาษาไทย": 528,
+      "ประเภทบุคลากร": 528,
+      "อีเมล": 528,
+      "อีเมล 2": 533
+    },
+    "date_parsing": {
+      "Date Doc": {
+        "parsed": 505,
+        "unparsed": 23,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Date End Project": {
+        "parsed": 520,
+        "unparsed": 8,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Date Start Project": {
+        "parsed": 520,
+        "unparsed": 8,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "DateApproved": {
+        "parsed": 502,
+        "unparsed": 20,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "DateDocBudget": {
+        "parsed": 290,
+        "unparsed": 237,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "FiscalYear": {
+        "parsed": 522,
+        "unparsed": 6,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

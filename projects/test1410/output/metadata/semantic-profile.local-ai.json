@@ -1,0 +1,65 @@
+{
+  "generated_by": "local-ai",
+  "source": "metadata_only",
+  "profile_generated_at": "2026-10-15T03:32:44.803348+00:00",
+  "dataset_summary": "ข้อมูลผู้วิจัยและพนักงาน",
+  "warnings": [
+    "ไม่แสดงชื่อ นามสกุล อีเมล เลขเอกสาร หรือข้อมูลส่วนบุคคลอื่น ๆ ใน KPI, กราฟ และตารางรายละเอียด"
+  ],
+  "field_interpretations": [
+    {
+      "field": "Cost",
+      "semantic_type": "currency",
+      "unit": "บาท",
+      "aggregation_guidance": "sum_when_additive",
+      "business_role": "ผลรวมค่าใช้จ่ายของโครงการทั้งหมด",
+      "confidence": 1.0,
+      "limitations": "ไม่รวมค่าที่เป็น '-' หรือว่าง"
+    },
+    {
+      "field": "Hour",
+      "semantic_type": "quantity",
+      "unit": "ชั่วโมง",
+      "aggregation_guidance": "sum_when_additive",
+      "business_role": "ผลรวมเวลาที่ใช้ในโครงการทั้งหมด",
+      "confidence": 1.0,
+      "limitations": "ไม่รวมค่าที่เป็น '-' หรือว่าง"
+    },
+    {
+      "field": "Date Doc",
+      "semantic_type": "date",
+      "unit": "วัน/เดือน/ปี (BE)",
+      "aggregation_guidance": "group_only",
+      "business_role": "วันที่เริ่มโครงการ",
+      "confidence": 1.0,
+      "limitations": "ใช้รูปแบบ YYYY-MM-DD"
+    },
+    {
+      "field": "Affiliation",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "หน่วยงานหรือสาขาวิจัย",
+      "confidence": 1.0,
+      "limitations": ""
+    },
+    {
+      "field": "DateRecepitReport",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "วันที่รับรายงาน",
+      "confidence": 1.0,
+      "limitations": ""
+    },
+    {
+      "field": "DateReport",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "group_only",
+      "business_role": "วันที่รายงาน",
+      "confidence": 1.0,
+      "limitations": ""
+    }
+  ]
+}

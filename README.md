@@ -2,6 +2,12 @@
 
 Multi-project AI dashboard automation for VS Code + GitHub Copilot Agent.
 
+## เริ่มใช้งานบนเครื่องตัวเอง
+
+สำหรับผู้ใช้ที่ดาวน์โหลดจาก Git แล้วต้องการใช้เว็บ Factory กับ LM Studio
+บนเครื่องของตัวเอง อ่าน [คู่มือติดตั้งแบบง่ายภาษาไทย](docs/local-quickstart-th.md)
+มีขั้นตอนติดตั้งครั้งแรก การเปิดใช้ครั้งถัดไป และคำแนะนำสำหรับเครื่อง RAM 16 GB
+
 ## เปิดใช้ระบบ
 
 ### Local AI (LM Studio)

@@ -1,0 +1,116 @@
+{
+  "dashboard_title": "ภาพรวมการดำเนินงาน",
+  "purpose": "สรุปข้อมูลสำหรับผู้บริหารและผู้ปฏิบัติงานจากชุดข้อมูลที่มีอยู่",
+  "audience": "ผู้บริหารและผู้ปฏิบัติงาน",
+  "kpis": [
+    {
+      "name": "จำนวนรายการทั้งหมด",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*)",
+      "source_fields": [],
+      "limitations": "นับรายการทั้งหมด 654 รายการตาม spec เดิม",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "ผลรวม Cost",
+      "metric": "Cost",
+      "aggregation": "sum",
+      "formula": "SUM(Cost) WHERE Cost != '-' AND Cost IS NOT NULL",
+      "source_fields": [
+        "Cost"
+      ],
+      "limitations": "ไม่นับค่า '-' และค่าว่าง หน่วยสกุลเงินต้องตรวจสอบกับข้อมูลต้นทาง",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "ผลรวม Hour",
+      "metric": "Hour",
+      "aggregation": "sum",
+      "formula": "SUM(Hour) WHERE Hour != '-' AND Hour IS NOT NULL",
+      "source_fields": [
+        "Hour"
+      ],
+      "limitations": "ไม่นับค่า '-' และค่าว่าง หน่วยเป็นชั่วโมงตาม spec เดิม",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "Date Doc",
+    "Affiliation",
+    "DateRecepitReport",
+    "DateReport",
+    "DocNumberBudget",
+    "FundingSources"
+  ],
+  "charts": [
+    {
+      "title": "แนวโน้มจำนวนรายการตาม Date Doc",
+      "type": "line",
+      "dimension": "Date Doc",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) GROUP BY Date Doc",
+      "source_fields": [
+        "Date Doc"
+      ],
+      "limitations": "ตาม spec เดิม มีวันที่ที่แปลงได้ 505 ค่า และค่า '-' 23 รายการ โปรดตรวจสอบกับรายงาน QA",
+      "target": {
+        "value": 654,
+        "label": "Total Records",
+        "year_be": 2569
+      }
+    },
+    {
+      "title": "จำนวนรายการตาม Affiliation (10 อันดับแรก)",
+      "type": "bar",
+      "dimension": "Affiliation",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) GROUP BY Affiliation LIMIT 10",
+      "source_fields": [
+        "Affiliation"
+      ],
+      "limitations": "แสดง 10 อันดับแรก"
+    },
+    {
+      "title": "จำนวนรายการตาม DateRecepitReport (10 อันดับแรก)",
+      "type": "bar",
+      "dimension": "DateRecepitReport",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) GROUP BY DateRecepitReport LIMIT 10",
+      "source_fields": [
+        "DateRecepitReport"
+      ],
+      "limitations": "แสดง 10 อันดับแรก"
+    },
+    {
+      "title": "จำนวนรายการตาม DateReport (10 อันดับแรก)",
+      "type": "bar",
+      "dimension": "DateReport",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) GROUP BY DateReport LIMIT 10",
+      "source_fields": [
+        "DateReport"
+      ],
+      "limitations": "แสดง 10 อันดับแรก"
+    }
+  ],
+  "insight_questions": [
+    "What is the total number of records?",
+    "What is the total Cost and Hour?"
+  ],
+  "generated_by": "local-ai",
+  "last_instruction": "สร้าง Dashboard สรุปสำหรับผู้บริหารและผู้ปฏิบัติงาน โดยใช้เฉพาะฟิลด์ที่มีอยู่ในชุดข้อมูลนี้\nห้ามแสดงชื่อ นามสกุล อีเมล รหัส เลขเอกสาร หรือข้อมูลระบุตัวบุคคลใน KPI กราฟ ตัวกรอง และตารางรายละเอียด\nให้มี KPI จำนวนรายการทั้งหมด\nเพิ่ม KPI ผลรวม Cost โดยรวมเฉพาะค่าตัวเลข และไม่นับค่า '-' หรือค่าว่าง\nเพิ่ม KPI ผลรวม Hour โดยรวมเฉพาะค่าตัวเลข และไม่นับค่า '-' หรือค่าว่าง\nเพิ่มกราฟแนวโน้มจำนวนรายการตาม Date Doc เฉพาะค่าที่แปลงวันที่ได้\nเพิ่มกราฟแท่งเปรียบเทียบจำนวนรายการตาม Affiliation (แสดง 10 อันดับแรก)\nเพิ่มกราฟแท่งเปรียบเทียบจำนวนรายการตาม DateRecepitReport (แสดง 10 อันดับแรก)\nเพิ่มกราฟแท่งเปรียบเทียบจำนวนรายการตาม DateReport (แสดง 10 อันดับแรก)\nเพิ่มตัวกรอง Date Doc, Affiliation, DateRecepitReport, DateReport, DocNumberBudget, FundingSources\nให้เลือกตารางรายละเอียดเฉพาะฟิลด์ที่ไม่ใช่ข้อมูลระบุตัวบุคคล และใช้สำหรับตรวจสอบรายการเท่านั้น\nระบุข้อจำกัดของข้อมูล เช่น ค่าว่าง ค่า '-' และวันที่หรือค่าตัวเลขที่แปลงไม่ได้ต้องไม่ถูกรวมในการคำนวณ\nใช้ป้ายกำกับภาษาไทย และแสดงปี พ.ศ. เมื่อฟิลด์วันที่รองรับ"
+}

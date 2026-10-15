@@ -3,6 +3,7 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -15,6 +16,30 @@ SPEC.loader.exec_module(factory_app)
 
 
 class AnalysisBundleTests(unittest.TestCase):
+    def test_model_switch_invalidates_analysis_cache(self):
+        profile = {"generated_at": "2026-10-15T00:00:00Z"}
+        with patch.dict("os.environ", {"LMSTUDIO_MODEL": "model-a"}):
+            first = factory_app.analysis_bundle_cache_key(profile, "same request", "local")
+        with patch.dict("os.environ", {"LMSTUDIO_MODEL": "model-b"}):
+            second = factory_app.analysis_bundle_cache_key(profile, "same request", "local")
+        self.assertNotEqual(first, second)
+
+    def test_requirement_template_uses_only_safe_profile_fields(self):
+        profile = {
+            "fields": [
+                {"name": "Email", "role": "category", "distinct": 12},
+                {"name": "Department", "role": "category", "distinct": 4},
+                {"name": "FiscalYear", "role": "date", "distinct": 3},
+                {"name": "Cost", "role": "measure", "distinct": 8},
+            ]
+        }
+        instruction = factory_app.dashboard_requirement_template(profile, {"audience": "management", "language": "th"})
+
+        self.assertIn("Cost", instruction)
+        self.assertIn("Department", instruction)
+        self.assertIn("FiscalYear", instruction)
+        self.assertNotIn("ตาม Email", instruction)
+
     def test_analysis_bundle_is_ai_generated_and_cached(self):
         calls = []
 
