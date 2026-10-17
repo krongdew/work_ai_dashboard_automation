@@ -1,4 +1,0 @@
-{
-  "instruction": "I would like this dashboard to display the total number of students; a breakdown of students by faculty/major (shown as a pie chart); a year-by-year comparison of student numbers; the number of student withdrawals (categorized by month, year, and faculty/major); a breakdown of reasons for withdrawal; the graduation rate based on a four-year cycle (with student year levels calculated from the first two digits of the student ID—e.g., \"66\" indicates the intake year); and the ratio of students who graduated versus those who did not.",
-  "timestamp": "2026-09-22T12:03:48.597594+00:00"
-}

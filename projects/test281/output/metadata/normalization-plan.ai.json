@@ -1,9 +1,0 @@
-{
-  "generated_by": "groq-ai",
-  "profile_generated_at": "2026-09-28T08:51:48.855093+00:00",
-  "mappings": [],
-  "warnings": [
-    "No fields provided for mapping; nothing to normalize.",
-    "No date fields detected; ensure any future date outputs are converted to Buddhist Era (BE) years (e.g., 2026 AD → 2569 BE)."
-  ]
-}

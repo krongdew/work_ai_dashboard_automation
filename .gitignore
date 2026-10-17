@@ -1,6 +1,10 @@
 .DS_Store
 .env
-projects/*/input/*
+# project data = real uploads/outputs, never commit
+projects/*
+!projects/README.md
+!projects/_template/
+!projects/_template/**
 
 .env
 .venv/
