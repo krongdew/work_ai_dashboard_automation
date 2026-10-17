@@ -1,185 +1,143 @@
 # Dashboard Factory
 
-Multi-project AI dashboard automation for VS Code + GitHub Copilot Agent.
+ระบบสร้าง **Dashboard อัตโนมัติจากไฟล์ Excel/CSV** สำหรับหน่วยงานที่บุคลากร
+ไม่จำเป็นต้องมีทักษะด้านข้อมูล — แค่ **อัปโหลดไฟล์** ระบบจะทำความสะอาดข้อมูล
+ที่ยุ่งเหยิงให้กลายเป็น master data ที่ถูกต้อง แล้ววางแผนและสร้าง dashboard
+ที่คำนวณตัวเลขด้วย Python ทั้งหมด พร้อมตรวจ QA ก่อนนำไปใช้
 
-## เริ่มใช้งานบนเครื่องตัวเอง
+หลักการสำคัญ: **AI วางแผนเท่านั้น — Python คำนวณตัวเลขทุกตัว** ตัวเลขบน dashboard
+จึงตรวจสอบย้อนกลับได้ ไม่ได้มาจากการเดาของโมเดล
 
-สำหรับผู้ใช้ที่ดาวน์โหลดจาก Git แล้วต้องการใช้เว็บ Factory กับ LM Studio
-บนเครื่องของตัวเอง อ่าน [คู่มือติดตั้งแบบง่ายภาษาไทย](docs/local-quickstart-th.md)
-มีขั้นตอนติดตั้งครั้งแรก การเปิดใช้ครั้งถัดไป และคำแนะนำสำหรับเครื่อง RAM 16 GB
+---
 
-## เปิดใช้ระบบ
+## ระบบทำอะไร (ภาพรวม)
 
-### Local AI (LM Studio)
-
-Dashboard specification generator ใช้ LM Studio ผ่าน OpenAI-compatible local
-server ได้โดยไม่ต้องใช้ Groq API key หรือส่ง metadata ออกนอกเครื่อง
-
-1. ใน LM Studio โหลด `Qwen/Qwen3-8B-GGUF` แบบ `Q4_K_M` แล้วไปที่
-	**Developer > Start Server** โดยใช้พอร์ต `1234`.
-2. สร้าง `data_factory/.env` จาก `local-ai/.env.example` แล้วตั้งค่า
-	`AI_PROVIDER=local` และ `LMSTUDIO_MODEL` ให้ตรงกับชื่อที่หน้า
-	**Developer > Models** แสดง.
-3. ติดตั้ง dependency และทดสอบการเชื่อมต่อ:
-
-```powershell
-Set-Location D:\pactices\MULA_DataLink_php\data_factory
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r local-ai\requirements.txt
-python local-ai\test_lmstudio.py
+```
+อัปโหลดไฟล์เละ ──► ทำความสะอาด ──► Profile ──► AI วางแผน ──► Python คำนวณ+QA ──► ดู/แก้/ส่งออก
+  (Excel/CSV)      (ต้นน้ำ)        (ไม่ใช้ AI)   (metadata)   (source of truth)    (dashboard)
 ```
 
-เมื่อผลทดสอบแสดง `Local AI response received` ให้สร้าง specification ได้ดังนี้:
+| ขั้น | ทำอะไร | ใช้ AI? |
+|---|---|---|
+| **1. Upload** | รับไฟล์ Excel/CSV เข้า project | — |
+| **2. ทำความสะอาด (ต้นน้ำ)** | forward-fill merge cell, รวม header หลายชั้น, กรอง total row, ตัด junk column, ล้าง Excel error (`#REF!`), trim ช่องว่าง — อัตโนมัติทุกไฟล์ | — |
+| **3. Profile** | หา header จริง, แยก field role (measure/date/category/identifier), ตรวจ null/distinct/duplicate, แปลงวันเป็น พ.ศ. | ไม่ใช้ (deterministic) + AI เสริมตั้งชื่อคอลัมน์กำกวม |
+| **4. AI Plan** | วางแผน KPI / charts / filters จาก **metadata เท่านั้น** (allowlist ของ field) | ✅ |
+| **5. Python + QA** | คำนวณ KPI/กราฟจริงด้วย Python, ตรวจ QA 7 ด้าน, สร้าง `dashboard/index.html` | ไม่ใช้ (source of truth) |
+| **6. View / Export** | ดู dashboard, สั่งแก้แผนเป็นภาษาไทย (Improve), ดาวน์โหลด DataLink Bundle | ✅ (เฉพาะตอนแก้แผน) |
 
-```powershell
-python local-ai\generate_dashboard_spec.py `
-  --profile projects\CASS\output\metadata\dataset-profile.json `
-  --output projects\CASS\output\metadata\dashboard-spec.local-ai.json
-```
+**ความเป็นส่วนตัว:** ส่งให้ AI เฉพาะ metadata ที่ลดข้อมูลแล้ว (ชื่อ field, ชนิด,
+บทบาท) — **ไม่ส่ง raw records, ไฟล์ต้นฉบับ, ค่า PII หรือ identifier** ขึ้น cloud
+การคำนวณ การสร้าง dashboard และ QA ทำในเครื่องทั้งหมด
 
-ไม่จำเป็นต้องกำหนด `GROQ_API_KEY` เมื่อใช้ workflow นี้. รักษา `.env` ไว้นอก Git
-และตรวจผลลัพธ์ `.local-ai.json` กับข้อมูลจริงก่อนนำไปใช้.
+---
 
-เมื่อสร้าง spec ผ่าน Factory UI ระบบจะสร้าง
-`semantic-profile.local-ai.json` เพิ่มจาก `dataset-profile.json` ด้วย AI ใช้เฉพาะ
-metadata ที่ลดข้อมูลแล้วเพื่อเสนอความหมายของคอลัมน์ หน่วย และแนวทาง aggregation;
-ผลนี้เป็นคำแนะนำและต้องผ่าน data rules กับการตรวจ field ของระบบก่อนใช้สร้าง KPI
-หรือกราฟ เมื่อ Data Profile เปลี่ยน ระบบจะสร้าง Semantic Profile ใหม่อัตโนมัติ.
+## หน้าจอผู้ใช้ (2 โหมด)
 
-การสร้างและแก้ไข dashboard ใช้ AI workflow เดียวกันทั้ง Local AI และ Groq: AI ขอ
-ผล aggregate แบบจำกัดจากเครื่อง, Python คำนวณจากข้อมูลจริง, แล้ว AI ใช้ผลนั้นสร้าง
-หรือแก้ specification. ตั้งค่าปีการศึกษา รูปแบบรหัสนักศึกษา GPAX risk และคำสั่ง
-การคำนวณต่อ project ได้จากหน้าจอ **กฎการคำนวณ**. ดูโครงสร้าง, วิธีแก้ dashboard,
-และแผนการพัฒนาต่อที่ [AI Calculation Workflow](docs/ai-calculation-workflow.md).
+หลัง login (Google OAuth) ผู้ใช้สลับได้ 2 โหมดในเว็บเดียวกัน:
 
-หน้าจอ **Metric Rule Library** มี template สำหรับอัตราสำเร็จการศึกษา กำไร
-อัตราส่วน และสัดส่วนหมวดหมู่. ต้องระบุ field mapping, บันทึกเป็น draft และให้ผู้
-ตรวจสอบอนุมัติก่อน; ระบบใช้เฉพาะกฎที่ approved และเก็บ snapshot version ไว้ใน
-`output/metadata/calculation-rule-versions/` ของ project.
+- **หน้าปกติ** — React SPA (Ant Design): สร้าง Dashboard, Dashboard ทั้งหมด,
+  จัดการระบบ, คู่มือ
+- **เมือง Workflow 3D** — ฉาก Three.js แบบ interactive แสดง workflow เป็นเมือง
+  โรงงานการ์ตูน 6 อาคาร (Login → Upload → Profile → AI Plan → Python+QA →
+  View/Export) พร้อมตัวละคร "Factory Buddies" เดินส่งงานระหว่างบ้าน และวงรอบ
+  **Improve** (6→4→5→6) ที่ผ่านขั้นคำนวณ+QA เสมอ
 
-ก่อนสร้าง dashboard ระบบสร้าง analytical copy โดยไม่แก้ไฟล์ต้นฉบับ และใช้ AI เสนอ
-mapping สำหรับ category/date value ที่ซ้ำกันอย่างชัดเจน เช่น `ช` -> `ชาย`. Mapping
-ที่ไม่แน่ใจจะเป็น Notice ใน QA แทนการปรับข้อมูลเอง; สรุปปี วันที่ และตัวกรองบน
-dashboard แสดงเป็น พ.ศ. เสมอ.
+---
 
-### สลับ Local AI และ Groq
+## AI แบบ Hybrid (Local / Groq)
 
-กำหนด provider ที่ `data_factory/.env` แล้ว restart Factory UI ทุกครั้งที่เปลี่ยนค่า:
+รองรับทั้งโมเดลในเครื่องและคลาวด์ สลับได้ที่ `.env`:
+
+- **Local (LM Studio)** — รันผ่าน OpenAI-compatible server ในเครื่อง ไม่ต้องใช้ API
+  key ไม่ต้องต่อเน็ต เหมาะกับข้อมูลที่ต้องอยู่ในองค์กร
+- **Groq Cloud** — เร็ว เหมาะกับงานวางแผนที่ต้องการโมเดลใหญ่ (`openai/gpt-oss-120b`,
+  fallback `llama-3.3-70b-versatile`)
 
 ```dotenv
-# ใช้โมเดลใน LM Studio
+# ใช้โมเดลในเครื่อง (LM Studio)
 AI_PROVIDER=local
+LMSTUDIO_MODEL=qwen2.5-3b-instruct-mlx
 
 # หรือใช้ Groq
 AI_PROVIDER=groq
 GROQ_API_KEY=your_groq_key
 ```
 
-ค่าอื่นของทั้งสอง provider เก็บไว้ใน `.env` เดียวกันได้; ระบบจะอ่านเฉพาะค่าของ
-provider ที่เลือก และจะบันทึก `generated_by` ใน dashboard specification เป็น
-`local-ai` หรือ `groq-ai` เพื่อบอกแหล่งที่สร้างผลลัพธ์.
+ระบบจะบันทึก `generated_by` ใน spec เป็น `local-ai` หรือ `groq-ai` เพื่อบอกแหล่งที่มา
+เมื่อต้นน้ำสะอาดดีพอ โมเดล local ขนาดเล็กก็วางแผน dashboard ได้โดยไม่ต้องพึ่งคลาวด์
 
-### Groq API
+---
 
-1. สร้าง Groq API key แล้วกำหนด `GROQ_API_KEY`, `GROQ_MODEL=openai/gpt-oss-120b` และ `GROQ_FALLBACK_MODEL=llama-3.3-70b-versatile` ใน environment หรือ `.env` ที่ไม่ commit.
-2. ติดตั้ง Python 3.11+ และเลือกตัวเลือก **Add Python to PATH** ระหว่างติดตั้ง. เปิด Terminal ที่โฟลเดอร์ repository, สร้าง virtual environment และติดตั้ง dependencies:
+## ติดตั้งและรัน
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python factory-ui/app.py
-```
-
-บน macOS หรือ Linux ใช้:
+ต้องมี **Python 3.11+** และ (ถ้าจะแก้ frontend) **Node.js 20+**
 
 ```bash
+# 1) backend
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate          # Windows: .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+
+# 2) สร้าง .env จากตัวอย่าง แล้วตั้งค่า AI_PROVIDER
+cp local-ai/.env.example .env      # หรือสร้างเองตามหัวข้อ Hybrid ด้านบน
+
+# 3) (ถ้าใช้ local) ติดตั้ง dependency ฝั่ง local-ai แล้วทดสอบ LM Studio
+python -m pip install -r local-ai/requirements.txt
+python local-ai/test_lmstudio.py
+
+# 4) รัน Factory
 python factory-ui/app.py
-
-deactivate
-Set-Location D:\pactices\MULA_DataLink_php\data_factory
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python factory-ui\app.py
 ```
 
-3. เปิด `http://127.0.0.1:5050` แล้วสร้างหรือเลือก project, อัปโหลดข้อมูล,
-	กด Profile, Groq AI Suggest/Improve และ Build Dashboard ตามลำดับ.
+เปิด **http://127.0.0.1:5050** → login → สร้าง/เลือก project → อัปโหลดไฟล์ →
+ตรวจโครงสร้าง (Profile) → สร้าง Dashboard → ดูผล / Improve / Export
 
-ระบบสร้างหรือปรับ dashboard spec ผ่าน **Groq API** โดยค่าเริ่มต้นใช้ `openai/gpt-oss-120b` และ fallback เป็น `llama-3.3-70b-versatile`.
-ระบบส่งเฉพาะ metadata ที่ลดข้อมูลแล้ว: ไม่ส่ง source files, raw records, example values,
-identifier หรือ field PII. การคำนวณ KPI, การสร้าง dashboard และ QA ทำในเครื่องทั้งหมด.
-API key อยู่ใน environment หรือ `.env` เท่านั้น และห้าม commit ลง repository.
+### แก้ไข frontend (ถ้าต้องการ)
 
-Workflow:
-1. Create or select a project.
-2. Put Excel/CSV files into `projects/<project>/input/`.
-3. Put optional `config.json` and `dashboard-request.md` in the project folder.
-4. Ask Copilot Agent to run the dashboard automation.
-5. Final dashboard is written to `projects/<project>/output/dashboard/`.
-
-Do not put sensitive raw data into a public repository.
-
-สร้าง dashboard ใหม่จาก projects/sales/input/sales.xlsx
-ใช้ dashboard-automation skill
-วิเคราะห์ข้อมูล ออกแบบ dashboard สร้าง dashboard และทำ QA ให้ครบ
-
-อัปเดต dashboard sales จากข้อมูลใหม่ใน projects/sales/input
-วิเคราะห์ข้อมูลใหม่ สร้าง dashboard ใหม่ และตรวจสอบ KPI
-
-คำสั่งที่ใช้บ่อย
-ดู Dashboard ทั้งหมด
-แสดง dashboard ทั้งหมดใน projects
-สร้างใหม่
-สร้าง dashboard ใหม่จากไฟล์นี้
-วิเคราะห์
-วิเคราะห์ข้อมูลของ dashboard sales
-อัปเดต
-อัปเดต dashboard sales จากข้อมูลใหม่
-ตรวจสอบ
-ตรวจสอบ dashboard sales และทำ QA
-เตรียม Publish
-เตรียม dashboard sales สำหรับ publish
-
-
-อัปเดต dashboard CASS จากข้อมูลใหม่ใน projects/CASS/input
-วิเคราะห์ข้อมูลใหม่ สร้าง dashboard ใหม่ และตรวจสอบ KPI
-
-## อัปเดต CASS รอบถัดไป
-
-1. วางไฟล์ Excel หรือ CSV ใหม่ใน `projects/CASS/input/` โดยไม่แก้ไฟล์เก่า
-	หากต้องการให้ข้อมูลใหม่แทนชุดเดิม ให้ย้ายไฟล์เดิมออกจากโฟลเดอร์ก่อน
-	สำหรับ Tab 1 และ Tab 3 ให้ใช้ไฟล์ทะเบียนคุมงบประมาณของแต่ละปี; ระบบคำนวณกำไรเป็น `รายรับ - ค่าใช้จ่ายรวม` จากแต่ละรายการ
-2. สั่ง Copilot Agent ด้วยข้อความนี้:
-
-```text
-ใช้ dashboard-automation skill
-อัปเดต dashboard CASS จากข้อมูลใหม่ใน projects/CASS/input
-วิเคราะห์ข้อมูลใหม่ สร้าง dashboard ใหม่ และตรวจสอบ KPI ให้ครบ
-```
-
-3. ตรวจสถานะใน `projects/CASS/output/qa/qa-report.json`
-	หากมี critical error จะเป็น `NOT READY` และไม่ควรใช้ตัวเลขตัดสินใจ
-	จนกว่าจะตรวจสอบข้อมูลต้นทาง
-4. รันคำสั่งนี้เพื่อสร้าง DataLink Bundle และ Publish Package ของ HTML output เดิม:
-
-```powershell
-python projects\CASS\working\create_datalink_bundle.py
-```
-
-5. ใน DataLink Dashboard Library ให้นำเข้า `projects/CASS/output/CASS-DataLink-Bundle.zip`, อนุมัติ Dataset และอนุมัติ Dashboard version ใหม่ก่อนเปิดใช้งาน. Bundle มี HTML output เดิมอยู่แล้ว จึงแสดง tab, chart, filter และธีม CASS ครบโดยไม่ต้องนำเข้า Publish Package เพิ่ม.
-6. เมื่อผลลัพธ์พร้อมเผยแพร่ ให้ push dashboard ที่สร้างใหม่:
+React SPA + เมือง 3D อยู่ที่ `factory-ui-react/` build ลงที่ Flask static dir:
 
 ```bash
-git add projects/CASS
-git commit -m "Update CASS dashboard data"
-git push
+cd factory-ui-react
+npm install
+npm run build        # -> factory-ui/static/dist/  (Flask เสิร์ฟให้อัตโนมัติ)
+npm run dev          # โหมดพัฒนา (proxy ไป :5050)
 ```
 
-GitHub Pages จะ deploy อัตโนมัติหลัง push ไฟล์ dashboard
+---
 
-มาตรฐานที่ระบบสร้างให้:
-# data_agentic_private
+## โครงสร้างโปรเจกต์
+
+```
+factory-ui/            Flask backend (pipeline + API + เสิร์ฟ SPA)
+  app.py               ต้นน้ำ (ทำความสะอาด) + profile + AI plan + build + QA
+  static/city/         เมือง Workflow 3D (standalone Three.js)
+factory-ui-react/      React SPA (Ant Design) — หน้าปกติ + ฝังเมือง 3D (/city)
+local-ai/              ไคลเอนต์ LM Studio + schema + ตัวอย่าง .env
+rules/                 data / qa / dashboard / analysis rules
+docs/                  คู่มือติดตั้งภาษาไทย, AI calculation workflow ฯลฯ
+projects/              ⚠️ ข้อมูลจริงของแต่ละ project — ไม่ commit (เหลือแค่ _template)
+```
+
+> **ข้อมูลใน `projects/` เป็นข้อมูลจริง ไม่ถูก track ใน git** (ดู `.gitignore`)
+> เก็บเฉพาะ `projects/README.md` และ `projects/_template/` เป็นโครงไว้เท่านั้น
+> ห้ามนำข้อมูลดิบที่อ่อนไหวขึ้น public repository
+
+---
+
+## QA และความถูกต้อง
+
+ก่อนใช้งาน ระบบตรวจ QA 7 ด้าน (records, identifier exclusion, duplicates,
+missing, date parse, calculation, normalization) และเขียนผลที่
+`projects/<project>/output/qa/qa-report.json` — หากมี critical error สถานะจะเป็น
+`NOT READY` ไม่ควรใช้ตัวเลขตัดสินใจจนกว่าจะตรวจข้อมูลต้นทาง
+
+สรุปปี วันที่ และตัวกรองบน dashboard แสดงเป็น **พ.ศ.** เสมอ
+
+---
+
+## เอกสารเพิ่มเติม
+
+- [คู่มือติดตั้งแบบง่าย (ภาษาไทย)](docs/local-quickstart-th.md)
+- [AI Calculation Workflow](docs/ai-calculation-workflow.md)
+- [คู่มือผู้ใช้ (ภาษาไทย)](docs/user-manual-th.md)
