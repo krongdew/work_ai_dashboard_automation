@@ -1,0 +1,85 @@
+{
+  "instruction": "",
+  "requests": [
+    {
+      "name": "_year_be",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_year_be",
+      "filters": [
+        {
+          "field": "_year_be",
+          "equals": ":2564"
+        }
+      ]
+    },
+    {
+      "name": "_month_th",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_month_th",
+      "filters": [
+        {
+          "field": "_month_th",
+          "equals": ":12"
+        }
+      ]
+    },
+    {
+      "name": "_quarter",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_quarter",
+      "filters": [
+        {
+          "field": "_quarter",
+          "equals": ":1"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "name": "_year_be",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_year_be",
+      "filters": [
+        {
+          "field": "_year_be",
+          "equals": ":2564"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "_month_th",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_month_th",
+      "filters": [
+        {
+          "field": "_month_th",
+          "equals": ":12"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "_quarter",
+      "metric": "Year_Level",
+      "aggregation": "count",
+      "dimension": "_quarter",
+      "filters": [
+        {
+          "field": "_quarter",
+          "equals": ":1"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    }
+  ]
+}

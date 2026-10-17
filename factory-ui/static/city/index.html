@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Factory · เมือง Workflow 3D</title>
+<style>
+  :root{
+    --cream:#F7F3E8; --ink:#3A3A4A; --muted:#6B6B7A;
+    --mint:#9FD9C4; --teal:#7FC8C0; --peach:#F2B79A; --lav:#C3B6E6; --lav-deep:#9B86D6;
+    --surface:#FFFFFF; --surface-soft:#FBF8F0; --border:#E6E0CF;
+    --shadow:0 10px 30px rgba(80,80,100,.14);
+    --radius:16px;
+    font-family:"Noto Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--cream);color:var(--ink);overflow:hidden}
+  #dfx-stage{position:fixed;inset:0}
+  #dfx-canvas{display:block;width:100%;height:100%;cursor:grab}
+  #dfx-canvas:active{cursor:grabbing}
+  #dfx-overlay{position:fixed;inset:0;pointer-events:none}
+  #dfx-overlay>*{pointer-events:auto}
+
+  /* ---- header ---- */
+  .dfx-header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;gap:12px;padding:14px 18px;flex-wrap:wrap}
+  .dfx-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:8px 16px;box-shadow:var(--shadow)}
+  .dfx-logo{font-size:1.2rem}
+  .dfx-demo{font-size:.68rem;font-weight:700;color:#8a6d00;background:#FFF2C9;
+    border:1px solid #F3DF9B;border-radius:999px;padding:3px 9px;margin-left:4px}
+  .dfx-legend{display:flex;gap:8px;flex-wrap:wrap;background:var(--surface);
+    border:1px solid var(--border);border-radius:999px;padding:7px 12px;box-shadow:var(--shadow)}
+  .dfx-chip{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted);font-weight:600}
+  .dfx-chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+  /* ---- controls ---- */
+  .dfx-controls{position:absolute;left:18px;bottom:66px;display:flex;gap:8px;flex-wrap:wrap;max-width:62vw}
+  .dfx-btn{font:inherit;font-weight:700;font-size:.82rem;border:1px solid var(--border);
+    background:var(--surface);color:var(--ink);border-radius:12px;padding:9px 14px;cursor:pointer;
+    box-shadow:var(--shadow);transition:transform .12s ease,background .12s ease}
+  .dfx-btn:hover{transform:translateY(-2px)}
+  .dfx-btn.primary{background:var(--mint);border-color:#7cc7ae}
+  .dfx-btn.improve{background:var(--lav);border-color:var(--lav-deep);color:#3a2f5e}
+  .dfx-btn.ghost{background:var(--surface-soft)}
+  .dfx-controls[data-state="idle"] #dfx-pause{opacity:.5}
+  .dfx-controls[data-state="paused"] #dfx-pause{background:var(--peach);border-color:#e39b78}
+
+  /* ---- sim caption + progress ---- */
+  .dfx-simbar-wrap{position:absolute;left:18px;right:18px;bottom:20px;display:flex;align-items:center;gap:12px}
+  .dfx-sim-caption{font-size:.82rem;font-weight:700;color:var(--ink);background:var(--surface);
+    border:1px solid var(--border);border-radius:999px;padding:7px 14px;box-shadow:var(--shadow);white-space:nowrap}
+  .dfx-sim-bar{flex:1;height:8px;background:var(--surface);border:1px solid var(--border);
+    border-radius:999px;overflow:hidden;box-shadow:var(--shadow)}
+  .dfx-sim-bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--teal));
+    transition:width .4s ease}
+
+  /* ---- detail panel (desktop) ---- */
+  .dfx-panel{position:absolute;top:70px;right:18px;width:min(360px,82vw);max-height:calc(100% - 150px);
+    overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px 20px 24px;transform:translateX(120%);opacity:0;
+    transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .32s ease}
+  .dfx-panel.show{transform:translateX(0);opacity:1}
+  .dfx-panel-close{position:absolute;top:12px;right:12px;border:none;background:var(--surface-soft);
+    width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.9rem;color:var(--muted)}
+  .dfx-panel-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:32px}
+  .dfx-panel-badge{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;
+    background:var(--lav);color:#3a2f5e;font-weight:800}
+  .dfx-panel-head h2{margin:0;font-size:1.15rem}
+  .dfx-panel-tag{font-size:.64rem;font-weight:800;letter-spacing:.04em;background:#EEF6F1;
+    color:#2f7d66;border:1px solid #Bfe3d4;border-radius:999px;padding:3px 8px}
+  .dfx-panel-status{display:inline-flex;align-items:center;gap:7px;margin:12px 0 2px;font-weight:700;font-size:.82rem}
+  .dfx-panel-status i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .dfx-panel-heading{margin:10px 0 8px;font-weight:700;color:var(--ink)}
+  .dfx-panel-list{margin:0;padding-left:18px;color:var(--muted);line-height:1.6;font-size:.86rem}
+  .dfx-panel-list li{margin:4px 0}
+
+  /* ---- mobile: panel becomes a bottom sheet, legend hides ---- */
+  @media (max-width:720px){
+    .dfx-legend{display:none}
+    .dfx-controls{left:10px;right:10px;bottom:12px;max-width:none;justify-content:center}
+    .dfx-btn{font-size:.76rem;padding:8px 11px}
+    .dfx-simbar-wrap{display:none}
+    .dfx-panel{top:auto;left:0;right:0;bottom:0;width:100%;max-height:60vh;border-radius:18px 18px 0 0;
+      transform:translateY(110%)}
+    .dfx-panel.show{transform:translateY(0)}
+  }
+
+  .dfx-tooltip{position:fixed;z-index:10;pointer-events:none;background:var(--ink);color:#fff;
+    font-size:.74rem;font-weight:600;padding:6px 10px;border-radius:8px;max-width:280px;
+    opacity:0;transform:translateY(4px);transition:opacity .12s ease}
+  .dfx-tooltip.show{opacity:.96;transform:none}
+
+  @media (prefers-reduced-motion:reduce){
+    .dfx-btn,.dfx-panel,.dfx-sim-bar>i,.dfx-tooltip{transition:none !important}
+  }
+</style>
+</head>
+<body>
+  <div id="dfx-stage"><canvas id="dfx-canvas"></canvas></div>
+  <div id="dfx-overlay"></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

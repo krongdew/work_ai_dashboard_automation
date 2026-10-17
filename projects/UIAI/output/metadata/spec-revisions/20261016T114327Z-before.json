@@ -1,0 +1,130 @@
+{
+  "dashboard_title": "Student Graduation Readiness Dashboard",
+  "purpose": "Monitor credit accumulation, academic performance, and risk status to support graduation planning.",
+  "audience": "Academic advisors and graduation office staff.",
+  "kpis": [
+    {
+      "name": "Total Credits Earned by Year",
+      "metric": "Total_Credits_Earned",
+      "aggregation": "SUM",
+      "formula": "SUM(Total_Credits_Earned)",
+      "source_fields": [
+        "Total_Credits_Earned",
+        "_year_be"
+      ],
+      "limitations": "Summed per year; assumes all records belong to the same year dimension.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Average GPAX",
+      "metric": "GPAX",
+      "aggregation": "AVG",
+      "formula": "AVG(GPAX)",
+      "source_fields": [
+        "GPAX"
+      ],
+      "limitations": "Average of GPA values; does not weight by credit load."
+    },
+    {
+      "name": "Students at Risk",
+      "metric": "Student_ID",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT Student_ID) WHERE Graduation_Readiness = 'AT_RISK'",
+      "source_fields": [
+        "Student_ID",
+        "Graduation_Readiness"
+      ],
+      "limitations": "Counts only students flagged as AT_RISK; other readiness categories excluded."
+    },
+    {
+      "name": "Graduation Readiness Distribution",
+      "metric": "Graduation_Readiness",
+      "aggregation": "COUNT",
+      "formula": "COUNT(Graduation_Readiness)",
+      "source_fields": [
+        "Graduation_Readiness"
+      ],
+      "limitations": "Limited to three readiness categories; may not reflect nuanced readiness."
+    },
+    {
+      "name": "Total Students",
+      "metric": "Student_ID",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT Student_ID)",
+      "source_fields": [
+        "Student_ID"
+      ],
+      "limitations": "Counts distinct students across all records; no additional filters applied."
+    }
+  ],
+  "filters": [
+    "Graduation_Readiness",
+    "Risk_Level",
+    "Year_Level",
+    "Program_Mode"
+  ],
+  "display_labels": {
+    "Graduation_Readiness": "สถานะการสำเร็จการศึกษา",
+    "Risk_Level": "ระดับความเสี่ยง",
+    "Year_Level": "ระดับปี",
+    "Program_Mode": "รูปแบบโปรแกรม",
+    "_year_be": "ปี พ.ศ."
+  },
+  "charts": [
+    {
+      "title": "Total Credits Earned by Year",
+      "type": "bar",
+      "dimension": "_year_be",
+      "metric": "Total_Credits_Earned",
+      "aggregation": "SUM",
+      "formula": "SUM(Total_Credits_Earned)",
+      "source_fields": [
+        "Total_Credits_Earned",
+        "_year_be"
+      ],
+      "limitations": "Year dimension derived from date fields; assumes consistent BE year.",
+      "target": {
+        "value": 120,
+        "label": "Required Credits",
+        "year_be": 2565
+      }
+    },
+    {
+      "title": "Graduation Readiness Distribution",
+      "type": "pie",
+      "dimension": "Graduation_Readiness",
+      "metric": "Student_ID",
+      "aggregation": "COUNT(DISTINCT)",
+      "formula": "COUNT(DISTINCT Student_ID)",
+      "source_fields": [
+        "Student_ID",
+        "Graduation_Readiness"
+      ],
+      "limitations": "Limited to three readiness categories; small sample size."
+    },
+    {
+      "title": "Average GPAX over Year",
+      "type": "line",
+      "dimension": "_year_be",
+      "metric": "GPAX",
+      "aggregation": "AVG",
+      "formula": "AVG(GPAX)",
+      "source_fields": [
+        "GPAX",
+        "_year_be"
+      ],
+      "limitations": "GPAX values may not be comparable across years without normalization."
+    }
+  ],
+  "insight_questions": [
+    "Which student groups are at risk of not meeting credit requirements?",
+    "How does average GPAX trend over recent years?",
+    "Is the total credit accumulation on track to meet graduation requirements?",
+    "What is the distribution of graduation readiness categories across risk levels?"
+  ],
+  "generated_by": "groq-ai",
+  "last_instruction": "อยากให้เพิ่มการนับจำนวนนักศึกษาทั้งหมดด้วย แสดงเป็นการ์ด"
+}

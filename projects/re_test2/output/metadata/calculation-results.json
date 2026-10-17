@@ -1,0 +1,70 @@
+{
+  "kpis": [
+    {
+      "name": "จำนวนผลงานตีพิมพ์รวม",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "เป้าหมาย KPI รวม",
+      "metric": "เป้าหมาย_KPI",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "จำนวนรายการผลงานและรางวัลที่บันทึก",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "แนวโน้มจำนวนผลงานตีพิมพ์ตามปีงบประมาณ",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "จำนวนผลงานตีพิมพ์สะสมจำแนกตามภาควิชา",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "dimension": "สังกัด_ภาควิชา",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "สัดส่วนผลงานตีพิมพ์ตามฐานข้อมูล",
+      "metric": "จำนวนผลงานตีพิมพ์",
+      "aggregation": "sum",
+      "dimension": "ฐานข้อมูลที่ตีพิมพ์",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "การกระจายตัวของผลงานตามสถานะเทียบเป้าหมาย",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "สถานะเทียบเป้าหมาย",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": []
+}

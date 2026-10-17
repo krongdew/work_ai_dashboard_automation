@@ -1,0 +1,55 @@
+{
+  "kpis": [
+    {
+      "name": "Total Credits Earned",
+      "metric": "Credits",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "Average Exam Score",
+      "metric": "ผลคะแนน",
+      "aggregation": "average",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "Total Credits by Academic Year",
+      "metric": "Credits",
+      "aggregation": "sum",
+      "dimension": "ปีการศึกษา",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Average Exam Score by Faculty",
+      "metric": "ผลคะแนน",
+      "aggregation": "average",
+      "dimension": "faculty",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Total Credits by Course Type",
+      "metric": "Credits",
+      "aggregation": "sum",
+      "dimension": "courseType",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": [
+    "Student Enrollment Count: Calculation tool request contains an unsupported metric or aggregation.",
+    "Student Distribution by Major: Calculation tool request contains an unsupported metric or aggregation."
+  ]
+}

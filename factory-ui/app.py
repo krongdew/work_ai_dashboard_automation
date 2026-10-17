@@ -32,6 +32,9 @@ DATA_RULES = ROOT / "rules" / "data-rules.md"
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(LOCAL_AI))
 
+from dotenv import load_dotenv
+load_dotenv(ROOT / ".env")
+
 from output_language import POLICY_VERSION, require_supported_text
 from lan_service import CURRENT_OWNER, install_lan, model_identity
 
@@ -41,8 +44,37 @@ ALLOWED_UPLOAD_SUFFIXES = {".xlsx", ".xlsm", ".csv"}
 AI_JOBS: dict[str, dict[str, Any]] = {}
 AI_JOBS_LOCK = Lock()
 install_lan(app, ROOT)
+
+# Local (non-LAN) mode uses Google OAuth + Postgres sessions + org scoping.
+if not app.config.get("FACTORY_LAN"):
+    import auth
+    try:
+        db_migrations = __import__("db").run_migrations()
+    except Exception as exc:  # DB may be down at import; surface clearly, don't crash import.
+        print(f"[startup] DB migration skipped/failed: {exc}", file=sys.stderr)
+    auth.install_auth(app)
+    import admin_api
+    admin_api.install_admin(app)
 PROJECT_WRITE_LOCKS: dict[tuple, Lock] = {}
 LAN_AI_SLOTS = BoundedSemaphore(8)
+
+
+@app.before_request
+def enforce_project_access():
+    """In authenticated (non-LAN) mode, block access to a project the signed-in
+    user may not see — closes the gap where guessing a URL reached another
+    org's dashboard. Creation (no <name> arg) and non-project routes pass."""
+    if app.config.get("FACTORY_LAN"):
+        return None
+    name = (request.view_args or {}).get("name")
+    if not name:
+        return None
+    import auth
+    if auth.current_user() is None:
+        return None  # the session guard in auth already handles anonymous
+    if not auth.can_access_project(name):
+        return jsonify({"error": "ไม่มีสิทธิ์เข้าถึง dashboard นี้"}), 403
+    return None
 
 
 @app.before_request
@@ -105,9 +137,130 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _read_sheet_filled(ws) -> list[list]:
+    """Read a worksheet into a dense grid, propagating merged-cell values.
+
+    Excel merges keep the value only in the top-left cell of the range; every
+    other cell in the range reads as None. Row-level data then loses the row's
+    own category (a unit name merged down two rows leaves the second row with
+    no unit). We expand the grid and copy the anchor value across every cell of
+    each merged range, so forward-fill is exact rather than guessed. Requires a
+    NON read-only load (read_only mode does not expose merged_cells)."""
+    rows = [list(r) for r in ws.iter_rows(values_only=True)]
+    for rng in list(ws.merged_cells.ranges):
+        anchor = ws.cell(row=rng.min_row, column=rng.min_col).value
+        for r in range(rng.min_row, rng.max_row + 1):
+            for c in range(rng.min_col, rng.max_col + 1):
+                ri, ci = r - 1, c - 1
+                if 0 <= ri < len(rows) and 0 <= ci < len(rows[ri]):
+                    rows[ri][ci] = anchor
+    return rows
+
+
+def _header_depth(rows: list, start: int) -> int:
+    """How many consecutive rows from `start` form a multi-row header.
+
+    A sub-header row (e.g. Q1/Q2 under a merged 'ไตรมาส') is text-ish, has
+    several non-empty cells, and the row below it starts carrying real data.
+    We extend the header while the next row still looks like labels, capped at
+    3 rows so a data table is never swallowed."""
+    depth = 1
+    for i in range(start + 1, min(start + 3, len(rows))):
+        cells = [c for c in rows[i] if c not in (None, "")]
+        if len(cells) < 2:
+            break
+        numeric = sum(_looks_numeric(c) for c in cells)
+        # a header row is mostly non-numeric labels; a data row is mostly numbers
+        if numeric > len(cells) / 2:
+            break
+        depth += 1
+    return depth
+
+
+def _combine_headers(header_rows: list[list], width: int) -> list[str]:
+    """Merge 1-N header rows into one label per column, forward-filling group
+    labels across the columns they span (after merge-fill they already repeat).
+    'ไตรมาส' + 'Q1' -> 'ไตรมาส_Q1'; a lone label stays as-is."""
+    labels = []
+    for col in range(width):
+        parts = []
+        for hr in header_rows:
+            val = hr[col] if col < len(hr) else None
+            text = str(val).strip().replace("\n", " ") if val not in (None, "") else ""
+            if text and (not parts or parts[-1] != text):
+                parts.append(text)
+        labels.append("_".join(parts) if parts else f"column_{col + 1}")
+    # de-duplicate identical labels (merge fill can repeat a group name)
+    seen: dict[str, int] = {}
+    out = []
+    for label in labels:
+        if label in seen:
+            seen[label] += 1
+            out.append(f"{label}_{seen[label]}")
+        else:
+            seen[label] = 1
+            out.append(label)
+    return out
+
+
+_TOTAL_RE = re.compile(r"^\s*(รวม|ผลรวม|รวมทั้งสิ้น|total|sum|grand\s*total|ยอดรวม|sub\s*total)\b", re.IGNORECASE)
+
+
+def _is_total_row(record: dict[str, Any], first_field: str) -> bool:
+    """A summary/total row carries a total keyword in one of its leading label
+    cells and no other distinguishing data. Real files often prefix a running
+    number or a junk column (#REF!) before the label, so we do not rely on the
+    first field alone: scan the first few non-numeric text cells for the
+    keyword. Including such a row double-counts every metric."""
+    checked = 0
+    for key, value in record.items():
+        if key.startswith("_"):
+            continue
+        text = str(value or "").strip()
+        if not text or _looks_numeric(text) or text == "#REF!":
+            continue
+        if _TOTAL_RE.match(text):
+            return True
+        checked += 1
+        if checked >= 3:  # only the leading label cells can head a total row
+            break
+    return False
+
+
+def _drop_junk_columns(records: list[dict[str, Any]], headers: list[str]) -> list[str]:
+    """Return the headers worth keeping. A column is JUNK only when its header is
+    generic (column_N) AND its data carries no information: almost entirely
+    empty, or a bare running index (1,2,3,… — a row counter, not a measure).
+    Named columns are always kept — the user named them, so they matter even if
+    sparse."""
+    if not records:
+        return headers
+    keep = []
+    n = len(records)
+    for h in headers:
+        if not h.startswith("column_"):
+            keep.append(h)
+            continue
+        values = [r.get(h) for r in records if r.get(h) not in (None, "")]
+        fill = len(values) / max(n, 1)
+        if fill < 0.1:  # essentially empty
+            continue
+        # running index: all integers forming 1..k with little gap
+        nums = [numeric(v) for v in values]
+        if nums and all(x is not None and float(x).is_integer() for x in nums):
+            ints = sorted(int(x) for x in nums)
+            if ints and ints[0] <= 2 and ints == list(range(ints[0], ints[0] + len(ints))):
+                continue  # 1,2,3,… sequential counter
+        keep.append(h)
+    return keep
+
+
 def clean_header(value: Any, index: int) -> str:
     text = str(value or "").strip().replace("\n", " ")
     return text or f"column_{index + 1}"
+
+
+_EXCEL_ERRORS = {"#REF!", "#DIV/0!", "#N/A", "#VALUE!", "#NAME?", "#NULL!", "#NUM!", "#SPILL!", "#CALC!", "#GETTING_DATA"}
 
 
 def scalar(value: Any) -> Any:
@@ -115,7 +268,61 @@ def scalar(value: Any) -> Any:
         return None
     if hasattr(value, "isoformat"):
         return value.isoformat()
+    # Excel error sentinels are not data — drop them so a measure column is not
+    # poisoned with '#REF!' and a category is not split by a stray error token.
+    if isinstance(value, str) and value.strip().upper() in _EXCEL_ERRORS:
+        return None
+    # Collapse Excel indentation and stray whitespace so '   รายได้' and 'รายได้'
+    # are one category, not two. Blank-after-trim becomes None.
+    if isinstance(value, str):
+        cleaned = re.sub(r"\s+", " ", value).strip()
+        return cleaned or None
     return value
+
+
+def _looks_numeric(value: Any) -> bool:
+    if value is None or value == "":
+        return False
+    try:
+        float(str(value).replace(",", "").replace("%", "").strip())
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def detect_header_row(rows: list) -> int:
+    """Find the most likely header row in a messy sheet.
+
+    Blindly using row 0 breaks when a file has blank leading rows, a title
+    banner, or merged cells above the real header — every column then becomes
+    column_N and real data lands under generic names. We score the first rows
+    and pick the one that most looks like a header: mostly non-empty text
+    labels (not numbers), with the widest set of distinct values, and with
+    non-empty data rows beneath it.
+    """
+    scan = min(len(rows), 15)
+    best_index, best_score = 0, float("-inf")
+    for i in range(scan):
+        cells = [c for c in rows[i] if c not in (None, "")]
+        if len(cells) < 2:
+            continue  # too sparse to be a header
+        numeric = sum(_looks_numeric(c) for c in cells)
+        text = len(cells) - numeric
+        distinct = len({str(c).strip() for c in cells})
+        # rows below must carry data for this to be the header
+        has_data_below = any(
+            any(v not in (None, "") for v in rows[j]) for j in range(i + 1, min(len(rows), i + 6))
+        )
+        # headers are text-heavy, wide, distinct, and sit above data. The distinct
+        # term counts UNIQUE labels, which merge-fill deflates on a group row
+        # (a spanned 'ไตรมาส' repeats), so weight it lightly and let position
+        # break ties toward the TOP of the header block — otherwise the sub-header
+        # row wins and the group row (ไตรมาส) is dropped.
+        score = text * 2 + distinct * 0.5 - numeric * 2 + (3 if has_data_below else -5) - i * 0.5
+        # strictly-greater keeps the FIRST (upper) row when a lower row only ties.
+        if score > best_score:
+            best_index, best_score = i, score
+    return best_index
 
 
 def load_sources(folder: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -131,24 +338,48 @@ def load_sources(folder: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any
                 rows = list(csv.reader(source))
             groups = [("CSV", rows)]
         else:
-            book = load_workbook(path, read_only=True, data_only=True)
-            groups = [(sheet.title, list(sheet.iter_rows(values_only=True))) for sheet in book.worksheets]
+            # NOT read_only: we must see merged_cells to forward-fill them.
+            book = load_workbook(path, read_only=False, data_only=True)
+            groups = [(sheet.title, _read_sheet_filled(sheet)) for sheet in book.worksheets]
             book.close()
         for sheet_name, rows in groups:
             if not rows:
                 continue
-            headers = [clean_header(value, index) for index, value in enumerate(rows[0])]
-            sheet_rows = 0
-            for row_number, values in enumerate(rows[1:], start=2):
+            header_row = detect_header_row(rows)
+            depth = _header_depth(rows, header_row)
+            width = max((len(r) for r in rows[header_row:header_row + depth]), default=0)
+            headers = _combine_headers(rows[header_row:header_row + depth], width)
+            first_field = headers[0] if headers else "column_1"
+            last_seen: dict[str, Any] = {}
+            sheet_records: list[dict[str, Any]] = []
+            filtered_total = 0
+            for row_number, values in enumerate(rows[header_row + depth:], start=header_row + depth + 1):
                 if not any(value not in (None, "") for value in values):
                     continue
                 record = {headers[index]: scalar(values[index]) if index < len(values) else None for index in range(len(headers))}
+                # Forward-fill a leading category that is blank because the file
+                # merged it down (the first data column carries the entity label).
+                if record.get(first_field) in (None, "") and last_seen.get(first_field) not in (None, ""):
+                    record[first_field] = last_seen[first_field]
+                elif record.get(first_field) not in (None, ""):
+                    last_seen[first_field] = record[first_field]
+                # Drop total/summary rows so aggregates are not double-counted.
+                if _is_total_row(record, first_field):
+                    filtered_total += 1
+                    continue
                 record["_source_file"] = path.name
                 record["_source_sheet"] = sheet_name
                 record["_source_row"] = row_number
-                records.append(record)
-                sheet_rows += 1
-            sheets.append({"file": path.name, "sheet": sheet_name, "rows": sheet_rows, "columns": len(headers), "fields": headers})
+                sheet_records.append(record)
+            # Drop junk columns (generic header + empty/running-index data).
+            kept = _drop_junk_columns(sheet_records, headers)
+            if len(kept) != len(headers):
+                dropped = set(headers) - set(kept)
+                for rec in sheet_records:
+                    for col in dropped:
+                        rec.pop(col, None)
+            records.extend(sheet_records)
+            sheets.append({"file": path.name, "sheet": sheet_name, "rows": len(sheet_records), "columns": len(kept), "fields": kept, "header_row": header_row + 1, "header_depth": depth, "total_rows_filtered": filtered_total})
     return records, sheets
 
 
@@ -255,6 +486,117 @@ def profile_project(name: str) -> dict[str, Any]:
         "quality": {"exact_duplicate_rows": duplicates, "missing_values": {field: sum(record.get(field) in (None, "") for record in records) for field in all_fields}, "date_parsing": date_quality},
     }
     write_json(directory / "output/metadata/dataset-profile.json", profile)
+    return profile
+
+
+def enrich_profile_with_ai(profile: dict[str, Any]) -> dict[str, Any]:
+    """Round-1 AI pass: infer a human-readable meaning/label for each field from
+    its name + example values. Helps most with messy files where columns are
+    generic (column_10 whose values are ส.ค./พ.ย./ต.ค. -> 'เดือน'). Additive only:
+    the deterministic role/type stay authoritative for calculation; we attach
+    inferred_label / inferred_meaning / suggested_role for the planner + UI.
+    Uses the LIGHT model and never fails the profile — on any error it returns
+    the profile unchanged."""
+    from ai_client import generate_json
+    fields = profile.get("fields", [])
+    if not fields:
+        return profile
+    # D-mode: only ask the AI about columns that actually need interpretation —
+    # generic auto-named columns (column_N) or very short/opaque names. Named
+    # columns ('GPAX', 'สาขา') are already clear, so sending them wastes tokens
+    # and time. This shrinks the prompt dramatically and usually avoids the TPM wall.
+    def _needs_ai(f):
+        name = str(f.get("name", ""))
+        return name.startswith("column_") or len(name.strip()) <= 2
+    targets = [f for f in fields if _needs_ai(f)]
+    if not targets:
+        profile["ai_enriched"] = True
+        profile["ai_enrichment_targets"] = 0
+        return profile
+    compact = [
+        {"name": f["name"], "role": f.get("role"), "type": f.get("type"),
+         "distinct": f.get("distinct"), "examples": f.get("examples", [])[:5]}
+        for f in targets
+    ]
+    schema = {
+        "type": "object", "additionalProperties": False, "required": ["fields"],
+        "properties": {"fields": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False,
+            "required": ["name", "inferred_label", "inferred_meaning", "suggested_role"],
+            "properties": {
+                "name": {"type": "string"},
+                "inferred_label": {"type": "string"},   # concise Thai display label
+                "inferred_meaning": {"type": "string"},  # one line: what this column holds
+                "suggested_role": {"type": "string", "enum": ["measure", "date", "category", "identifier", "text", "unknown"]},
+            },
+        }}},
+    }
+    try:
+        result = generate_json(
+            "You infer the meaning of dataset columns from their name and a few example values. "
+            "Pay special attention to generic names like column_10 — infer meaning from the examples "
+            "(e.g. values ส.ค./พ.ย./ต.ค. mean the column is a Thai month). "
+            "Give a short Thai display label and a one-line meaning. Never invent values; only interpret what is shown. "
+            "CRITICAL LANGUAGE RULE: every inferred_label and inferred_meaning MUST be written in Thai "
+            "(English is allowed only for established acronyms like GPA, KPI, QE). NEVER use Chinese, "
+            "Japanese, or any other language — a non-Thai/English label is wrong and will be discarded. "
+            "Return one object for EVERY field you are given, in the same order; do not skip any field.",
+            f"FIELDS (name, role, type, distinct, examples):\n{json.dumps(compact, ensure_ascii=False, separators=(',', ':'))}",
+            schema,
+            light=True,
+        )
+        ann = {item["name"]: item for item in result.get("fields", []) if isinstance(item, dict) and item.get("name")}
+        # 3B models often return a short array; re-ask ONCE for the fields it skipped.
+        missing = [c for c in compact if c["name"] not in ann]
+        if missing:
+            try:
+                more = generate_json(
+                    "Infer a short Thai display label and one-line Thai meaning for EACH of these dataset "
+                    "columns from its name and examples. Thai only (acronyms like GPA/KPI allowed); never "
+                    "Chinese or other languages. Return one object per field.",
+                    f"FIELDS:\n{json.dumps(missing, ensure_ascii=False, separators=(',', ':'))}",
+                    schema,
+                    light=True,
+                )
+                for item in more.get("fields", []):
+                    if isinstance(item, dict) and item.get("name") and item["name"] not in ann:
+                        ann[item["name"]] = item
+            except Exception:
+                pass  # coverage gap falls back to field name below — never fatal
+
+        def _bad_lang(text: str) -> bool:
+            # Reject a label that contains CJK (Chinese/Japanese/Korean) — Qwen
+            # occasionally answers in Chinese; such a label is wrong for a Thai UI.
+            return bool(re.search(r"[\u3000-\u9fff\uac00-\ud7a3\uff00-\uffef]", str(text or "")))
+
+        for f in fields:
+            a = ann.get(f["name"])
+            if not a:
+                continue
+            label = a.get("inferred_label") or ""
+            meaning = a.get("inferred_meaning", "")
+            # Drop a non-Thai/English (CJK) label/meaning; keep the field name instead.
+            f["inferred_label"] = f["name"] if (not label or _bad_lang(label)) else label
+            f["inferred_meaning"] = "" if _bad_lang(meaning) else meaning
+            f["suggested_role"] = a.get("suggested_role", "")
+        # Build a display-label map (field name stays column_N for calculations;
+        # the dashboard shows the AI label instead). Dedupe clashes by suffixing.
+        labels, used = {}, set()
+        for f in targets:
+            lbl = (f.get("inferred_label") or "").strip()
+            if not lbl or lbl == f["name"]:
+                continue
+            base, n, final = lbl, 2, lbl
+            while final in used:
+                final = f"{base} ({n})"; n += 1
+            used.add(final)
+            labels[f["name"]] = final
+            f["inferred_label"] = final
+        profile["ai_labels"] = labels
+        profile["ai_enriched"] = True
+    except Exception as exc:
+        profile["ai_enriched"] = False
+        profile["ai_enrichment_error"] = str(exc)[:200]
     return profile
 
 
@@ -493,11 +835,96 @@ def student_analytics_spec(instruction: str, profile: dict[str, Any]) -> dict[st
     }
 
 
+def normalize_spec_metrics(spec: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
+    """Repair common small-model formatting slips before validation, so the
+    first plan passes grounding without an expensive AI repair round:
+    - metric 'sum(Field)' / 'AVG(Field)'  -> metric 'Field' + aggregation set
+    - metric is a bare aggregation word ('SUM'/'sum', any case) -> move it to
+      aggregation and pick a numeric field (from source_fields, else the only
+      numeric source) as the real metric
+    - source_fields holds the dimension/category instead of the measure, while
+      metric already names a numeric field -> replace source_fields with metric
+    - an additive aggregation whose source_fields names no numeric field but
+      whose metric IS numeric -> sync source_fields to the metric
+    Keeps calculation field-grounded without forcing an extra AI repair round."""
+    if not isinstance(spec, dict):
+        return spec
+    field_names = {f["name"] for f in profile.get("fields", [])}
+    numeric = {f["name"] for f in profile.get("fields", []) if f.get("role") == "measure" or f.get("type") == "number"}
+    derived_metrics = {"record_count", "unique_student_count"}
+    agg_words = {"sum", "avg", "average", "mean", "min", "max", "count"}
+
+    def _norm_agg(word: str) -> str:
+        w = word.lower()
+        return "average" if w in {"avg", "average", "mean"} else w
+
+    def fix(item):
+        if not isinstance(item, dict):
+            return item
+        metric = item.get("metric")
+        sources = [s for s in (item.get("source_fields") or []) if isinstance(s, str)]
+
+        if isinstance(metric, str):
+            m = re.match(r"^\s*(sum|avg|average|mean|min|max|count)\s*\(\s*(.+?)\s*\)\s*$", metric, re.IGNORECASE)
+            if m:
+                fn, inner = m.group(1), m.group(2).strip()
+                if inner in field_names or inner in derived_metrics:
+                    item["metric"] = inner
+                    if not item.get("aggregation"):
+                        item["aggregation"] = _norm_agg(fn)
+                    metric = inner
+            # bare aggregation word as the metric (any case: 'SUM', 'sum', 'Average')
+            elif metric.strip().lower() in agg_words:
+                word = metric.strip().lower()
+                # prefer a numeric field already in source_fields, else the sole numeric source
+                cand = next((s for s in sources if s in numeric), None)
+                if not cand:
+                    cand = next((s for s in sources if s in field_names), None)
+                if cand:
+                    cur_agg = (item.get("aggregation") or "").strip().lower()
+                    if not cur_agg or cur_agg in agg_words:
+                        item["aggregation"] = _norm_agg(cur_agg or word)
+                    item["metric"] = cand
+                    metric = cand
+
+        # metric now names a real numeric field, but source_fields points at the
+        # dimension/category (the classic 3B swap) -> ground source_fields to metric
+        if isinstance(metric, str) and metric in numeric:
+            if not sources or not any(s in numeric for s in sources):
+                item["source_fields"] = [metric]
+
+        return item
+
+    for kpi in spec.get("kpis", []):
+        fix(kpi)
+    for chart in spec.get("charts", []):
+        fix(chart)
+    return spec
+
+
 def grounded_spec_errors(spec: dict[str, Any], profile: dict[str, Any], rules: dict[str, Any] | None = None) -> list[str]:
     """Reject a plan that cannot be rendered from the profiled dataset."""
     fields = {field["name"] for field in profile["fields"]}
     allowed_dimensions = fields | {"_year_be", "_academic_year_be", "_month_th", "_quarter", "_source_file"}
     allowed_metrics = fields | {"record_count", "unique_student_count"} | {f"contract:{contract_id}" for contract_id in approved_metric_contracts(rules or default_calculation_rules())}
+    numeric_fields = {f["name"] for f in profile["fields"] if f.get("role") == "measure" or f.get("type") == "number"}
+
+    def _additive_but_not_numeric(item) -> str | None:
+        """A sum/avg/max/min that targets no numeric field will compute to 0."""
+        agg = str(item.get("aggregation") or "").lower()
+        if not any(k in agg for k in ("sum", "avg", "average", "mean", "max", "min")):
+            return None
+        metric = item.get("metric")
+        if metric in {"record_count", "unique_student_count"} or str(metric).startswith("contract:"):
+            return None
+        targets = set(item.get("source_fields") or [])
+        if isinstance(metric, str):
+            targets.add(metric)
+        # at least one referenced field must be numeric
+        if targets & numeric_fields:
+            return None
+        return f"aggregation {agg!r} targets no numeric field (got {sorted(targets) or [metric]}); use a numeric field from NUMERIC FIELDS or record_count for counts"
+
     errors = []
     charts = spec.get("charts")
     if not isinstance(charts, list) or not charts:
@@ -516,12 +943,18 @@ def grounded_spec_errors(spec: dict[str, Any], profile: dict[str, Any], rules: d
                 errors.append(f"Chart {index} source field {field!r} is not an available field or supported derived dimension.")
         if chart.get("type") not in {"bar", "line", "pie"}:
             errors.append(f"Chart {index} type must be bar, line, or pie.")
+        _nnum = _additive_but_not_numeric(chart)
+        if _nnum:
+            errors.append(f"Chart {index} {_nnum}")
     for index, kpi in enumerate(spec.get("kpis", []), start=1):
         if not isinstance(kpi, dict):
             errors.append(f"KPI {index} is not an object.")
             continue
         if kpi.get("metric") not in allowed_metrics:
             errors.append(f"KPI {index} metric {kpi.get('metric')!r} is not an available field or supported derived metric.")
+        _nnum = _additive_but_not_numeric(kpi)
+        if _nnum:
+            errors.append(f"KPI {index} {_nnum}")
         for field in kpi.get("source_fields", []):
             if field not in allowed_dimensions:
                 errors.append(f"KPI {index} source field {field!r} is not an available field or supported derived dimension.")
@@ -551,25 +984,29 @@ def grounded_schema(profile: dict[str, Any]) -> dict[str, Any]:
     return schema
 
 
-def cloud_safe_profile(profile: dict[str, Any]) -> dict[str, Any]:
-    """Return only non-row-level metadata needed for Cloud dashboard planning."""
+def cloud_safe_profile(profile: dict[str, Any], lean: bool = False) -> dict[str, Any]:
+    """Return only non-row-level metadata needed for Cloud dashboard planning.
+    lean=True (Groq/TPM-tight path): keep only name/type/role, drop empty
+    columns, and trim the privacy note — the planner picks KPIs/charts from
+    field name+type+role; null/distinct counts do not change the design but
+    cost ~500 tokens on a wide file."""
     pii_name = re.compile(r"name|surname|email|phone|address|ชื่อ|นามสกุล|อีเมล|โทร|ที่อยู่", re.IGNORECASE)
+    keys = ("name", "type", "role") if lean else ("name", "type", "role", "non_null", "distinct")
     fields = [
-        {
-            key: field[key]
-            for key in ("name", "type", "role", "non_null", "distinct", "numeric_ratio")
-            if key in field
-        }
+        {key: field[key] for key in keys if key in field}
         for field in profile["fields"]
-        if field.get("role") != "identifier" and not pii_name.search(field.get("name", ""))
+        if field.get("role") != "identifier"
+        and not pii_name.search(field.get("name", ""))
+        # In lean mode, drop columns with no data — they can only yield 0-value KPIs.
+        and not (lean and field.get("non_null", 1) == 0)
     ]
     date_fields = {field["name"] for field in fields if field.get("role") == "date"}
     return {
         "records": profile.get("records", 0),
         "fields": fields,
-        "date_parsing": {field: details for field, details in profile.get("quality", {}).get("date_parsing", {}).items() if field in date_fields},
+        "date_parsing": {} if lean else {field: details for field, details in profile.get("quality", {}).get("date_parsing", {}).items() if field in date_fields},
         "derived_fields": ["_year_be", "_month_th", "_quarter"] if date_fields else [],
-        "privacy": "This is metadata only. No source files, records, identifiers, or example values are included.",
+        "privacy": "Metadata only; no records/identifiers/examples." if lean else "This is metadata only. No source files, records, identifiers, or example values are included.",
     }
 
 
@@ -617,6 +1054,7 @@ def semantic_profile(profile: dict[str, Any]) -> dict[str, Any]:
         "confidence, and limitations. Omit fields whose meaning cannot be inferred safely.\n\n"
         f"METADATA ONLY:\n{json.dumps(safe_profile, ensure_ascii=False)}",
         semantic_profile_schema(),
+        light=True,
     )
     interpretations = [
         item for item in result.get("field_interpretations", [])
@@ -682,6 +1120,7 @@ def get_normalization_plan(name: str, profile: dict[str, Any], records: list[dic
         "For date fields, identify ambiguity in warnings; Python will normalize valid dates to Buddhist Era dimensions.",
         f"NORMALIZATION CANDIDATES:\n{json.dumps(context, ensure_ascii=False)}",
         normalization_plan_schema(),
+        light=True,
     )
     allowed = {item["field"]: {value["value"] for value in item["values"]} for item in context["fields"]}
     mappings = [
@@ -747,6 +1186,7 @@ def uncovered_requirements(instruction: str, profile: dict[str, Any], spec: dict
         f"USER REQUEST:\n{instruction}\n\nDATA PROFILE:\n{json.dumps(cloud_safe_profile(profile), ensure_ascii=False)}\n\n"
         f"VALID DERIVED FIELDS:\n{json.dumps(derived_fields, ensure_ascii=False)}\n\nDASHBOARD PLAN:\n{json.dumps(spec, ensure_ascii=False)}",
         schema,
+        light=True,
     )
     return [f"{item['request']}: {item['evidence']}" for item in review.get("requirements", []) if item.get("status") == "missing"]
 
@@ -755,44 +1195,123 @@ def local_ai_spec(profile: dict[str, Any], rules: dict[str, Any], instruction: s
     """Ask the configured AI provider to create and repair a grounded dashboard plan."""
     from ai_client import generate_json, provider_name
     schema = grounded_schema(profile)
-    guidance = (LOCAL_AI / "prompts/dashboard-spec.md").read_text(encoding="utf-8")
     provider = provider_name()
-    workflow = planner_workflow_contract(compact=provider == "groq")
-    request_text = instruction or "Propose the most useful management dashboard supported by this dataset."
+    compact = provider == "groq"
+    # The compact workflow contract already restates every rule in dashboard-spec.md,
+    # so on the Groq path skip the separate guidance block to protect the TPM budget.
+    guidance = "" if compact else (LOCAL_AI / "prompts/dashboard-spec.md").read_text(encoding="utf-8")
+    workflow = planner_workflow_contract(compact=compact)
+    if instruction:
+        request_text = instruction
+    else:
+        # No user instruction — most staff will not type one, and a bare
+        # 'propose a dashboard' makes a small model play safe (just counts +
+        # filters). Build a concrete, data-aware brief from the real fields so
+        # the planner designs an ANALYTICAL dashboard on its own.
+        _num = [f["name"] for f in profile["fields"] if f.get("role") == "measure" or f.get("type") == "number"]
+        _cat = [f["name"] for f in profile["fields"] if f.get("role") == "category"]
+        _date = [f["name"] for f in profile["fields"] if f.get("role") == "date"]
+        parts = [
+            "Design the most insightful management dashboard this dataset supports — not a plain record count.",
+            "Make it ANALYTICAL: include several KPI cards for the key figures, and charts that COMPARE and RANK across categories, not just totals.",
+        ]
+        if _num:
+            parts.append(f"Build KPI cards and bar charts from these numeric measures (sum or average as appropriate): {', '.join(_num[:8])}.")
+        if _cat:
+            parts.append(f"Break those measures down BY these category dimensions to compare groups: {', '.join(_cat[:6])}.")
+        if _date or True:
+            parts.append("If a time dimension exists (_year_be/_month_th/_quarter), add a trend line to show change over time.")
+        parts.append("Aim for at least 3-4 KPIs and 3-4 charts of mixed types (bar for comparison, line for trend, pie only for a meaningful share). Use record_count only as a supporting KPI, never as the whole dashboard.")
+        request_text = " ".join(parts)
     available_fields = sorted(field["name"] for field in profile["fields"])
     contract_metrics = [f"contract:{contract_id}" for contract_id in approved_metric_contracts(rules)]
     allowed_references = available_fields + ["record_count", "unique_student_count", "_year_be", "_academic_year_be", "_month_th", "_quarter"] + contract_metrics
+    # Fields that actually hold additive numbers — the ONLY valid targets for
+    # SUM/AVG/MAX/MIN. On messy files the money columns are often column_N, so we
+    # name them explicitly plus any AI-inferred meanings so the planner does not
+    # pick a text/category column (which silently computes to 0).
+    numeric_fields = [f["name"] for f in profile["fields"] if f.get("role") == "measure" or f.get("type") == "number"]
+    ai_meanings = {f["name"]: f.get("inferred_label") for f in profile["fields"] if f.get("inferred_label")}
     prompt = (
         f"{workflow}\n\n{guidance}\n\nUSER REQUEST:\n{request_text}\n\n"
         "DATA PROFILE (metadata only; field names must be copied exactly):\n"
-        f"{json.dumps(cloud_safe_profile(profile), ensure_ascii=False)}\n\n"
-        "SEMANTIC PROFILE (metadata-only suggestions; do not treat as facts or use it to invent fields, values, or formulas):\n"
-        f"{json.dumps(semantic or {}, ensure_ascii=False)}\n\n"
-        "NORMALIZATION PLAN (validated category mappings that the local build applies; use canonical target values in filters and describe ambiguities as limitations):\n"
-        f"{json.dumps(normalization_plan or {}, ensure_ascii=False)}\n\n"
-        "LOCAL CALCULATION TOOL RESULTS (computed by Python from the actual project data; use these values as evidence, but only use fields from the allowlist):\n"
-        f"{json.dumps(calculation_results or [], ensure_ascii=False)}\n\n"
-        "APPROVED METRIC CONTRACTS (optional deterministic metrics; use contract:<id> exactly as the metric and preserve the listed formula):\n"
-        f"{json.dumps(list(approved_metric_contracts(rules).values()), ensure_ascii=False)}\n\n"
-        "Return each KPI as an object with name, metric, aggregation, formula, source_fields, limitations, and comparison. "
+        f"{json.dumps(cloud_safe_profile(profile, lean=compact), ensure_ascii=False, separators=(',', ':'))}\n\n"
+        + (
+            "FIELD MEANINGS (AI-inferred human labels for columns that have no clear name — "
+            "use these to understand what a column_N holds, but still reference it by its exact field name):\n"
+            f"{json.dumps(ai_meanings, ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if ai_meanings else ""
+        )
+        + (
+            "NUMERIC FIELDS (the ONLY fields valid for SUM/AVG/MAX/MIN metrics — a KPI or chart that "
+            "sums/averages any field NOT in this list will compute to 0 and is wrong; for counts use record_count):\n"
+            f"{json.dumps(numeric_fields, ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if numeric_fields else ""
+        )
+        + (
+            "SEMANTIC PROFILE (metadata-only suggestions; do not treat as facts or use it to invent fields, values, or formulas):\n"
+            f"{json.dumps(semantic, ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if semantic else ""
+        )
+        + (
+            "NORMALIZATION PLAN (validated category mappings that the local build applies; use canonical target values in filters and describe ambiguities as limitations):\n"
+            f"{json.dumps(normalization_plan, ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if normalization_plan else ""
+        )
+        + (
+            "LOCAL CALCULATION TOOL RESULTS (computed by Python from the actual project data; use these values as evidence, but only use fields from the allowlist):\n"
+            f"{json.dumps(calculation_results, ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if calculation_results else ""
+        )
+        + (
+            "APPROVED METRIC CONTRACTS (optional deterministic metrics; use contract:<id> exactly as the metric and preserve the listed formula):\n"
+            f"{json.dumps(list(approved_metric_contracts(rules).values()), ensure_ascii=False, separators=(',', ':'))}\n\n"
+            if approved_metric_contracts(rules) else ""
+        )
+        + (
+        "Return each KPI as an object with name, metric, aggregation, source_fields, and comparison. "
+        "CRITICAL FORMAT: metric MUST be an exact numeric field name (e.g. \"Core_Minor_Credits_Earned\"), NEVER an aggregation word like \"SUM\". "
+        "aggregation holds the word (sum/average/count). source_fields MUST list the numeric measure field(s), NEVER the category/dimension. "
+        "CORRECT: {\"metric\":\"Core_Minor_Credits_Earned\",\"aggregation\":\"sum\",\"source_fields\":[\"Core_Minor_Credits_Earned\"]}. "
+        "WRONG: {\"metric\":\"SUM\",...} or {\"metric\":\"Core_Minor_Credits_Earned\",\"source_fields\":[\"Academic_Pass\"]}. "
         "Use comparison.enabled=true and comparison.period=latest_year_vs_previous_year when the user requests an up/down KPI. "
-        "Return each chart as an object with title, type (bar/line/pie), dimension, metric, aggregation, formula, source_fields, limitations, and optional target. "
+        "Return each chart as an object with title, type (bar/line/pie), dimension, metric, aggregation, source_fields, and optional target. "
+        "For a chart, dimension is the category axis and metric is the numeric field being aggregated — they are DIFFERENT fields. "
+        "Keep every value short: do NOT write formula text, limitations prose, or long descriptions — the build computes all numbers itself, so extra prose only wastes space. "
         "When the user gives a chart target, set target.value, target.label, and target.year_be when supplied. "
         "Use filters to include only the filters requested or useful for the plan; omit a filter when the user asks to remove it. "
         "Use display_labels to rename a visible filter/axis label without changing its field name. "
         "Use only the exact field references in this allowlist for metric, dimension, source_fields, and filters. "
         "Never translate, shorten, or invent an alias for a field name.\n"
-        f"ALLOWED FIELD REFERENCES:\n{json.dumps(allowed_references, ensure_ascii=False)}"
+        f"ALLOWED FIELD REFERENCES: {', '.join(allowed_references)}"
+        )
     )
     if current_spec:
+        # The full spec is ~2.4k tokens for a rich dashboard; on the Groq TPM-8000
+        # budget that pushes a revise prompt over the limit. Send a compact view that
+        # keeps what must be preserved (names, types, fields, labels) but drops verbose
+        # prose the model does not need to echo back (limitations, insight_questions).
+        def _compact(spec):
+            keep_kpi = ("name", "metric", "aggregation", "formula", "source_fields", "comparison")
+            keep_chart = ("title", "type", "dimension", "metric", "aggregation", "formula", "source_fields", "target")
+            out = {
+                "dashboard_title": spec.get("dashboard_title"),
+                "kpis": [{k: v for k, v in kpi.items() if k in keep_kpi} for kpi in spec.get("kpis", [])],
+                "charts": [{k: v for k, v in ch.items() if k in keep_chart} for ch in spec.get("charts", [])],
+                "filters": spec.get("filters", []),
+            }
+            if spec.get("display_labels"):
+                out["display_labels"] = spec["display_labels"]
+            return out
         prompt += (
-            "\n\nCURRENT SPEC TO REVISE:\n"
-            f"{json.dumps(current_spec, ensure_ascii=False)}\n"
+            "\n\nCURRENT SPEC TO REVISE (compact):\n"
+            f"{json.dumps(_compact(current_spec), ensure_ascii=False, separators=(',', ':'))}\n"
             "This is a revision, not a replacement. Preserve every valid chart, KPI, filter, and exact field reference unless the user explicitly asks to remove or replace it. "
             "The revised specification must contain at least one chart. Do not introduce a calculated metric such as a rate, count, share, or distribution unless the exact source field or a supported derived metric is in ALLOWED FIELD REFERENCES. "
             "When a requested calculation is unsupported, retain the valid current plan and state the limitation instead."
         )
     spec = generate_json("You are a careful cloud analytics planner. Return only grounded JSON.", prompt, schema)
+    spec = normalize_spec_metrics(spec, profile)
     errors = grounded_spec_errors(spec, profile, rules)
     if errors:
         repair_prompt = (
@@ -802,6 +1321,7 @@ def local_ai_spec(profile: dict[str, Any], rules: dict[str, Any], instruction: s
             "Return a complete corrected JSON specification."
         )
         repaired = generate_json("You repair dashboard plans using only exact available fields. Return only grounded JSON.", repair_prompt, schema)
+        repaired = normalize_spec_metrics(repaired, profile)
         errors = grounded_spec_errors(repaired, profile, rules)
         if errors:
             raise ValueError("Local AI produced an unsupported dashboard plan: " + " ".join(errors))
@@ -817,6 +1337,7 @@ def local_ai_spec(profile: dict[str, Any], rules: dict[str, Any], instruction: s
         + "\nRevise the complete dashboard plan so every item is directly covered by a KPI or chart, or omit only items unsupported by the data profile."
     )
     covered_spec = generate_json("You repair dashboard plans so every explicit request is covered with grounded fields. Return only JSON.", coverage_prompt, schema)
+    covered_spec = normalize_spec_metrics(covered_spec, profile)
     errors = grounded_spec_errors(covered_spec, profile, rules)
     if errors:
         raise ValueError("Local AI produced an unsupported dashboard plan after requirement review: " + " ".join(errors))
@@ -1251,18 +1772,28 @@ def get_ai_analysis_bundle(name: str, profile: dict[str, Any], records: list[dic
     normalization = normalization_context(profile, records)
     allowed_fields = {field["name"] for field in safe_profile["fields"]}
     tool_fields = sorted(allowed_fields | {"record_count", "unique_student_count"})
-    result = generate_json(
-        "You are a careful data-governance and dashboard-analysis planner. Work only from supplied metadata and bounded category counts. "
-        "Never invent facts, fields, values, formulas, relationships, or raw-data examples. Identify aggregation risks. "
-        "Propose only clearly equivalent category mappings; never map identifiers, names, free text, or numeric measures. "
-        "Choose no more than ten bounded aggregate requests using exact allowed fields and equality filters only.",
-        f"USER REQUEST:\n{instruction or 'Create a useful management dashboard.'}\n\n"
-        f"DATA PROFILE (metadata only):\n{json.dumps(safe_profile, ensure_ascii=False)}\n\n"
-        f"NORMALIZATION CANDIDATES:\n{json.dumps(normalization, ensure_ascii=False)}\n\n"
-        f"AVAILABLE AGGREGATE FIELDS:\n{json.dumps(tool_fields, ensure_ascii=False)}\n\n"
-        "Return semantic interpretations, normalization mappings, and calculation requests in the requested JSON object.",
-        analysis_bundle_schema(),
-    )
+    try:
+        result = generate_json(
+            "You are a careful data-governance and dashboard-analysis planner. Work only from supplied metadata and bounded category counts. "
+            "Never invent facts, fields, values, formulas, relationships, or raw-data examples. Identify aggregation risks. "
+            "Propose only clearly equivalent category mappings; never map identifiers, names, free text, or numeric measures. "
+            "KEEP NORMALIZATION MINIMAL: only map when two category labels clearly mean the same thing. NEVER create a mapping "
+            "for a numeric field (GPAX, credits, counts) and NEVER emit one mapping per distinct value — that is wrong and wastes space. "
+            "Most fields need NO mapping; return an empty mappings list when nothing needs merging. "
+            "Choose no more than ten bounded aggregate requests using exact allowed fields and equality filters only.",
+            f"USER REQUEST:\n{instruction or 'Create a useful management dashboard.'}\n\n"
+            f"DATA PROFILE (metadata only):\n{json.dumps(safe_profile, ensure_ascii=False)}\n\n"
+            f"NORMALIZATION CANDIDATES:\n{json.dumps(normalization, ensure_ascii=False)}\n\n"
+            f"AVAILABLE AGGREGATE FIELDS:\n{json.dumps(tool_fields, ensure_ascii=False)}\n\n"
+            "Return semantic interpretations, normalization mappings, and calculation requests in the requested JSON object.",
+            analysis_bundle_schema(),
+        )
+    except Exception:
+        # The analysis bundle is advisory — semantic hints + optional category
+        # merges. A small local model can truncate this long JSON; when it does,
+        # fall back to an EMPTY analysis so the dashboard still builds from the
+        # deterministic profile instead of failing the whole run.
+        result = {}
     semantic_result = result.get("semantic") if isinstance(result.get("semantic"), dict) else {}
     semantic = {
         "generated_by": f"{provider}-ai",
@@ -1374,18 +1905,27 @@ def render_dashboard_qa(name: str, config: dict[str, Any], spec: dict[str, Any],
     chart_html = "".join(f'<article class="panel"><h2>{plan["title"]}</h2><div class="chart" id="{plan["id"]}"></div></article>' for plan in plans)
     warning_html = "".join(f"<li>{issue}</li>" for issue in issues) or "<li>ผ่านการตรวจความเหมาะสมของ field ก่อนสร้างกราฟ</li>"
     tracker_html = "".join(f"<li>{issue}</li>" for issue in issues) or "<li>ไม่พบประเด็นเชิงโครงสร้างจากการตรวจอัตโนมัติ</li>"
-    template = '''<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet"><title>__TITLE__</title><style>
-:root{--navy:#0B2B5E;--blue:#263988;--gold:#FECD54;--bg:#F4F5F9;--line:#D9DEE8;--muted:#5f6b7c;--green:#0F8F83;--red:#C94A4A}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1F2937;font-family:Prompt,"Noto Sans Thai",Tahoma,sans-serif}main{max-width:1440px;margin:auto;padding:20px clamp(16px,3vw,44px) 48px}header,.panel,.card{background:#fff;border:1px solid var(--line);border-radius:6px}header{display:grid;grid-template-columns:330px 1fr auto;gap:20px;align-items:center;border-top:4px solid var(--gold);padding:16px 22px}.identity{display:flex;align-items:center;gap:13px;color:var(--navy);font-weight:700}.identity img{width:72px;height:72px;object-fit:contain}.identity small,.title p{display:block;color:var(--muted);font-size:12px;font-weight:400}.title{text-align:center}.title p{margin:0}.title h1{margin:5px 0;color:var(--navy);font-family:Prompt,"Noto Serif Thai",serif;font-size:clamp(1.65rem,3vw,2.5rem)}.badge{border:1px solid var(--gold);padding:9px;font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap}.filters,.kpis,.grid{display:grid;gap:14px;margin-top:18px}.filters{grid-template-columns:repeat(auto-fit,minmax(175px,1fr));align-items:end}label{display:grid;gap:6px;color:var(--navy);font-size:12px;font-weight:700}button,.multi{border:1px solid var(--line);background:#fff;border-radius:4px;padding:8px;color:#1F2937;font:inherit}.multi{position:relative;padding:0}.multi summary{padding:8px;cursor:pointer;list-style:none}.multi summary:after{content:'⌄';float:right}.options{position:absolute;z-index:3;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow:auto;background:#fff;border:1px solid var(--line);padding:6px;box-shadow:0 6px 16px #0b2b5e22}.options label{display:flex;align-items:center;gap:7px;padding:5px;color:#1F2937;font-weight:400}.options input{margin:0}button{min-height:38px;cursor:pointer}button:hover,.bar-label.active{border-color:var(--navy);background:#edf2fb}.kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.card{border-top:3px solid var(--navy);padding:15px}.card span{font-size:12px;color:var(--muted);font-weight:700}.card strong{display:block;margin-top:7px;color:var(--navy);font-size:25px}.delta{margin-top:6px;font-size:12px;font-weight:700}.good{color:var(--green)}.bad{color:var(--red)}.neutral{color:var(--muted)}.grid{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}.panel{padding:18px}.panel h2{margin:0 0 12px;color:var(--navy);font:700 17px Prompt,"Noto Serif Thai",serif}.bar-row{display:grid;grid-template-columns:minmax(90px,1fr) 2fr auto;align-items:center;gap:9px;margin:9px 0;font-size:12px}.bar-label{text-align:left;border:0;padding:0;background:transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.track{height:13px;background:#dce2ed}.bar{height:100%;background:var(--mark,var(--blue))}.line{display:flex;align-items:end;height:180px;gap:8px;border-bottom:1px solid var(--line)}.point{flex:1;min-width:18px;background:var(--mark,var(--blue));position:relative;border:0;padding:0}.point span{position:absolute;bottom:calc(100% + 4px);font-size:10px;transform:rotate(-35deg);transform-origin:left bottom;white-space:nowrap}.pie-wrap{display:flex;align-items:center;gap:18px}.pie{width:150px;height:150px;border-radius:50%;flex:none}.legend{font-size:12px;line-height:1.8}.notice{grid-column:1/-1;border-left:3px solid var(--gold);background:#fff9e8;padding:12px;color:#5d4d1d;font-size:13px}.notice ul{margin:5px 0 0;padding-left:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--navy)}.table{overflow:auto;max-height:340px}@media(max-width:860px){header{grid-template-columns:1fr}.title{text-align:left}.badge{width:max-content}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}</style></head><body><main><header><div class="identity"><img src="__LOGO__" alt="ตรามหาวิทยาลัยมหิดล"><div>คณะศิลปศาสตร์ มหาวิทยาลัยมหิดล<small>Faculty of Liberal Arts, Mahidol University</small></div></div><div class="title"><p>การวิเคราะห์ผลการดำเนินงาน</p><h1>__TITLE__</h1><p>__PURPOSE__</p></div><div class="badge">QA-AWARE DASHBOARD</div></header><section class="filters">__FILTERS__<button id="clear" type="button">ล้างตัวกรองทั้งหมด</button></section><section class="kpis" id="kpis"></section><section class="grid"><aside class="notice"><b>ข้อมูลที่ต้องพิจารณาเพิ่มเติม</b><ul>__ISSUES__</ul></aside>__CHARTS__<article class="panel"><h2>รายละเอียดข้อมูล</h2><div class="table"><table id="table"></table></div></article></section></main><script>
+    template = '''<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><title>__TITLE__</title><style>
+:root{--navy:#0B2B5E;--blue:#263988;--gold:#FECD54;--bg:#eef1f6;--surface:#ffffff;--line:#e3e8f0;--muted:#5f6b7c;--green:#0F8F83;--red:#C94A4A;--teal:#1AA9B8;--violet:#6C5CE7;--radius:16px;--shadow:0 1px 2px rgba(11,43,94,.04),0 6px 20px rgba(11,43,94,.06)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1F2937;font-family:Prompt,"Noto Sans Thai",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}main{max-width:1480px;margin:auto;padding:22px clamp(16px,3vw,40px) 52px}header,.panel,.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}header{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;padding:18px 24px;margin-bottom:4px;background:linear-gradient(120deg,#ffffff 60%,#f3f0ff 100%)}.identity{display:flex;align-items:center;gap:13px;color:var(--navy);font-weight:700}.identity img{width:58px;height:58px;object-fit:contain}.identity small,.title p{display:block;color:var(--muted);font-size:12px;font-weight:400}.title{text-align:center}.title p{margin:0}.title h1{margin:4px 0;color:var(--navy);font-weight:800;font-size:clamp(1.5rem,2.6vw,2.1rem);letter-spacing:-.01em}.badge{border:0;background:linear-gradient(135deg,var(--navy),var(--violet));color:#fff;border-radius:999px;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap}.filters,.kpis,.grid{display:grid;gap:16px;margin-top:20px}.filters{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}label{display:grid;gap:6px;color:var(--navy);font-size:12px;font-weight:600}button,.multi{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;color:#1F2937;font:inherit;transition:border-color .15s,background .15s,box-shadow .15s}.multi{position:relative;padding:0}.multi summary{padding:9px 12px;cursor:pointer;list-style:none}.multi summary:after{content:'⌄';float:right;color:var(--muted)}.options{position:absolute;z-index:3;top:calc(100% + 6px);left:0;right:0;max-height:230px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(11,43,94,.14)}.options label{display:flex;align-items:center;gap:7px;padding:6px;border-radius:8px;color:#1F2937;font-weight:400}.options label:hover{background:#f1f4fa}.options input{margin:0}button{min-height:40px;cursor:pointer;font-weight:600}button:hover,.bar-label.active{border-color:var(--navy);background:#eef3fc;box-shadow:0 1px 0 rgba(11,43,94,.05)}#clear{align-self:end}.kpis{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.card{padding:18px 20px;position:relative;overflow:hidden}.card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--navy);border-radius:var(--radius) 0 0 var(--radius)}.card span{font-size:12px;color:var(--muted);font-weight:600}.card strong{display:block;margin-top:9px;color:var(--navy);font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+/* Vivid KPI tiers derived from the Mahidol palette */
+.kpis .card:nth-child(1){background:linear-gradient(135deg,var(--navy),var(--violet));border:0;color:#fff}.kpis .card:nth-child(1):before{display:none}.kpis .card:nth-child(1) span{color:rgba(255,255,255,.82)}.kpis .card:nth-child(1) strong{color:#fff}.kpis .card:nth-child(1) .delta{background:rgba(255,255,255,.18);color:#fff!important}.kpis .card:nth-child(1):after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
+.kpis .card:nth-child(2):before{background:linear-gradient(180deg,var(--teal),#0f8f83)}.kpis .card:nth-child(2) strong{color:var(--teal)}
+.kpis .card:nth-child(3):before{background:linear-gradient(180deg,var(--gold),#e0a92a)}.kpis .card:nth-child(3) strong{color:#b9821a}
+.kpis .card:nth-child(4):before{background:linear-gradient(180deg,var(--violet),#4b3fb8)}.kpis .card:nth-child(4) strong{color:var(--violet)}
+.delta{margin-top:8px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px}.good{color:var(--green);background:rgba(15,143,131,.12)}.bad{color:var(--red);background:rgba(201,74,74,.12)}.neutral{color:var(--muted);background:#eef1f6}.grid{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}.panel{padding:20px 22px}.panel h2{margin:0 0 14px;color:var(--navy);font-weight:700;font-size:16px}.bar-row{display:grid;grid-template-columns:minmax(90px,1fr) 2fr auto;align-items:center;gap:10px;margin:11px 0;font-size:12px}.bar-label{text-align:left;border:0;padding:0;background:transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:auto;font-weight:500}.bar-label:hover{background:transparent;box-shadow:none;color:var(--navy);text-decoration:underline}.track{height:11px;background:#e7ecf4;border-radius:999px;overflow:hidden}.bar{height:100%;background:var(--mark,linear-gradient(90deg,var(--blue),var(--violet)));border-radius:999px;transition:width .4s ease}.line{display:flex;align-items:end;height:180px;gap:9px;border-bottom:1px solid var(--line)}.point{flex:1;min-width:16px;background:var(--mark,linear-gradient(180deg,var(--violet),var(--blue)));border-radius:6px 6px 0 0;position:relative;border:0;padding:0;min-height:auto}.point span{position:absolute;bottom:calc(100% + 4px);font-size:10px;transform:rotate(-35deg);transform-origin:left bottom;white-space:nowrap;color:var(--muted)}.pie-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.pie{width:150px;height:150px;border-radius:50%;flex:none}.legend{font-size:12px;line-height:1.9}.notice{grid-column:1/-1;border:0;border-left:4px solid var(--gold);background:#fffaf0;border-radius:12px;padding:14px 16px;color:#6b5618;font-size:13px;box-shadow:var(--shadow)}.notice ul{margin:6px 0 0;padding-left:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 10px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--navy);font-weight:600;position:sticky;top:0;background:var(--surface);z-index:1}tbody tr:hover{background:#f6f8fc}.table{overflow:auto;max-height:380px;border-radius:10px;border:1px solid var(--line)}#charts-anchor{grid-column:1/-1;height:0;margin:0;padding:0;border:0}#table-anchor{display:block;height:0}@media(max-width:860px){header{grid-template-columns:1fr;text-align:left}.title{text-align:left}.badge{width:max-content}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;transition:none!important}}
+.shell{display:flex;min-height:100vh}.sidenav{width:230px;flex:none;background:#0B2B5E;color:#fff;padding:20px 14px;position:sticky;top:0;align-self:flex-start;height:100vh;overflow:auto}.sidenav .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;font-weight:700}.sidenav .brand .mark{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.12);color:var(--gold);display:grid;place-items:center;font-size:18px;font-weight:800}.sidenav .brand small{display:block;font-size:10px;font-weight:400;color:#aeb8d4}.sidenav .navgroup{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8595bf;padding:12px 10px 6px}.sidenav a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;color:#d7def0;text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s}.sidenav a:hover,.sidenav a.active{background:rgba(255,255,255,.1);color:#fff}.sidenav a .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}.shell main{flex:1;min-width:0;max-width:none;padding:22px clamp(16px,3vw,40px) 52px}@media(max-width:860px){.shell{display:block}.sidenav{width:auto;height:auto;position:static;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sidenav .brand{padding:4px 8px}.sidenav .navgroup{display:none}.sidenav a{padding:7px 10px}}</style></head><body><div class="shell"><aside class="sidenav"><div class="brand"><span class="mark">✧</span><span>Dashboard Factory<small>คณะศิลปศาสตร์ ม.มหิดล</small></span></div><div class="navgroup">เมนู</div><nav id="sidenav-links"><a href="#kpis" class="active"><span class="dot"></span>ภาพรวม (KPI)</a><a href="#charts-anchor"><span class="dot"></span>กราฟวิเคราะห์</a><a href="#table-anchor"><span class="dot"></span>รายละเอียดข้อมูล</a></nav></aside><main><header><div class="identity"><img src="__LOGO__" alt="ตรามหาวิทยาลัยมหิดล"><div>คณะศิลปศาสตร์ มหาวิทยาลัยมหิดล<small>Faculty of Liberal Arts, Mahidol University</small></div></div><div class="title"><p>การวิเคราะห์ผลการดำเนินงาน</p><h1>__TITLE__</h1><p>__PURPOSE__</p></div><div class="badge">QA-AWARE DASHBOARD</div></header><section class="filters">__FILTERS__<button id="clear" type="button">ล้างตัวกรองทั้งหมด</button></section><section class="kpis" id="kpis"></section><section class="grid"><span id="charts-anchor"></span>__CHARTS__<article class="panel"><span id="table-anchor"></span><h2>รายละเอียดข้อมูล</h2><div class="table"><table id="table"></table></div></article><aside class="notice"><b>ข้อมูลที่ต้องพิจารณาเพิ่มเติม</b><ul>__ISSUES__</ul></aside></section></main></div><script>
 const rows=__ROWS__,plans=__PLANS__,fields=__FIELDS__,filterFields=__FILTER_FIELDS__,fmt=new Intl.NumberFormat('th-TH',{maximumFractionDigits:2});let chartFilter=null;
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');const numericValue=value=>{const match=String(value??'').replaceAll(',','').match(/-?\d+(?:\.\d+)?/);return match?Number(match[0]):0};function aggregate(data,metric){if(metric==='record_count')return data.length;if(metric==='unique_student_count')return new Set(data.map(row=>String(row['รหัสนักศึกษา']??'').trim()).filter(value=>value&&!/^[-\s]*$/.test(value))).size;const values=data.map(row=>numericValue(row[metric])).filter(value=>Number.isFinite(value));if(!values.length)return 0;if(/อัตรา|rate/i.test(metric)){const normalized=values.map(value=>value<=1?value*100:value);return normalized.reduce((sum,value)=>sum+value,0)/normalized.length}return values.reduce((sum,value)=>sum+value,0)}
 filterFields.forEach((field,index)=>{const options=document.querySelector('#filter-'+index),summary=document.querySelector('#filter-'+index+'-summary');[...new Set(rows.map(row=>String(row[field]??'ไม่ระบุ'))) ].sort((a,b)=>a.localeCompare(b,'th',{numeric:true})).forEach((value,itemIndex)=>{const id=`f-${index}-${itemIndex}`;options.insertAdjacentHTML('beforeend',`<label for="${id}"><input id="${id}" type="checkbox" value="${esc(value)}">${esc(value)}</label>`)});options.addEventListener('change',()=>{const values=selectedValues(field,index);summary.textContent=values.size?`${values.size} รายการ`: 'ทั้งหมด';render()})});
 function selectedValues(field,index){return new Set([...document.querySelectorAll('#filter-'+index+' input:checked')].map(input=>input.value))}function visible(){return rows.filter(row=>filterFields.every((field,index)=>{const picked=selectedValues(field,index);return !picked.size||picked.has(String(row[field]??'ไม่ระบุ'))})&&(!chartFilter||String(row[chartFilter.field]??'ไม่ระบุ')===chartFilter.value))}
-function draw(plan,data){const buckets={};data.forEach(row=>{const key=String(row[plan.dimension]??'ไม่ระบุ');(buckets[key]??=[]).push(row)});const items=Object.entries(buckets).map(([label,group])=>[label,aggregate(group,plan.metric)]).sort((a,b)=>plan.type==='line'?a[0].localeCompare(b[0],'th',{numeric:true}):b[1]-a[1]).slice(0,12),max=Math.max(...items.map(item=>item[1]),1),total=items.reduce((sum,item)=>sum+item[1],0)||1,target=document.querySelector('#'+plan.id),colors=['#263988','#0F8F83','#FECD54','#C94A4A','#8094b8','#718c8e','#6B7280'],detail=`Field: ${plan.metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${data.length}`;if(plan.type==='pie'){let run=0;const parts=items.map(([label,value],index)=>{const start=run;run+=value/total*100;return `${colors[index%colors.length]} ${start}% ${run}%`});target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label,value],index)=>`<div style="color:${colors[index%colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value/total*100)}%)</span></div>`).join('')}</div></div>`}else if(plan.type==='line'){target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">`+items.map(([label,value],index)=>`<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index%colors.length]};height:${Math.max(value/max*100,3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('')+'</div>'}else{target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button>`+items.map(([label,value],index)=>`<div class="bar-row"><button class="bar-label" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" title="กรองตาม ${esc(label)}">${esc(label)}</button><div class="track"><div class="bar" style="--mark:${colors[index%colors.length]};width:${Math.max(value/max*100,2)}%"></div></div><b>${fmt.format(value)}</b></div>`).join('')||'<span class="neutral">ไม่พบข้อมูล</span>'}target.querySelectorAll('[data-field]').forEach(button=>button.onclick=()=>{chartFilter={field:button.dataset.field,value:button.dataset.value};render()})}
+function draw(plan,data){const buckets={};data.forEach(row=>{const key=String(row[plan.dimension]??'ไม่ระบุ');(buckets[key]??=[]).push(row)});const items=Object.entries(buckets).map(([label,group])=>[label,aggregate(group,plan.metric)]).sort((a,b)=>plan.type==='line'?a[0].localeCompare(b[0],'th',{numeric:true}):b[1]-a[1]).slice(0,12),max=Math.max(...items.map(item=>item[1]),1),total=items.reduce((sum,item)=>sum+item[1],0)||1,target=document.querySelector('#'+plan.id),colors=['#263988','#6C5CE7','#1AA9B8','#0F8F83','#FECD54','#E8743B','#C94A4A','#8094b8'],detail=`Field: ${plan.metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${data.length}`;if(plan.type==='pie'){let run=0;const parts=items.map(([label,value],index)=>{const start=run;run+=value/total*100;return `${colors[index%colors.length]} ${start}% ${run}%`});target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label,value],index)=>`<div style="color:${colors[index%colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value/total*100)}%)</span></div>`).join('')}</div></div>`}else if(plan.type==='line'){target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">`+items.map(([label,value],index)=>`<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index%colors.length]};height:${Math.max(value/max*100,3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('')+'</div>'}else{target.innerHTML=`<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button>`+items.map(([label,value],index)=>`<div class="bar-row"><button class="bar-label" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" title="กรองตาม ${esc(label)}">${esc(label)}</button><div class="track"><div class="bar" style="--mark:${colors[index%colors.length]};width:${Math.max(value/max*100,2)}%"></div></div><b>${fmt.format(value)}</b></div>`).join('')||'<span class="neutral">ไม่พบข้อมูล</span>'}target.querySelectorAll('[data-field]').forEach(button=>button.onclick=()=>{chartFilter={field:button.dataset.field,value:button.dataset.value};render()})}
 function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filter(row=>row._year_be),year=Math.max(...yearRows.map(row=>Number(row._year_be)),0),current=aggregate(yearRows.filter(row=>Number(row._year_be)===year),metric),previous=aggregate(yearRows.filter(row=>Number(row._year_be)===year-1),metric),change=previous?((current-previous)/Math.abs(previous)*100):null;document.querySelector('#kpis').innerHTML=`<article class="card"><span>จำนวนนักศึกษาที่ระบุรหัส</span><strong>${fmt.format(aggregate(data,'unique_student_count'))}</strong><div class="delta neutral">COUNT(DISTINCT รหัสนักศึกษา)</div></article><article class="card"><span>จำนวนรายการ</span><strong>${fmt.format(data.length)}</strong><div class="delta neutral">${chartFilter?'กรองจากกราฟ: '+esc(chartFilter.value):'ข้อมูลตามตัวกรอง'}</div></article><article class="card"><span>อัตราจบเฉลี่ย</span><strong>${fmt.format(aggregate(data,'อัตราการจบตามวงรอบ'))}%</strong><div class="delta ${change===null?'neutral':change>=0?'good':'bad'}">${change===null?'ไม่มีฐานเปรียบเทียบ':`${change>=0?'▲':'▼'} ${fmt.format(Math.abs(change))}% เทียบปีก่อน`}</div></article>`;plans.forEach(plan=>draw(plan,data));document.querySelector('#table').innerHTML='<thead><tr>'+fields.map(field=>`<th>${esc(field)}</th>`).join('')+'</tr></thead><tbody>'+data.slice(0,100).map(row=>'<tr>'+fields.map(field=>`<td>${esc(row[field])}</td>`).join('')+'</tr>').join('')+'</tbody>'}document.querySelector('#clear').onclick=()=>{chartFilter=null;filterFields.forEach((field,index)=>{document.querySelectorAll('#filter-'+index+' input').forEach(input=>input.checked=false);document.querySelector('#filter-'+index+'-summary').textContent='ทั้งหมด'});render()};render();
 </script></body></html>'''
     html = (template.replace("__TITLE__", str(spec.get("dashboard_title", name))).replace("__PURPOSE__", str(spec.get("purpose", ""))).replace("__LOGO__", f"/api/projects/{name}/dashboard/assets/logo.png").replace("__FILTERS__", filter_html).replace("__ISSUES__", warning_html).replace("__CHARTS__", chart_html).replace("__ROWS__", json.dumps(prepared, ensure_ascii=False, separators=(",", ":"))).replace("__PLANS__", json.dumps(plans, ensure_ascii=False)).replace("__FIELDS__", json.dumps(fields, ensure_ascii=False)).replace("__FILTER_FIELDS__", json.dumps(filter_fields, ensure_ascii=False)))
     enhancement = '''<style>
 .chart{position:relative}.axis-label{color:#5f6b7c;font-size:11px;font-weight:600}.axis-y{margin:4px 0}.axis-x{text-align:center;margin-top:7px}.bar-scale{display:flex;justify-content:space-between;margin-left:32%;padding-top:4px;border-top:1px solid #b8c3d6;color:#5f6b7c;font-size:10px}.line{position:relative;align-items:end!important;background:repeating-linear-gradient(to top,transparent 0,transparent 24%,#d9dee8 24%,#d9dee8 25%);padding-bottom:26px}.target-line{position:absolute;left:0;right:0;border-top:2px dashed #C94A4A;pointer-events:none}.target-line span{position:absolute;right:0;bottom:3px;padding:1px 4px;background:#fff;color:#C94A4A;font-size:10px;font-weight:700}.target-marker{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed #C94A4A;pointer-events:none}.target-marker span{position:absolute;top:-18px;left:-2px;white-space:nowrap;padding:1px 4px;background:#fff;color:#C94A4A;font-size:10px;font-weight:700}.point{overflow:visible!important}.point span{bottom:-24px!important;transform:none!important;left:50%;translate:-50% 0;max-width:54px;overflow:hidden;text-overflow:ellipsis;text-align:center}.point .point-value{position:absolute;bottom:calc(100% + 5px);left:50%;translate:-50% 0;color:#1F2937;font-size:10px;font-weight:700;white-space:nowrap}.calc{position:absolute;right:0;top:-38px;min-height:auto;padding:4px 7px;font-size:10px;color:#0B2B5E}.calc-detail{margin:0 0 10px;padding:8px 10px;background:#f4f5f9;border-left:3px solid #FECD54;color:#1F2937;font-size:11px;line-height:1.55}.review-tools{display:flex;justify-content:flex-end;margin:-4px 0 10px}.review-tools button{min-height:auto;padding:5px 8px;font-size:11px}.review-row{background:#fff8e8}.review-note{font-size:11px;color:#9a6700;font-weight:600}.tracker-panel{border-top:3px solid #FECD54}.tracker-panel ul{margin:0;padding-left:18px;font-size:12px;line-height:1.7}.tracker-panel p{font-size:12px;color:#5f6b7c}@media(min-width:1080px){.detail-panel{grid-column:span 2}.tracker-panel{grid-column:span 1}}@media(max-width:1079px){.detail-panel,.tracker-panel{grid-column:auto}}
+.view-toggle{display:flex;gap:0;margin-left:auto}.view-toggle button{min-height:38px;border-radius:0}.view-toggle button:first-child{border-radius:4px 0 0 4px}.view-toggle button:last-child{border-radius:0 4px 4px 0;border-left:0}.view-toggle button.active{background:#0B2B5E;color:#fff;border-color:#0B2B5E}
+body.view-table .grid > .panel:not(.detail-panel):not(.tracker-panel),body.view-table .grid > .notice{display:none}body.view-table .detail-panel{grid-column:1/-1}body.view-table .detail-panel .table{max-height:none}
 </style><script>
 (() => {
     let reviewOnly = false;
@@ -1448,6 +1988,17 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
         }
         const grid = document.querySelector('.grid');
         if (grid && !document.querySelector('.tracker-panel')) grid.insertAdjacentHTML('beforeend', '<article class="panel tracker-panel"><h2>ประเด็นที่ต้องติดตาม</h2><p>รายการที่ต้องตรวจสอบหรือยืนยันกับข้อมูลต้นทาง</p><ul>__TRACKER__</ul></article>');
+        const filtersBar = document.querySelector('.filters');
+        if (filtersBar && !document.querySelector('.view-toggle')) {
+            filtersBar.insertAdjacentHTML('beforeend', '<div class="view-toggle"><button type="button" id="view-chart" class="active">กราฟ</button><button type="button" id="view-table">ตาราง</button></div>');
+            const setView = table => {
+                document.body.classList.toggle('view-table', table);
+                document.querySelector('#view-table').classList.toggle('active', table);
+                document.querySelector('#view-chart').classList.toggle('active', !table);
+            };
+            document.querySelector('#view-table').addEventListener('click', () => setView(true));
+            document.querySelector('#view-chart').addEventListener('click', () => setView(false));
+        }
         applyReview();
     }
     function applyReview() {
@@ -1514,7 +2065,7 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
         constrained.forEach(row => (buckets[String(row[plan.dimension] ?? 'ไม่ระบุ')] ??= []).push(row));
         const items = Object.entries(buckets).map(([label, group]) => [label, planAggregate(group, plan)]).sort((left, right) => plan.type === 'line' ? String(left[0]).localeCompare(String(right[0]), 'th', {numeric: true}) : right[1] - left[1]).slice(0, 12);
         const max = Math.max(...items.map(item => item[1]), 1), total = items.reduce((sum, item) => sum + item[1], 0) || 1;
-        const target = document.querySelector('#' + plan.id), colors = ['#263988','#0F8F83','#FECD54','#C94A4A','#8094b8','#718c8e','#6B7280'];
+        const target = document.querySelector('#' + plan.id), colors = ['#263988','#6C5CE7','#1AA9B8','#0F8F83','#FECD54','#E8743B','#C94A4A','#8094b8'];
         const detail = `Field: ${formulaPlan(plan).metric} | Group: ${plan.dimension} | Formula: ${plan.formula} | Source rows: ${constrained.length}`;
         if (plan.type === 'pie') { let run = 0; const parts = items.map(([label, value], index) => { const start = run; run += value / total * 100; return `${colors[index % colors.length]} ${start}% ${run}%`; }); target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="pie-wrap"><div class="pie" style="background:conic-gradient(${parts.join(',')})"></div><div class="legend">${items.map(([label, value], index) => `<div style="color:${colors[index % colors.length]}">■ <span style="color:#1F2937">${esc(label)}: ${fmt.format(value)} (${fmt.format(value / total * 100)}%)</span></div>`).join('')}</div></div>`; }
         else if (plan.type === 'line') target.innerHTML = `<button class="calc" title="${esc(detail)}">วิธีคำนวณ</button><div class="line">` + items.map(([label, value], index) => `<button class="point" data-field="${esc(plan.dimension)}" data-value="${esc(label)}" style="--mark:${colors[index % colors.length]};height:${Math.max(value / max * 100, 3)}%" title="${esc(label)}: ${fmt.format(value)}"><span>${esc(label)} · ${fmt.format(value)}</span></button>`).join('') + '</div>';
@@ -1533,6 +2084,20 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
     };
     render();
     decorate();
+    // Sidebar nav: smooth scroll + highlight the section in view.
+    (() => {
+        document.documentElement.style.scrollBehavior = 'smooth';
+        const links = [...document.querySelectorAll('#sidenav-links a')];
+        const targets = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+        if (!targets.length) return;
+        const spy = () => {
+            let activeIndex = 0;
+            targets.forEach((el, i) => { if (el.getBoundingClientRect().top <= 140) activeIndex = i; });
+            links.forEach((a, i) => a.classList.toggle('active', i === activeIndex));
+        };
+        window.addEventListener('scroll', spy, { passive: true });
+        spy();
+    })();
 })();
 </script>'''
     labels = {field: display_label(field, label_overrides) for field in set(fields) | {"_year_be", "_academic_year_be", "_month_th", "_quarter", "record_count", "unique_student_count"}}
@@ -1542,12 +2107,20 @@ function render(){const data=visible(),metric=plans[0].metric,yearRows=data.filt
 def build_project(name: str) -> dict[str, Any]:
     directory = project_dir(name)
     profile = read_json(directory / "output/metadata/dataset-profile.json", None) or profile_project(name)
+    # A profile from an older/incompatible pipeline (or a half-written one) can lack
+    # the 'fields' key the rest of the build relies on — regenerate it rather than crash.
+    if not isinstance(profile, dict) or not profile.get("fields"):
+        profile = profile_project(name)
     config = project_config(name, profile)
     rules = validate_calculation_rules(config["calculation_rules"])
     config["calculation_rules"] = rules
     write_json(directory / "config.json", config)
     spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None) or suggest_spec(name)
     require_supported_text(spec)
+    _ai_labels = profile.get("ai_labels") if isinstance(profile.get("ai_labels"), dict) else {}
+    if _ai_labels:
+        _cur = spec.get("display_labels") if isinstance(spec.get("display_labels"), dict) else {}
+        spec["display_labels"] = {**_ai_labels, **_cur}
     records, _ = load_sources(directory / "input")
     # The bundle data contract includes the supported derived dimensions used by the spec.
     normalization_plan = get_normalization_plan(name, profile, records)
@@ -1583,14 +2156,148 @@ def build_project(name: str) -> dict[str, Any]:
     return {"qa": qa, "dashboard": f"/api/projects/{name}/dashboard", "records": len(records)}
 
 
+def _load_profile_rules(name: str):
+    """Shared setup: resolve profile (re-profile if stale) + validated config/rules."""
+    directory = project_dir(name)
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None) or profile_project(name)
+    if not isinstance(profile, dict) or not profile.get("fields"):
+        profile = profile_project(name)
+    config = project_config(name, profile)
+    rules = validate_calculation_rules(config["calculation_rules"])
+    config["calculation_rules"] = rules
+    write_json(directory / "config.json", config)
+    return directory, profile, config, rules
+
+
+def build_master_data(name: str) -> dict[str, Any]:
+    """Round 2: normalize + prepare the analytical records and persist them as a
+    checkpoint (output/data/master-records.json) so Round 3 can run without
+    re-doing normalization. Uses the LIGHT model for normalization."""
+    directory, profile, config, rules = _load_profile_rules(name)
+    records, _ = load_sources(directory / "input")
+    normalization_plan = get_normalization_plan(name, profile, records)
+    require_supported_text(normalization_plan)
+    records, transformation_notices = prepare_analytical_records(records, profile, rules, normalization_plan)
+    output = directory / "output"
+    output.joinpath("data").mkdir(parents=True, exist_ok=True)
+    write_json(output / "data/master-records.json", records)
+    write_json(output / "data/master-data-manifest.json", {
+        "project": name,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "records": len(records),
+        "transformation_notices": transformation_notices,
+    })
+    return {"records": len(records), "transformation_notices": transformation_notices}
+
+
+def build_dashboard_from_master(name: str) -> dict[str, Any]:
+    """Round 3: read the master-data checkpoint (or rebuild it if missing),
+    plan the spec with the SMART model, compute with Python, render + QA."""
+    directory, profile, config, rules = _load_profile_rules(name)
+    spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None) or suggest_spec(name)
+    require_supported_text(spec)
+    # B-mode: surface AI-inferred column labels as display labels. Field names stay
+    # column_N for calculation; the dashboard renders the friendly label instead.
+    # Existing spec/user labels win over AI guesses.
+    ai_labels = profile.get("ai_labels") if isinstance(profile.get("ai_labels"), dict) else {}
+    if ai_labels:
+        current = spec.get("display_labels") if isinstance(spec.get("display_labels"), dict) else {}
+        spec["display_labels"] = {**ai_labels, **current}
+    output = directory / "output"
+    records = read_json(output / "data/master-records.json", None)
+    manifest = read_json(output / "data/master-data-manifest.json", {})
+    transformation_notices = manifest.get("transformation_notices", [])
+    if records is None:
+        # No checkpoint yet — produce one now so Round 3 is self-sufficient.
+        result = build_master_data(name)
+        records = read_json(output / "data/master-records.json", [])
+        transformation_notices = result.get("transformation_notices", [])
+    calculations = calculate_spec_results(records, spec, profile, rules)
+    output.joinpath("data").mkdir(parents=True, exist_ok=True)
+    write_json(output / "data/records.json", records)
+    with (output / "data/records.csv").open("w", encoding="utf-8", newline="") as target:
+        fields = sorted({key for row in records for key in row})
+        writer = csv.DictWriter(target, fieldnames=fields)
+        writer.writeheader(); writer.writerows(records)
+    output.joinpath("dashboard").mkdir(parents=True, exist_ok=True)
+    assets = output / "dashboard/assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(ROOT / "dashboard-automation/assets/logo.png", assets / "logo.png")
+    (output / "dashboard/index.html").write_text(render_dashboard_qa(name, config, spec, profile, records, calculations), encoding="utf-8")
+    missing = profile["quality"]["missing_values"]
+    identifiers = [field["name"] for field in profile["fields"] if field.get("role") == "identifier"]
+    date_issues = [f"{field}: parse ไม่ได้ {detail['unparsed']} ค่า" for field, detail in profile["quality"].get("date_parsing", {}).items() if detail["unparsed"]]
+    checks = [{"name": "Input records", "status": "pass", "detail": f"{len(records)} records processed"}, {"name": "Identifier exclusion", "status": "pass", "detail": f"Excluded from metrics: {', '.join(identifiers) or 'None'}"}, {"name": "Duplicate rows", "status": "warning" if profile["quality"]["exact_duplicate_rows"] else "pass", "detail": str(profile["quality"]["exact_duplicate_rows"])}, {"name": "Missing values", "status": "warning" if any(missing.values()) else "pass", "detail": ", ".join(f"{key}: {value}" for key, value in missing.items() if value) or "None"}, {"name": "Date normalization", "status": "warning" if date_issues else "pass", "detail": ", ".join(date_issues) or "All recognized date values were normalized"}, {"name": "Calculation results", "status": "warning" if calculations["errors"] else "pass", "detail": "; ".join(calculations["errors"]) or f"Verified {len(calculations['kpis'])} KPI and {len(calculations['charts'])} chart calculations"}, {"name": "Data normalization", "status": "warning" if transformation_notices else "pass", "detail": "; ".join(f"{item['notice']} ({item['affected_records']} records)" for item in transformation_notices) or "No normalization was required"}]
+    qa = {"status": "warning" if any(check["status"] == "warning" for check in checks) else "pass", "checks": checks}
+    write_json(output / "qa/qa-report.json", qa)
+    (output / "reports").mkdir(parents=True, exist_ok=True)
+    (output / "reports/data-quality-report.md").write_text("# Data Quality Report\n\n" + "\n".join(f"- {check['name']}: {check['detail']}" for check in checks) + "\n", encoding="utf-8")
+    (output / "reports/transformation-report.md").write_text("# Transformation Report\n\n" + ("\n".join(f"- {item['notice']}: {item['affected_records']} records" for item in transformation_notices) if transformation_notices else "- No category normalization was required.") + "\n", encoding="utf-8")
+    (output / "reports/insight-report.md").write_text("# Insight Questions\n\n" + "\n".join(f"- {item}" for item in spec.get("insight_questions", [])) + "\n", encoding="utf-8")
+    write_json(output / "metadata/dashboard-spec.json", spec)
+    write_json(output / "metadata/calculation-results.json", calculations)
+    write_json(output / "metadata/dashboard-requirements.json", {"audience": spec.get("audience"), "purpose": spec.get("purpose"), "questions": spec.get("insight_questions", []), "kpis": spec.get("kpis", []), "filters": spec.get("filters", [])})
+    write_json(output / "metadata/run-manifest.json", {"project": name, "timestamp": datetime.now(timezone.utc).isoformat(), "stages": ["profile", "master-data", "local-ai-spec", "build", "qa"], "status": qa["status"]})
+    return {"qa": qa, "dashboard": f"/api/projects/{name}/dashboard", "records": len(records)}
+
+
 @app.get("/")
 def index():
+    # Prefer the built React SPA when present; fall back to the legacy page.
+    dist_index = Path(app.static_folder) / "dist" / "index.html"
+    if dist_index.exists():
+        return send_from_directory(str(dist_index.parent), "index.html")
     return send_from_directory(app.static_folder, "index.html")
+
+
+@app.get("/<path:spa_path>")
+def spa_fallback(spa_path: str):
+    # Client-side routes (react-router BrowserRouter): /city, /dashboards, /admin,
+    # /help, ... must return the SPA shell so the router can render them. Only
+    # non-API, non-static paths reach here — /api/* and /static/* have their own
+    # handlers and are left untouched. A request that looks like a real asset
+    # (has a file extension) is not an SPA route, so 404 it normally.
+    if spa_path.startswith(("api/", "static/")) or "." in spa_path.rsplit("/", 1)[-1]:
+        return ("Not found", 404)
+    dist_index = Path(app.static_folder) / "dist" / "index.html"
+    if dist_index.exists():
+        return send_from_directory(str(dist_index.parent), "index.html")
+    return send_from_directory(app.static_folder, "index.html")
+
+
+@app.get("/api/manual")
+def manual():
+    manual_path = ROOT / "docs" / "user-manual-th.md"
+    if not manual_path.exists():
+        return ("คู่มือยังไม่พร้อมใช้งาน", 404, {"Content-Type": "text/plain; charset=utf-8"})
+    return (manual_path.read_text(encoding="utf-8"), 200, {"Content-Type": "text/markdown; charset=utf-8"})
 
 
 @app.get("/api/health")
 def health():
-    return jsonify({"service": "dashboard-factory", "status": "ok", "local_only": not app.config.get("FACTORY_LAN"), "mode": "lan" if app.config.get("FACTORY_LAN") else "local"})
+    try:
+        from ai_client import provider_name
+        provider = provider_name()
+    except Exception:
+        provider = "unknown"
+    model = model_identity() or (
+        os.getenv("LMSTUDIO_MODEL") if provider == "local"
+        else os.getenv("GROQ_MODEL") if provider == "groq"
+        else None
+    )
+    light_model = (os.getenv("GROQ_LIGHT_MODEL") or model) if provider == "groq" else None
+    # Per-task provider split (light=semantic/normalize/enrich, heavy=plan/repair)
+    try:
+        from ai_client import resolve_provider
+        light_provider = resolve_provider(light=True)
+        heavy_provider = resolve_provider(light=False)
+    except Exception:
+        light_provider = heavy_provider = provider
+    def _model_of(p):
+        return os.getenv("LMSTUDIO_MODEL") if p == "local" else (os.getenv("GROQ_MODEL") if p == "groq" else None)
+    return jsonify({"service": "dashboard-factory", "status": "ok", "local_only": not app.config.get("FACTORY_LAN"), "mode": "lan" if app.config.get("FACTORY_LAN") else "local", "ai_provider": provider, "ai_model": model, "ai_light_model": light_model,
+                    "light_provider": light_provider, "light_provider_model": _model_of(light_provider),
+                    "heavy_provider": heavy_provider, "heavy_provider_model": _model_of(heavy_provider)})
 
 
 @app.get("/api/projects")
@@ -1598,13 +2305,44 @@ def list_projects():
     result = []
     directory_root = projects_root()
     directory_root.mkdir(parents=True, exist_ok=True)
+    visible = None
+    meta_by_name = {}
+    org_name = {}
+    sub_name = {}
+    if not app.config.get("FACTORY_LAN"):
+        import auth
+        visible = auth.visible_project_names()  # None = admin sees all
+        # Pull org/sub-unit metadata + names once for labels + filtering.
+        import db
+        with db.connect() as conn, conn.cursor() as cur:
+            cur.execute("SELECT project_name, org_id, sub_unit_id, visibility FROM project_meta")
+            meta_by_name = {r["project_name"]: dict(r) for r in cur.fetchall()}
+            cur.execute("SELECT id, name FROM organizations")
+            org_name = {r["id"]: r["name"] for r in cur.fetchall()}
+            cur.execute("SELECT id, name FROM sub_units")
+            sub_name = {r["id"]: r["name"] for r in cur.fetchall()}
     for directory in sorted(directory_root.iterdir()):
         if not directory.is_dir() or directory.name.startswith("_"):
+            continue
+        if visible is not None and directory.name not in visible:
             continue
         spec = read_json(directory / "output/metadata/dashboard-spec.local-ai.json", {})
         config = read_json(directory / "config.json", {})
         qa = read_json(directory / "output/qa/qa-report.json", {})
-        result.append({"name": directory.name, "category": config.get("category", "Uncategorized"), "input_files": len(list((directory / "input").glob("*"))), "built": (directory / "output/dashboard/index.html").exists(), "title": spec.get("dashboard_title", directory.name), "qa_status": qa.get("status")})
+        m = meta_by_name.get(directory.name, {})
+        result.append({
+            "name": directory.name,
+            "category": config.get("category", "Uncategorized"),
+            "input_files": len(list((directory / "input").glob("*"))),
+            "built": (directory / "output/dashboard/index.html").exists(),
+            "title": spec.get("dashboard_title", directory.name),
+            "qa_status": qa.get("status"),
+            "org_id": m.get("org_id"),
+            "sub_unit_id": m.get("sub_unit_id"),
+            "visibility": m.get("visibility"),
+            "org_name": org_name.get(m.get("org_id")),
+            "sub_unit_name": sub_name.get(m.get("sub_unit_id")),
+        })
     return jsonify(result)
 
 
@@ -1620,7 +2358,39 @@ def create_project():
         return jsonify({"error": "Project already exists."}), 409
     for folder in ("input", "output", "working"):
         (directory / folder).mkdir(parents=True, exist_ok=True)
+    # Tag the new project with org/sub-unit/visibility.
+    if not app.config.get("FACTORY_LAN"):
+        import auth
+        user = auth.current_user() or {}
+        visibility = payload.get("visibility", "org")
+        if visibility not in {"sub_unit", "org", "authenticated"}:
+            visibility = "org"
+        # A member is pinned to their own org; only an admin may target another org.
+        if auth.is_admin() and payload.get("org_id") is not None:
+            org_id = payload.get("org_id")
+            sub_unit_id = payload.get("sub_unit_id")
+        else:
+            org_id = user.get("org_id")
+            # A member may file under their own sub-unit; ignore a foreign one.
+            sub_unit_id = payload.get("sub_unit_id") if payload.get("sub_unit_id") is not None else user.get("sub_unit_id")
+        auth.set_project_meta(directory.name, org_id, sub_unit_id, user.get("email"), visibility)
     return jsonify({"name": name}), 201
+
+
+@app.delete("/api/projects/<name>")
+def delete_project(name: str):
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    if not app.config.get("FACTORY_LAN"):
+        import auth
+        if not auth.can_access_project(name):
+            return jsonify({"error": "คุณไม่มีสิทธิ์ลบโปรเจกต์นี้"}), 403
+    shutil.rmtree(directory)
+    if not app.config.get("FACTORY_LAN"):
+        import auth
+        auth.delete_project_meta(name)
+    return jsonify({"ok": True, "deleted": name})
 
 
 @app.put("/api/projects/<name>/category")
@@ -1755,6 +2525,10 @@ def project_details(name: str):
     ] if input_directory.exists() else []
     profile = read_json(directory / "output/metadata/dataset-profile.json", None)
     config = project_config(name, profile) if profile else read_json(directory / "config.json", {})
+    meta = None
+    if not app.config.get("FACTORY_LAN"):
+        import auth
+        meta = auth.project_meta(name)
     return jsonify({
         "name": name,
         "inputs": inputs,
@@ -1763,7 +2537,33 @@ def project_details(name: str):
         "spec": read_json(directory / "output/metadata/dashboard-spec.local-ai.json", None),
         "qa": read_json(directory / "output/qa/qa-report.json", None),
         "calculation_rules": config.get("calculation_rules"),
+        "meta": meta,
     })
+
+
+@app.patch("/api/projects/<name>/meta")
+def update_project_meta(name: str):
+    if app.config.get("FACTORY_LAN"):
+        return jsonify({"error": "Not available in LAN mode."}), 400
+    if not project_dir(name).exists():
+        return jsonify({"error": "Project not found."}), 404
+    import auth
+    body = request.get_json(silent=True) or {}
+    visibility = body.get("visibility", "org")
+    if visibility not in {"sub_unit", "org", "authenticated"}:
+        return jsonify({"error": "visibility ต้องเป็น sub_unit, org หรือ authenticated"}), 400
+    user = auth.current_user() or {}
+    existing = auth.project_meta(name) or {}
+    # Admin may move a dashboard to any org; a member keeps it in its current org
+    # (or their own) and may only change sub-unit within that org + visibility.
+    if auth.is_admin():
+        org_id = body.get("org_id", existing.get("org_id"))
+        sub_unit_id = body.get("sub_unit_id", existing.get("sub_unit_id"))
+    else:
+        org_id = existing.get("org_id") or user.get("org_id")
+        sub_unit_id = body.get("sub_unit_id", existing.get("sub_unit_id"))
+    auth.update_project_visibility(name, org_id, sub_unit_id, visibility)
+    return jsonify(auth.project_meta(name))
 
 
 @app.post("/api/projects/<name>/uploads")
@@ -1791,6 +2591,104 @@ def upload_files(name: str):
     return jsonify({"files": saved}), 201
 
 
+@app.delete("/api/projects/<name>/uploads/<path:filename>")
+def delete_upload(name: str, filename: str):
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    input_directory = (directory / "input").resolve()
+    # Guard against path traversal: the resolved target must be a direct child of input/.
+    target = (input_directory / filename).resolve()
+    if target.parent != input_directory:
+        return jsonify({"error": "Invalid file name."}), 400
+    if not target.is_file():
+        return jsonify({"error": "File not found."}), 404
+    target.unlink()
+    remaining = [
+        {"name": item.name, "size": item.stat().st_size}
+        for item in sorted(input_directory.iterdir())
+        if item.is_file() and not item.name.startswith("~$")
+    ]
+    return jsonify({"deleted": filename, "files": remaining})
+
+
+
+def suggest_prompts(profile: dict[str, Any], limit: int = 6) -> list[dict[str, str]]:
+    """Turn a finished profile into ready-to-use Thai dashboard prompts the user
+    can click instead of typing. DETERMINISTIC — built from the real numeric /
+    category / date fields, so a suggestion can never reference a field that is
+    not there. Each item: {title, prompt}. The prompt is phrased the way the
+    planner expects, so clicking it reliably produces that dashboard."""
+    def label(f):
+        return (f.get("inferred_label") or f["name"]).strip()
+    fields = profile.get("fields", [])
+    records = max(profile.get("records", 1), 1)
+    _pii = re.compile(r"name|surname|full_?name|ชื่อ|นามสกุล|email|phone|id$|_id|รหัส|code", re.IGNORECASE)
+    measures = [f for f in fields if (f.get("role") == "measure" or f.get("type") == "number") and not f["name"].startswith("column_")]
+    # good dimensions: real categories, low-cardinality, NOT identifiers/names
+    cats = [
+        f for f in fields
+        if f.get("role") == "category" and not f["name"].startswith("column_")
+        and 1 < (f.get("distinct") or 0) <= min(30, records)
+        and (f.get("distinct") or 0) / records < 0.7            # not near-unique
+        and not _pii.search(f["name"])                          # not a person/identifier
+    ]
+    has_date = any(f.get("role") == "date" for f in fields)
+    out: list[dict[str, str]] = []
+    # Diverse measure × category pairs: pair each measure with a DIFFERENT
+    # category so suggestions do not all repeat the same breakdown, and skip
+    # near-duplicate month measures (keep a representative, not all 12).
+    _month = re.compile(r"^(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.)$")
+    primary = [m for m in measures if not _month.search(m["name"])] or measures
+    for i, m in enumerate(primary[:4]):
+        if not cats:
+            break
+        c = cats[i % len(cats)]
+        out.append({
+            "title": f"{label(m)} แยกตาม {label(c)}",
+            "prompt": f"สร้างกราฟแท่งเปรียบเทียบผลรวม {m['name']} แยกตาม {c['name']} พร้อม KPI ยอดรวม {m['name']}",
+        })
+    # trend over time
+    if has_date and primary:
+        m = primary[0]
+        out.append({
+            "title": f"แนวโน้ม {label(m)} ตามช่วงเวลา",
+            "prompt": f"สร้างกราฟเส้นแสดงแนวโน้ม {m['name']} ตามเดือน/ปี พร้อม KPI ยอดรวมและค่าเฉลี่ย",
+        })
+    # share / composition
+    if cats and primary:
+        out.append({
+            "title": f"สัดส่วน {label(primary[0])} ตาม {label(cats[0])}",
+            "prompt": f"สร้างกราฟวงกลมแสดงสัดส่วน {primary[0]['name']} ตาม {cats[0]['name']}",
+        })
+    # overview fallback
+    out.append({
+        "title": "ภาพรวมทั้งหมด (KPI + กราฟหลายมุม)",
+        "prompt": "สร้าง dashboard ภาพรวมที่มี KPI หลายตัวและกราฟเปรียบเทียบหลายมุมมองจากข้อมูลนี้",
+    })
+    # de-dup by title, cap
+    seen, uniq = set(), []
+    for item in out:
+        if item["title"] in seen:
+            continue
+        seen.add(item["title"])
+        uniq.append(item)
+    return uniq[:limit]
+
+
+@app.get("/api/projects/<name>/prompt-suggestions")
+def api_prompt_suggestions(name: str):
+    """After profiling, offer clickable dashboard prompts built from the real
+    fields — so staff who are unsure what to type can just pick one."""
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not profile:
+        return jsonify({"error": "ยังไม่มีโปรไฟล์ข้อมูล กรุณาตรวจโครงสร้างก่อน"}), 400
+    return jsonify({"suggestions": suggest_prompts(profile)})
+
+
 @app.post("/api/projects/<name>/profile")
 def api_profile(name: str):
     try:
@@ -1800,6 +2698,81 @@ def api_profile(name: str):
         return jsonify({"profile": profile, "config": config})
     except (ValueError, FileNotFoundError) as exc:
         return jsonify({"error": str(exc)}), 400
+
+
+@app.post("/api/projects/<name>/profile-jobs")
+def start_profile_job(name: str):
+    """Round 1: structural profiling + optional AI semantic enrichment, as a job
+    so the UI can show progress. AI enrichment uses the light model and never
+    fails the profile."""
+    if not project_dir(name).exists():
+        return jsonify({"error": "Project not found."}), 404
+    use_ai = bool((request.get_json(silent=True) or {}).get("use_ai", True))
+    job_id = uuid4().hex
+    with AI_JOBS_LOCK:
+        owner = CURRENT_OWNER.get()
+        if any(job.get("owner") == owner and job["project"] == name and job["status"] == "running" for job in AI_JOBS.values()):
+            return jsonify({"error": "มีงานกำลังทำบนโปรเจกต์นี้อยู่"}), 409
+        for old_id in list(AI_JOBS):
+            if len(AI_JOBS) > 100 and AI_JOBS[old_id]["status"] != "running":
+                del AI_JOBS[old_id]
+        AI_JOBS[job_id] = {"owner": owner, "project": name, "status": "running", "percent": 10, "stage": "กำลังตรวจโครงสร้างข้อมูล", "result": None, "error": None}
+
+    def update(percent, stage):
+        with AI_JOBS_LOCK:
+            if job_id in AI_JOBS:
+                AI_JOBS[job_id].update({"percent": percent, "stage": stage})
+
+    def run():
+        try:
+            update(30, "Python กำลังอ่านโครงสร้างและตรวจหาแถว header")
+            profile = profile_project(name)
+            config = project_config(name, profile)
+            write_json(project_dir(name) / "config.json", config)
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "completed", "percent": 100, "result": {"profile": profile, "config": config}, "stage": "ตรวจโครงสร้างเสร็จ"})
+        except Exception as exc:
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "ตรวจโครงสร้างไม่สำเร็จ"})
+
+    context = copy_context()
+    Thread(target=lambda: context.run(run), name=f"factory-profile-{job_id[:8]}", daemon=True).start()
+    return jsonify({"job_id": job_id, "status": "running", "percent": 10}), 202
+
+
+@app.post("/api/projects/<name>/enrich-jobs")
+def start_enrich_job(name: str):
+    """Background AI enrichment (D-mode): interpret only the generic/unnamed
+    columns. Runs AFTER the structural profile is already shown, so the user
+    never waits on it. Non-fatal — on failure the profile is unchanged."""
+    directory = project_dir(name)
+    if not directory.exists():
+        return jsonify({"error": "Project not found."}), 404
+    profile = read_json(directory / "output/metadata/dataset-profile.json", None)
+    if not profile or not profile.get("fields"):
+        return jsonify({"error": "ตรวจโครงสร้างก่อน"}), 400
+    job_id = uuid4().hex
+    with AI_JOBS_LOCK:
+        owner = CURRENT_OWNER.get()
+        for old_id in list(AI_JOBS):
+            if len(AI_JOBS) > 100 and AI_JOBS[old_id]["status"] != "running":
+                del AI_JOBS[old_id]
+        AI_JOBS[job_id] = {"owner": owner, "project": name, "status": "running", "percent": 20, "stage": "AI กำลังตีความคอลัมน์ที่ไม่มีชื่อ", "result": None, "error": None}
+
+    def run():
+        try:
+            prof = read_json(directory / "output/metadata/dataset-profile.json", None)
+            enriched = enrich_profile_with_ai(prof)
+            write_json(directory / "output/metadata/dataset-profile.json", enriched)
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "completed", "percent": 100, "result": {"profile": enriched}, "stage": "AI ตีความเสร็จ"})
+        except Exception as exc:
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "AI ตีความไม่สำเร็จ"})
+
+    context = copy_context()
+    Thread(target=lambda: context.run(run), name=f"factory-enrich-{job_id[:8]}", daemon=True).start()
+    return jsonify({"job_id": job_id, "status": "running", "percent": 20}), 202
 
 
 @app.post("/api/projects/<name>/suggest")
@@ -1881,12 +2854,100 @@ def api_improve(name: str):
         return jsonify({"error": str(exc)}), 400
 
 
+@app.post("/api/projects/<name>/improve-jobs")
+def start_improve_job(name: str):
+    if not project_dir(name).exists():
+        return jsonify({"error": "Project not found."}), 404
+    instruction = str((request.get_json(silent=True) or {}).get("instruction", ""))
+    if not instruction.strip():
+        return jsonify({"error": "กรุณาพิมพ์คำสั่งแก้ไข"}), 400
+    job_id = uuid4().hex
+    with AI_JOBS_LOCK:
+        owner = CURRENT_OWNER.get()
+        if app.config.get("FACTORY_LAN") and sum(job["status"] == "running" for job in AI_JOBS.values()) >= 8:
+            return jsonify({"error": "AI queue is busy. Please try again later."}), 429
+        if any(job.get("owner") == owner and job["project"] == name and job["status"] == "running" for job in AI_JOBS.values()):
+            return jsonify({"error": "AI is already working on this project."}), 409
+        if app.config.get("FACTORY_LAN") and not LAN_AI_SLOTS.acquire(blocking=False):
+            return jsonify({"error": "AI capacity is full. Please retry later."}), 429
+        for old_id in list(AI_JOBS):
+            if len(AI_JOBS) > 100 and AI_JOBS[old_id]["status"] != "running":
+                del AI_JOBS[old_id]
+        AI_JOBS[job_id] = {"owner": owner, "project": name, "status": "running", "percent": 10, "stage": "AI กำลังแก้ไขแผน dashboard ตามคำสั่ง", "result": None, "error": None}
+
+    def run() -> None:
+        try:
+            result = improve_spec(name, instruction)
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "completed", "percent": 100, "result": result, "stage": "แก้ไขเสร็จ"})
+        except Exception as exc:
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "แก้ไข specification ไม่สำเร็จ"})
+        finally:
+            if app.config.get("FACTORY_LAN"):
+                LAN_AI_SLOTS.release()
+
+    context = copy_context()
+    Thread(target=lambda: context.run(run), name=f"factory-improve-{job_id[:8]}", daemon=True).start()
+    return jsonify({"job_id": job_id, "status": "running", "percent": 10}), 202
+
+
 @app.post("/api/projects/<name>/build")
 def api_build(name: str):
     try:
         return jsonify(build_project(name))
     except (ValueError, FileNotFoundError) as exc:
         return jsonify({"error": str(exc)}), 400
+
+
+def _start_build_round(name: str, fn, start_stage: str, done_stage: str):
+    """Shared job launcher for the multi-pass build rounds (master-data, dashboard)."""
+    if not project_dir(name).exists():
+        return jsonify({"error": "Project not found."}), 404
+    job_id = uuid4().hex
+    with AI_JOBS_LOCK:
+        owner = CURRENT_OWNER.get()
+        if any(job.get("owner") == owner and job["project"] == name and job["status"] == "running" for job in AI_JOBS.values()):
+            return jsonify({"error": "มีงานกำลังทำบนโปรเจกต์นี้อยู่"}), 409
+        for old_id in list(AI_JOBS):
+            if len(AI_JOBS) > 100 and AI_JOBS[old_id]["status"] != "running":
+                del AI_JOBS[old_id]
+        AI_JOBS[job_id] = {"owner": owner, "project": name, "status": "running", "percent": 15, "stage": start_stage, "result": None, "error": None}
+
+    def run():
+        try:
+            import cloud_ai_client as _cc
+            def _pace(msg):
+                with AI_JOBS_LOCK:
+                    if job_id in AI_JOBS and AI_JOBS[job_id]["status"] == "running":
+                        AI_JOBS[job_id]["stage"] = msg
+            _cc.pace_status = _pace
+            try:
+                result = fn(name)
+            finally:
+                if getattr(_cc, "pace_status", None) is _pace:
+                    _cc.pace_status = None
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "completed", "percent": 100, "result": result, "stage": done_stage})
+        except Exception as exc:
+            with AI_JOBS_LOCK:
+                AI_JOBS[job_id].update({"status": "failed", "error": str(exc), "stage": "ไม่สำเร็จ"})
+
+    context = copy_context()
+    Thread(target=lambda: context.run(run), name=f"factory-round-{job_id[:8]}", daemon=True).start()
+    return jsonify({"job_id": job_id, "status": "running", "percent": 15}), 202
+
+
+@app.post("/api/projects/<name>/master-data-jobs")
+def start_master_data_job(name: str):
+    """Round 2: normalize + build the clean master-records checkpoint."""
+    return _start_build_round(name, build_master_data, "กำลังสร้าง master data ที่ถูกต้อง", "สร้าง master data เสร็จ")
+
+
+@app.post("/api/projects/<name>/dashboard-jobs")
+def start_dashboard_job(name: str):
+    """Round 3: plan the spec + compute + render + QA from the master-data checkpoint."""
+    return _start_build_round(name, build_dashboard_from_master, "กำลังวางแผนและสร้าง Dashboard", "สร้าง Dashboard เสร็จ")
 
 
 @app.get("/api/projects/<name>/dashboard")

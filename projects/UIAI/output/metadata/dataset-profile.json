@@ -1,0 +1,670 @@
+{
+  "project": "UIAI",
+  "generated_at": "2026-10-16T15:53:46.413274+00:00",
+  "input_files": [
+    "mockup_summary_20-e21febcb.csv"
+  ],
+  "records": 20,
+  "worksheets": [
+    {
+      "file": "mockup_summary_20-e21febcb.csv",
+      "sheet": "CSV",
+      "rows": 20,
+      "columns": 46,
+      "fields": [
+        "Student_ID",
+        "Full_Name",
+        "Degree_Level",
+        "Program_Name",
+        "Program_Mode",
+        "Study_Plan",
+        "Year_Level",
+        "Total_Credits_Earned",
+        "Total_Credits_Required",
+        "Required_Credits_Earned",
+        "Required_Credits_Required",
+        "Elective_Credits_Earned",
+        "Elective_Credits_Required",
+        "Core_Minor_Credits_Earned",
+        "Core_Minor_Credits_Required",
+        "Research_Credits_Earned",
+        "Research_Credits_Required",
+        "Free_Elective_Credits",
+        "Free_Elective_Required",
+        "GE_Total_Credits",
+        "GE_MUGE100_Credits",
+        "GE_Language_Credits",
+        "GE_MU_Literacy_Credits",
+        "GE_Literacy_Total_Credits",
+        "GE_Lit_Group_Health",
+        "GE_Lit_Group_Science_Env",
+        "GE_Lit_Group_Intercultural_Global",
+        "GE_Lit_Group_Civic",
+        "GE_Lit_Group_Finance_Mgmt",
+        "GE_Literacy_Groups_Pass",
+        "GPAX",
+        "GPAX_Minimum",
+        "Unresolved_FUW_Count",
+        "Max_Course_Attempts",
+        "Language_Requirement_Type",
+        "Language_Test_Status",
+        "Comprehensive_QE_Required",
+        "Comprehensive_QE_Status",
+        "Defense_Required",
+        "Defense_Status",
+        "Curriculum_Credits_Pass",
+        "Academic_Pass",
+        "Language_Pass",
+        "Graduation_Readiness",
+        "Risk_Level",
+        "Risk_Reason"
+      ],
+      "header_row": 1,
+      "header_depth": 1,
+      "total_rows_filtered": 0
+    }
+  ],
+  "fields": [
+    {
+      "name": "Academic_Pass",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PASS"
+      ]
+    },
+    {
+      "name": "Comprehensive_QE_Required",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "NO"
+      ]
+    },
+    {
+      "name": "Comprehensive_QE_Status",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Core_Minor_Credits_Earned",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "18"
+      ]
+    },
+    {
+      "name": "Core_Minor_Credits_Required",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "18"
+      ]
+    },
+    {
+      "name": "Curriculum_Credits_Pass",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PASS",
+        "PENDING"
+      ]
+    },
+    {
+      "name": "Defense_Required",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "NO"
+      ]
+    },
+    {
+      "name": "Defense_Status",
+      "type": "category",
+      "role": "category",
+      "non_null": 0,
+      "distinct": 0,
+      "numeric_ratio": 0.0,
+      "examples": []
+    },
+    {
+      "name": "Degree_Level",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ปริญญาตรี"
+      ]
+    },
+    {
+      "name": "Elective_Credits_Earned",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "18"
+      ]
+    },
+    {
+      "name": "Elective_Credits_Required",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "18"
+      ]
+    },
+    {
+      "name": "Free_Elective_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "3",
+        "6"
+      ]
+    },
+    {
+      "name": "Free_Elective_Required",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "6"
+      ]
+    },
+    {
+      "name": "Full_Name",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 20,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "กมลชนก ใจดี",
+        "ณัฐชา พรหมมา",
+        "พิมพ์ชนก แสงทอง",
+        "ศิริพร วัฒนะ",
+        "ชลธิชา บุญมี"
+      ]
+    },
+    {
+      "name": "GE_Language_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "6"
+      ]
+    },
+    {
+      "name": "GE_Lit_Group_Civic",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1"
+      ]
+    },
+    {
+      "name": "GE_Lit_Group_Finance_Mgmt",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1"
+      ]
+    },
+    {
+      "name": "GE_Lit_Group_Health",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1"
+      ]
+    },
+    {
+      "name": "GE_Lit_Group_Intercultural_Global",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1"
+      ]
+    },
+    {
+      "name": "GE_Lit_Group_Science_Env",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1"
+      ]
+    },
+    {
+      "name": "GE_Literacy_Groups_Pass",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PASS"
+      ]
+    },
+    {
+      "name": "GE_Literacy_Total_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "10"
+      ]
+    },
+    {
+      "name": "GE_MUGE100_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "3"
+      ]
+    },
+    {
+      "name": "GE_MU_Literacy_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2"
+      ]
+    },
+    {
+      "name": "GE_Total_Credits",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "24"
+      ]
+    },
+    {
+      "name": "GPAX",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 5,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "3.42",
+        "3.15",
+        "2.78",
+        "3.61",
+        "2.34"
+      ]
+    },
+    {
+      "name": "GPAX_Minimum",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "2.0"
+      ]
+    },
+    {
+      "name": "Graduation_Readiness",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "READY",
+        "AT_RISK",
+        "NOT_READY"
+      ]
+    },
+    {
+      "name": "Language_Pass",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PASS",
+        "PENDING"
+      ]
+    },
+    {
+      "name": "Language_Requirement_Type",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "THAI",
+        "ENGLISH",
+        "CHINESE"
+      ]
+    },
+    {
+      "name": "Language_Test_Status",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "PASS",
+        "PENDING"
+      ]
+    },
+    {
+      "name": "Max_Course_Attempts",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "name": "Program_Mode",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ปกติ"
+      ]
+    },
+    {
+      "name": "Program_Name",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "สาขาวิชาภาษาไทย",
+        "สาขาวิชาภาษาอังกฤษ",
+        "สาขาวิชาภาษาจีน"
+      ]
+    },
+    {
+      "name": "Required_Credits_Earned",
+      "type": "date",
+      "role": "date",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "60"
+      ]
+    },
+    {
+      "name": "Required_Credits_Required",
+      "type": "date",
+      "role": "date",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "60"
+      ]
+    },
+    {
+      "name": "Research_Credits_Earned",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 2,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "0",
+        "6"
+      ]
+    },
+    {
+      "name": "Research_Credits_Required",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "6"
+      ]
+    },
+    {
+      "name": "Risk_Level",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ]
+    },
+    {
+      "name": "Risk_Reason",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "ผ่านเกณฑ์ครบถ้วน พร้อมจบการศึกษา",
+        "มีหน่วยกิตบางหมวดที่ต้องตรวจสอบเพิ่มเติม",
+        "หน่วยกิตยังไม่ครบตามโครงสร้างหลักสูตร"
+      ]
+    },
+    {
+      "name": "Student_ID",
+      "type": "identifier",
+      "role": "identifier",
+      "non_null": 20,
+      "distinct": 20,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "6601001",
+        "6601002",
+        "6601003",
+        "6601004",
+        "6601005"
+      ]
+    },
+    {
+      "name": "Study_Plan",
+      "type": "category",
+      "role": "category",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 0.0,
+      "examples": [
+        "-"
+      ]
+    },
+    {
+      "name": "Total_Credits_Earned",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 5,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "120",
+        "126",
+        "108",
+        "132",
+        "96"
+      ]
+    },
+    {
+      "name": "Total_Credits_Required",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 1,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "132"
+      ]
+    },
+    {
+      "name": "Unresolved_FUW_Count",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "0",
+        "1",
+        "2"
+      ]
+    },
+    {
+      "name": "Year_Level",
+      "type": "number",
+      "role": "measure",
+      "non_null": 20,
+      "distinct": 3,
+      "numeric_ratio": 1.0,
+      "examples": [
+        "3",
+        "4",
+        "2"
+      ]
+    }
+  ],
+  "quality": {
+    "exact_duplicate_rows": 0,
+    "missing_values": {
+      "Academic_Pass": 0,
+      "Comprehensive_QE_Required": 0,
+      "Comprehensive_QE_Status": 20,
+      "Core_Minor_Credits_Earned": 0,
+      "Core_Minor_Credits_Required": 0,
+      "Curriculum_Credits_Pass": 0,
+      "Defense_Required": 0,
+      "Defense_Status": 20,
+      "Degree_Level": 0,
+      "Elective_Credits_Earned": 0,
+      "Elective_Credits_Required": 0,
+      "Free_Elective_Credits": 0,
+      "Free_Elective_Required": 0,
+      "Full_Name": 0,
+      "GE_Language_Credits": 0,
+      "GE_Lit_Group_Civic": 0,
+      "GE_Lit_Group_Finance_Mgmt": 0,
+      "GE_Lit_Group_Health": 0,
+      "GE_Lit_Group_Intercultural_Global": 0,
+      "GE_Lit_Group_Science_Env": 0,
+      "GE_Literacy_Groups_Pass": 0,
+      "GE_Literacy_Total_Credits": 0,
+      "GE_MUGE100_Credits": 0,
+      "GE_MU_Literacy_Credits": 0,
+      "GE_Total_Credits": 0,
+      "GPAX": 0,
+      "GPAX_Minimum": 0,
+      "Graduation_Readiness": 0,
+      "Language_Pass": 0,
+      "Language_Requirement_Type": 0,
+      "Language_Test_Status": 0,
+      "Max_Course_Attempts": 0,
+      "Program_Mode": 0,
+      "Program_Name": 0,
+      "Required_Credits_Earned": 0,
+      "Required_Credits_Required": 0,
+      "Research_Credits_Earned": 0,
+      "Research_Credits_Required": 0,
+      "Risk_Level": 0,
+      "Risk_Reason": 0,
+      "Student_ID": 0,
+      "Study_Plan": 0,
+      "Total_Credits_Earned": 0,
+      "Total_Credits_Required": 0,
+      "Unresolved_FUW_Count": 0,
+      "Year_Level": 0
+    },
+    "date_parsing": {
+      "Required_Credits_Earned": {
+        "parsed": 20,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      },
+      "Required_Credits_Required": {
+        "parsed": 20,
+        "unparsed": 0,
+        "dominant_format": "normalized mixed date formats"
+      }
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "kpis": [
+    {
+      "name": "ทุนวิจัยจากแหล่งทุนภายนอก (ตามสัญญา)",
+      "metric": "จำนวนเงินทุนตามสัญญา",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "ทุนวิจัยจากเงินรายได้มหาวิทยาลัยและส่วนงาน (ตามสัญญา)",
+      "metric": "จำนวนเงินทุนตามสัญญา",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "การสนับสนุนการตีพิมพ์ (จำนวนเงินที่ได้รับจริง)",
+      "metric": "จำนวนเงินทุนที่ได้รับจริง",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "แนวโน้มทุนวิจัยจากแหล่งภายนอกตามปี",
+      "metric": "จำนวนเงินทุนตามสัญญา",
+      "aggregation": "sum",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "ทุนวิจัยตามสาขาวิชา",
+      "metric": "จำนวนเงินทุนตามสัญญา",
+      "aggregation": "sum",
+      "dimension": "สาขาวิชา",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "การสนับสนุนการตีพิมพ์เทียบเป้าหมายปี",
+      "metric": "จำนวนเงินทุนที่ได้รับจริง",
+      "aggregation": "sum",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "เปรียบเทียบทุนวิจัยตามปี (ปีก่อน)",
+      "metric": "จำนวนเงินทุนตามสัญญา",
+      "aggregation": "sum",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": []
+}

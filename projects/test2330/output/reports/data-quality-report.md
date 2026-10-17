@@ -1,0 +1,9 @@
+# Data Quality Report
+
+- Input records: 38 records processed
+- Identifier exclusion: Excluded from metrics: Student_ID, course_code_LATH201_LATH202, student_id_6302001_6302002
+- Duplicate rows: 0
+- Missing values: Academic_Pass: 18, Comprehensive_QE_Required: 18, Comprehensive_QE_Status: 18, Core_Minor_Credits_Earned: 18, Core_Minor_Credits_Required: 18, Curriculum_Credits_Pass: 18, Defense_Required: 18, Defense_Status: 18, Degree_Level: 18, Elective_Credits_Earned: 18, Elective_Credits_Required: 18, Free_Elective_Credits: 18, Free_Elective_Required: 18, Full_Name: 18, GE_Language_Credits: 18, GE_Lit_Group_Civic: 18, GE_Lit_Group_Finance_Mgmt: 18, GE_Lit_Group_Health: 18, GE_Lit_Group_Intercultural_Global: 18, GE_Lit_Group_Science_Env: 18, GE_Literacy_Groups_Pass: 18, GE_Literacy_Total_Credits: 18, GE_MUGE100_Credits: 18, GE_MU_Literacy_Credits: 18, GE_Total_Credits: 18, GPAX: 18, GPAX_Minimum: 18, Graduation_Readiness: 18, Language_Pass: 18, Language_Requirement_Type: 18, Language_Test_Status: 18, Max_Course_Attempts: 18, Program_Mode: 18, Program_Name: 18, Required_Credits_Earned: 18, Required_Credits_Required: 18, Research_Credits_Earned: 18, Research_Credits_Required: 18, Risk_Level: 18, Risk_Reason: 18, Student_ID: 18, Study_Plan: 18, Total_Credits_Earned: 18, Total_Credits_Required: 18, Unresolved_FUW_Count: 18, Year_Level: 18, category_REQUIRED: 20, course_code_LATH201_LATH202: 20, course_name_การเขียนภาษาไทยเชิงวิชาการ: 20, credits_3: 20, grade_A_B: 21, status_PASS: 20, student_id_6302001_6302002: 20
+- Date normalization: GPAX: parse ไม่ได้ 10 ค่า
+- Calculation results: Verified 1 KPI and 1 chart calculations
+- Data normalization: AI normalization warning: No normalization mappings are needed as all fields have distinct values and no equivalent categories need to be merged. (0 records)

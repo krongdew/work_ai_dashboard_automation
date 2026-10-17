@@ -1,0 +1,95 @@
+{
+  "kpis": [
+    {
+      "name": "Student Exit Rate",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "Exit Rate by Faculty",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "Exit Rate by Exit Reason",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "Exit Rate by Faculty and Year",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "คณะ",
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Exit Rate by Exit Reason",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "สาเหตุการลาออก",
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Student Exit Trends by Month",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "_month_th",
+      "filters": [
+        {
+          "field": "status",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": [
+    "Average GPA of Exiting Students: Calculation tool request contains an unsupported metric or aggregation.",
+    "Average GPA by Faculty: Calculation tool request contains an unsupported metric or aggregation.",
+    "Average GPA of Exiting Students Over Time: Calculation tool request contains an unsupported metric or aggregation."
+  ]
+}

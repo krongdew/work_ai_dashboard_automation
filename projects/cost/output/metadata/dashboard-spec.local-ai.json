@@ -1,0 +1,138 @@
+{
+  "dashboard_title": "รายได้หน่วยงานปี 2569",
+  "purpose": "แสดงภาพรวมและรายละเอียดของรายได้ในปีงบประมาณ 2569",
+  "audience": "ผู้บริหารและผู้จัดการฝ่ายการเงิน",
+  "kpis": [
+    {
+      "name": "Total Revenue 2569",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Revenue by Category",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "dimension": "หัวหมวดใหญ่",
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Maximum Revenue 2569",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "maximum",
+      "formula": "MAX(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Minimum Revenue 2569",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "minimum",
+      "formula": "MIN(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Maximum Revenue by Category",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "maximum",
+      "formula": "MAX(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "dimension": "หัวหมวดใหญ่",
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Minimum Revenue by Category",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "minimum",
+      "formula": "MIN(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "dimension": "หัวหมวดใหญ่",
+      "limitations": "บางบรรทัดอาจมีค่า null ในฟิลด์รายได้",
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [],
+  "display_labels": {
+    "หัวหมวดใหญ่": "Revenue Category"
+  },
+  "charts": [
+    {
+      "title": "Revenue by Category",
+      "type": "bar",
+      "dimension": "หัวหมวดใหญ่",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "ไม่มีฟิลด์วันที่ จึงไม่สามารถทำการจัดกลุ่มตามเดือนหรือไตรมาสได้"
+    },
+    {
+      "title": "Revenue Distribution by Category",
+      "type": "pie",
+      "dimension": "หัวหมวดใหญ่",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "ไม่มีฟิลด์วันที่ จึงไม่สามารถทำการจัดกลุ่มตามเดือนหรือไตรมาสได้"
+    },
+    {
+      "title": "Revenue by Quarter",
+      "type": "bar",
+      "dimension": "หัวหมวดใหญ่",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "ไม่มีฟิลด์วันที่ จึงไม่สามารถทำการจัดกลุ่มตามเดือนหรือไตรมาสได้"
+    }
+  ],
+  "generated_by": "groq-ai",
+  "last_instruction": "เพิ่มกราฟวิเคราะห์ที่มีประโยชน์เพิ่มเติม โดยใช้เฉพาะฟิลด์ที่มีในข้อมูลและระบุข้อจำกัด"
+}

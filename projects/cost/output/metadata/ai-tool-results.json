@@ -1,0 +1,55 @@
+{
+  "instruction": "เพิ่มกราฟแนวโน้มค่าใช้จ่ายรายเดือน คงกราฟและ KPI เดิมไว้ทั้งหมด",
+  "requests": [
+    {
+      "name": "ค่าใช้จ่าย ก.ค.",
+      "metric": "ก.ค.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": []
+    },
+    {
+      "name": "ค่าใช้จ่าย ก.พ.",
+      "metric": "ก.พ.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": []
+    },
+    {
+      "name": "ค่าใช้จ่าย ต.ค.",
+      "metric": "ต.ค.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": []
+    }
+  ],
+  "results": [
+    {
+      "name": "ค่าใช้จ่าย ก.ค.",
+      "metric": "ก.ค.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 188,
+      "value": 10721952.46
+    },
+    {
+      "name": "ค่าใช้จ่าย ก.พ.",
+      "metric": "ก.พ.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 188,
+      "value": 63910290.24000001
+    },
+    {
+      "name": "ค่าใช้จ่าย ต.ค.",
+      "metric": "ต.ค.",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 188,
+      "value": 10664890.659999998
+    }
+  ]
+}

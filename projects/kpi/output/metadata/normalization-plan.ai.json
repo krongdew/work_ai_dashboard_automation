@@ -1,0 +1,8 @@
+{
+  "generated_by": "groq-ai",
+  "profile_generated_at": "2026-09-23T03:52:39.575687+00:00",
+  "mappings": [],
+  "warnings": [
+    "No fields provided for mapping; nothing to normalize. Date fields, if added later, must be converted to Buddhist Era years (BE) as required."
+  ]
+}

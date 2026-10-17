@@ -1,0 +1,105 @@
+{
+  "kpis": [
+    {
+      "name": "Total number of students who dropped out",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "Average GPA of dropping out students",
+      "metric": "เกรดเฉลี่ย_GPAX",
+      "aggregation": "average",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "Most common reasons for withdrawal",
+      "metric": "สาเหตุการลาออก",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "Student Drop-out Distribution by Batch",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "คณะ",
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Reasons for Withdrawal Pie Chart",
+      "metric": "สาเหตุการลาออก",
+      "aggregation": "count",
+      "dimension": "สาเหตุการลาออก",
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Average GPA by Faculty",
+      "metric": "เกรดเฉลี่ย_GPAX",
+      "aggregation": "average",
+      "dimension": "คณะ",
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "Student Drop-out Timeline",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "_year_be",
+      "filters": [
+        {
+          "field": "สถานะ",
+          "equals": "ลาออก"
+        }
+      ],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": []
+}

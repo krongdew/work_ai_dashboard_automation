@@ -3,7 +3,7 @@
 	"title": "Dashboard Spec",
 	"type": "object",
 	"additionalProperties": false,
-	"required": ["dashboard_title", "purpose", "audience", "kpis", "filters", "charts", "insight_questions"],
+	"required": ["dashboard_title", "kpis", "filters", "charts"],
 	"properties": {
 		"dashboard_title": {"type": "string"},
 		"purpose": {"type": "string"},
@@ -18,7 +18,7 @@
 		"kpi": {
 			"type": "object",
 			"additionalProperties": false,
-			"required": ["name", "metric", "aggregation", "formula", "source_fields", "limitations"],
+			"required": ["name", "metric", "aggregation", "source_fields"],
 			"properties": {
 				"name": {"type": "string"}, "metric": {"type": "string"}, "aggregation": {"type": "string"},
 				"formula": {"type": "string"}, "source_fields": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "string"},
@@ -28,7 +28,7 @@
 		"chart": {
 			"type": "object",
 			"additionalProperties": false,
-			"required": ["title", "type", "dimension", "metric", "aggregation", "formula", "source_fields", "limitations"],
+			"required": ["title", "type", "dimension", "metric", "aggregation", "source_fields"],
 			"properties": {
 				"title": {"type": "string"}, "type": {"type": "string", "enum": ["bar", "line", "pie"]},
 				"dimension": {"type": "string"}, "metric": {"type": "string"}, "aggregation": {"type": "string"},

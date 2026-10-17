@@ -1,0 +1,20 @@
+{
+  "audience": null,
+  "purpose": null,
+  "questions": [],
+  "kpis": [
+    {
+      "name": "_year_be",
+      "metric": "record_count",
+      "aggregation": "count",
+      "source_fields": [
+        "_year_be"
+      ],
+      "comparison": {
+        "enabled": false,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": []
+}

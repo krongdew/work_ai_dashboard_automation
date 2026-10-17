@@ -9,3 +9,12 @@ local-ai/dashboard-spec.json
 __pycache__/
 .lan/
 lan/dist/
+
+# React SPA build artifacts
+factory-ui-react/node_modules/
+factory-ui-react/dist/
+factory-ui/static/dist/
+
+# secret backups
+.env.bak*
+.env.*.bak

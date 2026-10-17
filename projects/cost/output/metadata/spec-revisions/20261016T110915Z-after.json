@@ -1,0 +1,92 @@
+{
+  "dashboard_title": "แดชบอร์ดรายรับ FY2569",
+  "purpose": "แสดงรายรับรวมทั้งปีและการแยกตามประเภท รายได้และแผน/ผลรายรับ (ตามที่ข้อมูลมี)",
+  "audience": "ผู้บริหารและผู้วิเคราะห์การเงิน",
+  "kpis": [
+    {
+      "name": "Total Revenue",
+      "metric": "column_10",
+      "aggregation": "sum",
+      "formula": "SUM(column_10)",
+      "source_fields": [
+        "column_10"
+      ],
+      "limitations": "ค่ารายได้ทั้งหมดเป็น 0; ไม่มีข้อมูลจำนวนจริงเพื่อสรุป"
+    },
+    {
+      "name": "Revenue by Main Category",
+      "metric": "column_10",
+      "aggregation": "sum",
+      "formula": "SUM(column_10) GROUP BY หัวหมวดใหญ่",
+      "source_fields": [
+        "column_10",
+        "หัวหมวดใหญ่"
+      ],
+      "limitations": "ค่าของหมวดหมู่อื่น ๆ เป็น 0; ข้อมูลไม่มีการระบุหมวดหมู่"
+    },
+    {
+      "name": "Revenue by Subcategory Level 1",
+      "metric": "column_10",
+      "aggregation": "sum",
+      "formula": "SUM(column_10) GROUP BY หัวหมวดย่อย 1",
+      "source_fields": [
+        "column_10",
+        "หัวหมวดย่อย 1"
+      ],
+      "limitations": "ค่าของหมวดหมู่ย่อยอื่น ๆ เป็น 0; ข้อมูลไม่มีการระบุหมวดหมู่"
+    },
+    {
+      "name": "Planned vs Actual Revenue (FY2569)",
+      "metric": "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569",
+      "aggregation": "sum",
+      "formula": "SUM(แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569)",
+      "source_fields": [
+        "แผน/ผลรายรับเงินรายได้ส่วนงาน ประจำปีงบประมาณ พ.ศ. 2569"
+      ],
+      "limitations": "ค่าที่บันทึกเป็น 0 ทั้งหมด; ไม่สามารถเปรียบเทียบผลจริงได้"
+    }
+  ],
+  "filters": [
+    "รายรับ/รายจ่าย"
+  ],
+  "display_labels": {
+    "หัวหมวดใหญ่": "Revenue Main Category",
+    "หัวหมวดย่อย 1": "Revenue Subcategory Level 1"
+  },
+  "charts": [
+    {
+      "title": "Revenue by Main Category",
+      "type": "bar",
+      "dimension": "หัวหมวดใหญ่",
+      "metric": "column_10",
+      "aggregation": "sum",
+      "formula": "SUM(column_10)",
+      "source_fields": [
+        "column_10",
+        "หัวหมวดใหญ่"
+      ],
+      "limitations": "ค่าของหมวดหมู่เป็น 0; ไม่มีข้อมูลจริง"
+    },
+    {
+      "title": "Revenue by Subcategory Level 1",
+      "type": "pie",
+      "dimension": "หัวหมวดย่อย 1",
+      "metric": "column_10",
+      "aggregation": "sum",
+      "formula": "SUM(column_10)",
+      "source_fields": [
+        "column_10",
+        "หัวหมวดย่อย 1"
+      ],
+      "limitations": "ค่าของหมวดหมู่ย่อยเป็น 0; ไม่มีข้อมูลจริง"
+    }
+  ],
+  "insight_questions": [
+    "รวมรายรับทั้งหมดของปีงบประมาณเท่าไหร่?",
+    "รายรับแยกตามหมวดหมู่หลักเป็นอย่างไร?",
+    "รายรับแยกตามหมวดหมู่ย่อยระดับ 1 มีการกระจายอย่างไร?",
+    "แผนรายรับกับผลจริงของปีงบประมาณ 2569 แตกต่างกันเท่าไหร่?"
+  ],
+  "generated_by": "groq-ai",
+  "last_instruction": "ลองปรับตัวกรองและวิธีการคำนวณอีกครั้ง เหมือนรายได้แยกแต่ละประเภทจะเป็น 0 หมดเลย"
+}

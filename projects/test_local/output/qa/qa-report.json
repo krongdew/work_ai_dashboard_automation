@@ -4,7 +4,7 @@
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "18759 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -25,6 +25,16 @@
       "name": "Date normalization",
       "status": "warning",
       "detail": "Required_By_Year: parse ไม่ได้ 544 ค่า, ชั้นปี: parse ไม่ได้ 8701 ค่า"
+    },
+    {
+      "name": "Calculation results",
+      "status": "warning",
+      "detail": "Student Enrollment Count: Calculation tool request contains an unsupported metric or aggregation.; Student Distribution by Major: Calculation tool request contains an unsupported metric or aggregation."
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: ไม่มีฟิลด์ใดที่ระบุไว้สำหรับการแมปค่า – ไม่ได้ทำการแมปใด ๆ (0 records); AI normalization warning: ไม่พบฟิลด์ประเภทวันที่ในข้อมูล – โปรดแปลงปีเป็น พ.ศ. หากมีฟิลด์วันที่ในภายหลัง (0 records)"
     }
   ]
 }

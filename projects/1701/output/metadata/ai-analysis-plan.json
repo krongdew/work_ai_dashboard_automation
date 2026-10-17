@@ -1,0 +1,18 @@
+{
+  "cache_key": "3e2f6208b81a61402c1e07d5244d48bf42e91fa4cc76a112667674bc6969ba4a",
+  "semantic": {
+    "generated_by": "local-ai",
+    "source": "metadata_only",
+    "profile_generated_at": "2026-10-17T04:42:10.873108+00:00",
+    "dataset_summary": "",
+    "warnings": [],
+    "field_interpretations": []
+  },
+  "normalization": {
+    "generated_by": "local-ai",
+    "profile_generated_at": "2026-10-17T04:42:10.873108+00:00",
+    "mappings": [],
+    "warnings": []
+  },
+  "calculation_requests": []
+}

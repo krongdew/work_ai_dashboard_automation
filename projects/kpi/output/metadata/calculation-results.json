@@ -1,0 +1,43 @@
+{
+  "kpis": [
+    {
+      "name": "จำนวนเงินทุนวิจัยจากแหล่งทุนภายนอก",
+      "metric": "column_12",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    },
+    {
+      "name": "จำนวนเงินทุนวิจัยจากเงินรายได้มหาวิทยาลัยและรายได้ส่วนงาน",
+      "metric": "column_3",
+      "aggregation": "sum",
+      "dimension": null,
+      "filters": [],
+      "rows": 0,
+      "value": 0
+    }
+  ],
+  "charts": [
+    {
+      "name": "จำนวนเงินทุนวิจัยจากแหล่งทุนภายนอกตามประเภท",
+      "metric": "column_12",
+      "aggregation": "sum",
+      "dimension": "column_2",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    },
+    {
+      "name": "จำนวนเงินทุนวิจัยจากเงินรายได้มหาวิทยาลัยและรายได้ส่วนงานรายปี",
+      "metric": "column_3",
+      "aggregation": "sum",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 0,
+      "value": []
+    }
+  ],
+  "errors": []
+}

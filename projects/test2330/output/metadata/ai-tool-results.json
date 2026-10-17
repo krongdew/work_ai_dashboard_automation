@@ -1,0 +1,76 @@
+{
+  "instruction": "",
+  "requests": [
+    {
+      "name": "Total Credits Earned",
+      "metric": "sum",
+      "aggregation": "sum",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Total Credits Required",
+      "metric": "sum",
+      "aggregation": "sum",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Unresolved FUW Count",
+      "metric": "sum",
+      "aggregation": "sum",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Year Level Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Graduation Readiness Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Risk Level Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Study Plan Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Language Requirement Type Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Language Test Status Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    },
+    {
+      "name": "Program Mode Count",
+      "metric": "count_distinct",
+      "aggregation": "count",
+      "dimension": "",
+      "filters": []
+    }
+  ],
+  "results": []
+}

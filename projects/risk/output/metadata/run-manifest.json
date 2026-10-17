@@ -1,8 +1,10 @@
 {
   "project": "risk",
-  "timestamp": "2026-09-22T14:12:56.533342+00:00",
+  "timestamp": "2026-10-16T10:05:25.959966+00:00",
   "stages": [
     "profile",
+    "semantic-profile",
+    "ai-calculation-tools",
     "local-ai-spec",
     "build",
     "qa"

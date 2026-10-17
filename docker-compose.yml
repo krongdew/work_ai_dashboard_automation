@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: datafactory-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-factory}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-factory_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-datafactory}
+    ports:
+      # Bind to localhost only — never expose the DB to the network.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - datafactory_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-factory} -d ${POSTGRES_DB:-datafactory}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  datafactory_pgdata:

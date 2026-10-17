@@ -6,8 +6,8 @@
       "aggregation": "sum",
       "dimension": null,
       "filters": [],
-      "rows": 12,
-      "value": 15322.0
+      "rows": 0,
+      "value": 0
     }
   ],
   "charts": [
@@ -17,14 +17,8 @@
       "aggregation": "sum",
       "dimension": "_month_th",
       "filters": [],
-      "rows": 12,
-      "value": [
-        {
-          "label": "มี.ค.",
-          "value": 15322.0,
-          "rows": 12
-        }
-      ]
+      "rows": 0,
+      "value": []
     }
   ],
   "errors": []

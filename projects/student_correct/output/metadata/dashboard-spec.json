@@ -3,51 +3,100 @@
   "purpose": "Analyze student drop-out data across two batches to identify trends, common reasons for withdrawal, and academic performance metrics.",
   "audience": "Academic administrators and student affairs officers",
   "kpis": [
-    "Total number of students who dropped out",
-    "Average GPA of dropping out students",
-    "Most common reasons for withdrawal"
+    {
+      "name": "Total number of students who dropped out",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
+        "สถานะ"
+      ],
+      "limitations": "Counts only students with status 'ลาออก'."
+    },
+    {
+      "name": "Average GPA of dropping out students",
+      "metric": "record_count",
+      "aggregation": "avg",
+      "formula": "AVG(เกรดเฉลี่ย_GPAX) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
+        "เกรดเฉลี่ย_GPAX",
+        "สถานะ"
+      ],
+      "limitations": "Excludes students with missing GPA data."
+    },
+    {
+      "name": "Most common reasons for withdrawal",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(สาเหตุการลาออก) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
+        "สาเหตุการลาออก",
+        "สถานะ"
+      ],
+      "limitations": "Counts only students with status 'ลาออก'."
+    }
   ],
   "filters": [
-    "Batch (Batch 1 or Batch 2)",
-    "Faculty",
-    "Major"
+    "_year_be",
+    "_academic_year_be",
+    "_month_th",
+    "_quarter",
+    "คณะ",
+    "สาขาวิชา"
   ],
   "charts": [
     {
       "title": "Student Drop-out Distribution by Batch",
-      "type": "bar chart",
-      "description": "Compare the number of drop-outs between Batch 1 and Batch 2.",
-      "fields": [
-        "Batch",
-        "Count"
-      ]
+      "type": "bar",
+      "dimension": "คณะ",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
+        "สถานะ",
+        "คณะ"
+      ],
+      "limitations": "Counts only students with status 'ลาออก'."
     },
     {
       "title": "Reasons for Withdrawal Pie Chart",
-      "type": "pie chart",
-      "description": "Show the proportion of students dropping out due to each reason.",
-      "fields": [
+      "type": "pie",
+      "dimension": "สาเหตุการลาออก",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(สาเหตุการลาออก) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
         "สาเหตุการลาออก",
-        "Count"
-      ]
+        "สถานะ"
+      ],
+      "limitations": "Counts only students with status 'ลาออก'."
     },
     {
       "title": "Average GPA by Faculty",
-      "type": "bar chart",
-      "description": "Display the average GPA of students who dropped out in each faculty.",
-      "fields": [
-        "คณะ",
-        "Average GPA"
-      ]
+      "type": "bar",
+      "dimension": "คณะ",
+      "metric": "record_count",
+      "aggregation": "avg",
+      "formula": "AVG(เกรดเฉลี่ย_GPAX) WHERE สถานะ = 'ลาออก'",
+      "source_fields": [
+        "เกรดเฉลี่ย_GPAX",
+        "สถานะ",
+        "คณะ"
+      ],
+      "limitations": "Excludes students with missing GPA data."
     },
     {
       "title": "Student Drop-out Timeline",
-      "type": "line chart",
-      "description": "Show the trend of drop-outs over time.",
-      "fields": [
-        "วันที่ลาออก",
-        "Count"
-      ]
+      "type": "line",
+      "dimension": "_year_be",
+      "metric": "record_count",
+      "aggregation": "count",
+      "formula": "COUNT(*) WHERE สถานะ = 'ลาออก' AND วันที่ลาออก BETWEEN (YEAR(วันที่ลาออก) - 543) AND (YEAR(วันที่ลาออก) - 543)",
+      "source_fields": [
+        "สถานะ",
+        "วันที่ลาออก"
+      ],
+      "limitations": "Counts only students with status 'ลาออก' and valid dates."
     }
   ],
   "insight_questions": [

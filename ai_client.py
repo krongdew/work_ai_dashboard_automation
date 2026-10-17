@@ -26,21 +26,47 @@ def provider_name() -> str:
     return provider
 
 
-def generate_json(system_prompt: str, user_prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
-    if provider_name() == "worker":
+def resolve_provider(light: bool) -> str:
+    """Pick the provider for this task. A LAN worker store always wins. Otherwise
+    split by task weight when configured:
+      LIGHT_PROVIDER  — semantic/normalization/enrich (small, frequent)
+      HEAVY_PROVIDER  — dashboard planning/repair (big, must be fast)
+    Both default to AI_PROVIDER, so a single-provider setup keeps working."""
+    from lan_service import CURRENT_STORE
+    if CURRENT_STORE.get() is not None:
+        return "worker"
+    base = os.getenv("AI_PROVIDER", "groq").strip().lower()
+    key = "LIGHT_PROVIDER" if light else "HEAVY_PROVIDER"
+    chosen = (os.getenv(key, "") or base).strip().lower()
+    if chosen not in {"groq", "local"}:
+        chosen = base
+    return chosen
+
+
+def generate_json(system_prompt: str, user_prompt: str, schema: dict[str, Any], light: bool = False) -> dict[str, Any]:
+    provider = resolve_provider(light)
+    if provider == "worker":
         from lan_service import remote_generate
         generate = remote_generate
-    elif provider_name() == "local":
+        light_supported = False
+    elif provider == "local":
         from lmstudio_client import generate_json as local_generate_json
         generate = local_generate_json
+        light_supported = False
     else:
         from cloud_ai_client import generate_json as groq_generate_json
         generate = groq_generate_json
+        light_supported = True
 
     prompt = f"{system_prompt}\n\n{LANGUAGE_INSTRUCTION}"
     request = user_prompt
+
+    def call(req):
+        # Only the Groq backend supports model-tiering; others ignore the flag.
+        return generate(prompt, req, schema, light=light) if light_supported else generate(prompt, req, schema)
+
     for attempt in range(3):
-        result = generate(prompt, request, schema)
+        result = call(request)
         issues = unsupported_text_paths(result)
         if not issues:
             return result

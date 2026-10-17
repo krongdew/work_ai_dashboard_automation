@@ -1,0 +1,61 @@
+{
+  "kpis": [
+    {
+      "name": "_year_be",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": null,
+      "filters": [],
+      "rows": 20,
+      "value": 20
+    }
+  ],
+  "charts": [
+    {
+      "name": "Year-Level Distribution",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "_year_be",
+      "filters": [],
+      "rows": 20,
+      "value": [
+        {
+          "label": "2560",
+          "value": 20,
+          "rows": 20
+        }
+      ]
+    },
+    {
+      "name": "Quarter Distribution",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "_quarter",
+      "filters": [],
+      "rows": 20,
+      "value": [
+        {
+          "label": "Q1",
+          "value": 20,
+          "rows": 20
+        }
+      ]
+    },
+    {
+      "name": "Month Distribution",
+      "metric": "record_count",
+      "aggregation": "count",
+      "dimension": "_month_th",
+      "filters": [],
+      "rows": 20,
+      "value": [
+        {
+          "label": "ม.ค.",
+          "value": 20,
+          "rows": 20
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

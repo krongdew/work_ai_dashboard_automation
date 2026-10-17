@@ -1,0 +1,12 @@
+{
+  "generated_by": "groq-ai",
+  "profile_generated_at": "2026-10-16T12:01:23.308623+00:00",
+  "mappings": [],
+  "warnings": [
+    "Field 'column_1' contains value '#REF!' which is an error placeholder and may need to be treated as missing or invalid category.",
+    "Values in 'column_2' such as '1', '1.1', '1.1.1', etc. appear to be hierarchical numeric codes; ensure consistent interpretation across analyses.",
+    "Values in 'column_3' contain leading hyphens and inconsistent spacing (e.g., '- รายได้ค่าบำรุงรับจัดสรร  4901010020'); consider normalizing whitespace and removing leading hyphens if they are not part of the category.",
+    "Values in 'หัวหมวดใหญ่' and 'หัวหมวดย่อย 1' include numeric prefixes (e.g., '1. รายได้จากการดำเนินงาน'); these prefixes may be used as codes but are not mapped to other fields.",
+    "No date fields detected; therefore no Buddhist Era date normalization is required."
+  ]
+}

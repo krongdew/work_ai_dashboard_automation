@@ -4,7 +4,7 @@
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "40 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -25,6 +25,16 @@
       "name": "Date normalization",
       "status": "pass",
       "detail": "All recognized date values were normalized"
+    },
+    {
+      "name": "Calculation results",
+      "status": "pass",
+      "detail": "Verified 1 KPI and 2 chart calculations"
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: ไม่มีฟิลด์ใดที่ระบุให้ทำการแมปค่า – ไม่ได้สร้างการแมปใด ๆ (0 records); AI normalization warning: ข้อกำหนดระบุให้แปลงวันที่เป็นปีพุทธศักราช แต่ไม่มีฟิลด์วันที่ในข้อมูลที่ให้มา (0 records)"
     }
   ]
 }

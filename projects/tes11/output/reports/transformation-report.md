@@ -1,13 +1,3 @@
 # Transformation Report
 
-- วันที่: 08-03-2569 -> 08-03-2569 (Exact match; already in Buddhist Era format): 2 records
-- วันที่: 10-03-2569 -> 10-03-2569 (Exact match; already in Buddhist Era format): 2 records
-- วันที่: 01-03-2569 -> 01-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 02-03-2569 -> 02-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 03-03-2569 -> 03-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 04-03-2569 -> 04-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 05-03-2569 -> 05-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 06-03-2569 -> 06-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 07-03-2569 -> 07-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- วันที่: 09-03-2569 -> 09-03-2569 (Exact match; already in Buddhist Era format): 1 records
-- AI normalization warning: Date format assumed DD-MM-YYYY; verify if this matches source convention.: 0 records
+- AI normalization warning: ไม่มีฟิลด์ใดที่ระบุให้ทำการแมปค่า; จึงไม่มีการแมปใด ๆ ถูกสร้างขึ้น: 0 records

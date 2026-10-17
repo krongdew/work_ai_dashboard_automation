@@ -1,0 +1,389 @@
+{
+  "generated_by": "local-ai",
+  "source": "metadata_only",
+  "profile_generated_at": "2026-10-16T15:53:46.413274+00:00",
+  "dataset_summary": "The dataset contains information related to student graduation requirements and performance, including categories such as Academic Pass, Comprehensive QE Required, Degree Level, etc., along with measures like GPAX and Credits Earned. The data is normalized to map equivalent category values only, adhering to the requirement of using Buddhist Era years for date outputs.",
+  "warnings": [
+    "No raw data or identifiers are included in the dataset profile. The normalization mappings and calculation requests are based on the provided metadata only."
+  ],
+  "field_interpretations": [
+    {
+      "field": "Academic_Pass",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Comprehensive_QE_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Comprehensive_QE_Status",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 0,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Core_Minor_Credits_Earned",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Core_Minor_Credits_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Curriculum_Credits_Pass",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Defense_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Defense_Status",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 0,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Degree_Level",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Elective_Credits_Earned",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Elective_Credits_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Free_Elective_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Free_Elective_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Language_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Lit_Group_Civic",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Lit_Group_Finance_Mgmt",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Lit_Group_Health",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Lit_Group_Intercultural_Global",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Lit_Group_Science_Env",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Literacy_Groups_Pass",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Literacy_Total_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_MUGE100_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_MU_Literacy_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GE_Total_Credits",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GPAX",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "GPAX_Minimum",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Graduation_Readiness",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Language_Pass",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Language_Requirement_Type",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Language_Test_Status",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Program_Mode",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Required_Credits_Earned",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "date",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Required_Credits_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "date",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Research_Credits_Earned",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Research_Credits_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Risk_Level",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Risk_Reason",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Study_Plan",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "category",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Total_Credits_Earned",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Total_Credits_Required",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Unresolved_FUW_Count",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    },
+    {
+      "field": "Year_Level",
+      "semantic_type": "category",
+      "unit": "",
+      "aggregation_guidance": "unknown",
+      "business_role": "measure",
+      "confidence": 1,
+      "limitations": "No aggregation possible as it is a category field."
+    }
+  ]
+}

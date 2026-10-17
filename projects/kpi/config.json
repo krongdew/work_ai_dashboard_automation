@@ -11,5 +11,21 @@
   "theme": "mahidol-faculty",
   "source_files": [
     "1.9_MUKPI2569.xlsx.xlsx"
-  ]
+  ],
+  "calculation_rules": {
+    "current_academic_year_be": 2569,
+    "student_id": {
+      "field": "",
+      "entry_year_digits": 2,
+      "entry_year_base_be": 2500,
+      "program_years": 4,
+      "maximum_study_years": 8
+    },
+    "risk": {
+      "gpa_field": "",
+      "gpa_below": 2.0
+    },
+    "calculation_instruction": "",
+    "metric_contracts": []
+  }
 }

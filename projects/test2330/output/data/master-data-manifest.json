@@ -1,0 +1,11 @@
+{
+  "project": "test2330",
+  "generated_at": "2026-10-16T16:45:35.464804+00:00",
+  "records": 38,
+  "transformation_notices": [
+    {
+      "notice": "AI normalization warning: No normalization mappings are needed as all fields have distinct values and no equivalent categories need to be merged.",
+      "affected_records": 0
+    }
+  ]
+}

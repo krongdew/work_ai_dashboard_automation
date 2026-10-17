@@ -1,136 +1,122 @@
 {
-  "dashboard_title": "Dashboard ตรวจความเสี่ยงการจบไม่ทันของนักศึกษาปริญญาตรี",
-  "purpose": "ประเมินความพร้อมการสำเร็จการศึกษาและระบุระดับความเสี่ยงของนักศึกษา",
-  "audience": "คณะกรรมการการศึกษา, ผู้บริหาร, ที่ปรึกษานักศึกษา",
-  "filters": [
-    "หลักสูตร",
-    "classType",
-    "Year"
-  ],
-  "display_labels": {
-    "Year": "ปีการศึกษา",
-    "classType": "ประเภทหลักสูตร"
-  },
+  "dashboard_title": "Management Dashboard for Academic Performance and Enrollment",
+  "purpose": "Provide senior academic leaders with key indicators on credit accumulation, student enrollment, and exam performance to support strategic planning and resource allocation.",
+  "audience": "University senior management, deans, and academic affairs office",
   "kpis": [
     {
-      "name": "จำนวนนักศึกษาทั้งหมด",
-      "metric": "Student_ID",
-      "aggregation": "COUNT(DISTINCT)",
-      "formula": "COUNT(DISTINCT Student_ID)",
-      "source_fields": [
-        "Student_ID"
-      ],
-      "limitations": "ต้องมีค่า Student_ID ที่ไม่ซ้ำ",
-      "comparison": {
-        "enabled": true,
-        "period": "latest_year_vs_previous_year"
-      }
-    },
-    {
-      "name": "นักศึกษาที่เครดิตไม่ครบตามที่ต้องการ",
-      "metric": "Credits",
-      "aggregation": "COUNT(DISTINCT)",
-      "formula": "COUNT(DISTINCT CASE WHEN Credits < RequiredCredits THEN Student_ID END)",
-      "source_fields": [
-        "Credits",
-        "RequiredCredits",
-        "Student_ID"
-      ],
-      "limitations": "ใช้ Credits จาก Fact_Credit_Allocation ที่ Is_Credit_Count = TRUE; สมมติว่ามีการกรองไว้แล้ว",
-      "comparison": {
-        "enabled": true,
-        "period": "latest_year_vs_previous_year"
-      }
-    },
-    {
-      "name": "นักศึกษาที่มีสถานะเกรด F/U/W ค้าง",
-      "metric": "สถานะเกรด",
-      "aggregation": "COUNT(DISTINCT)",
-      "formula": "COUNT(DISTINCT CASE WHEN สถานะเกรด IN ('F','U','W') THEN Student_ID END)",
-      "source_fields": [
-        "สถานะเกรด",
-        "Student_ID"
-      ],
-      "limitations": "ต้องมีการบันทึกสถานะเกรดอย่างถูกต้อง",
-      "comparison": {
-        "enabled": true,
-        "period": "latest_year_vs_previous_year"
-      }
-    },
-    {
-      "name": "นักศึกษาที่ผ่านเกณฑ์ English",
-      "metric": "Eng_status",
-      "aggregation": "COUNT(DISTINCT)",
-      "formula": "COUNT(DISTINCT CASE WHEN Eng_status = 'Pass' THEN Student_ID END)",
-      "source_fields": [
-        "Eng_status",
-        "Student_ID"
-      ],
-      "limitations": "Eng_status ต้องมีค่า 'Pass' แสดงการผ่าน",
-      "comparison": {
-        "enabled": true,
-        "period": "latest_year_vs_previous_year"
-      }
-    },
-    {
-      "name": "จำนวนข้อมูลที่มีปัญหาคุณภาพ (Required_By_Year ไม่ครบ)",
-      "metric": "Required_By_Year",
-      "aggregation": "COUNT",
-      "formula": "COUNT(CASE WHEN Required_By_Year IS NULL THEN 1 END)",
-      "source_fields": [
-        "Required_By_Year"
-      ],
-      "limitations": "Required_By_Year มีค่าที่ไม่สามารถแปลงเป็นปีได้"
-    }
-  ],
-  "charts": [
-    {
-      "title": "จำนวนนักศึกษาตามหลักสูตร",
-      "type": "bar",
-      "dimension": "หลักสูตร",
-      "metric": "Student_ID",
-      "aggregation": "COUNT(DISTINCT)",
-      "formula": "COUNT(DISTINCT Student_ID)",
-      "source_fields": [
-        "หลักสูตร",
-        "Student_ID"
-      ],
-      "limitations": "แสดงจำนวนรวมต่อหลักสูตร"
-    },
-    {
-      "title": "เครดิตรวมต่อปีการศึกษา",
-      "type": "line",
-      "dimension": "Year",
+      "name": "Total Credits Earned",
       "metric": "Credits",
       "aggregation": "SUM",
       "formula": "SUM(Credits)",
       "source_fields": [
-        "Year",
         "Credits"
       ],
-      "limitations": "รวมเฉพาะเครดิตที่ Is_Credit_Count = TRUE"
+      "limitations": "Credits field has missing values (non_null 754 of 18759 records).",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
     },
     {
-      "title": "สัดส่วนสถานะ English",
-      "type": "pie",
-      "dimension": "Eng_status",
+      "name": "Average Exam Score",
+      "metric": "ผลคะแนน",
+      "aggregation": "AVG",
+      "formula": "AVG(ผลคะแนน)",
+      "source_fields": [
+        "ผลคะแนน"
+      ],
+      "limitations": "Exam score field has many missing values (non_null 958). Scores may be on different scales across courses.",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    },
+    {
+      "name": "Student Enrollment Count",
       "metric": "Student_ID",
-      "aggregation": "COUNT(DISTINCT)",
+      "aggregation": "COUNT_DISTINCT",
       "formula": "COUNT(DISTINCT Student_ID)",
       "source_fields": [
-        "Eng_status",
         "Student_ID"
       ],
-      "limitations": "Eng_status ต้องมีค่า Pass/Fail"
+      "limitations": "Student_ID may be missing for some records (non_null unknown).",
+      "comparison": {
+        "enabled": true,
+        "period": "latest_year_vs_previous_year"
+      }
+    }
+  ],
+  "filters": [
+    "ปีการศึกษา",
+    "faculty",
+    "Major",
+    "courseType"
+  ],
+  "display_labels": {
+    "ปีการศึกษา": "ปีการศึกษา",
+    "faculty": "คณะ",
+    "Major": "สาขา",
+    "courseType": "ประเภทหลักสูตร"
+  },
+  "charts": [
+    {
+      "title": "Total Credits by Academic Year",
+      "type": "line",
+      "dimension": "ปีการศึกษา",
+      "metric": "Credits",
+      "aggregation": "SUM",
+      "formula": "SUM(Credits)",
+      "source_fields": [
+        "Credits",
+        "ปีการศึกษา"
+      ],
+      "limitations": "Credits missing in many rows; year parsing succeeded for all ปีการศึกษา records."
+    },
+    {
+      "title": "Average Exam Score by Faculty",
+      "type": "bar",
+      "dimension": "faculty",
+      "metric": "ผลคะแนน",
+      "aggregation": "AVG",
+      "formula": "AVG(ผลคะแนน)",
+      "source_fields": [
+        "ผลคะแนน",
+        "faculty"
+      ],
+      "limitations": "Score missing for many records; faculty values may include an 'unknown' category."
+    },
+    {
+      "title": "Student Distribution by Major",
+      "type": "pie",
+      "dimension": "Major",
+      "metric": "Student_ID",
+      "aggregation": "COUNT_DISTINCT",
+      "formula": "COUNT(DISTINCT Student_ID)",
+      "source_fields": [
+        "Student_ID",
+        "Major"
+      ],
+      "limitations": "Student_ID may be missing for some records; some majors have very low counts leading to high variance."
+    },
+    {
+      "title": "Total Credits by Course Type",
+      "type": "bar",
+      "dimension": "courseType",
+      "metric": "Credits",
+      "aggregation": "SUM",
+      "formula": "SUM(Credits)",
+      "source_fields": [
+        "Credits",
+        "courseType"
+      ],
+      "limitations": "Credits missing in many rows; courseType has only two distinct values, enabling clear comparison."
     }
   ],
   "insight_questions": [
-    "นักศึกษากี่คนมีความเสี่ยงระดับสูง/กลาง/ต่ำ?",
-    "สาเหตุหลักของความเสี่ยงคืออะไร?",
-    "แนวโน้มเครดิตรวมต่อปีการศึกษามีการเปลี่ยนแปลงอย่างไร?",
-    "สัดส่วนนักศึกษาที่ผ่าน English มีเท่าไหร่ตามหลักสูตร?",
-    "ข้อมูลคุณภาพของ Required_By_Year มีผลต่อการประเมินความเสี่ยงอย่างไร?"
+    "How have total credits earned changed compared to the previous academic year?",
+    "Which faculty shows the highest average exam score and how does it trend over time?",
+    "What is the enrollment share of each major for the current academic year?",
+    "How does credit accumulation differ between course types?"
   ],
-  "generated_by": "groq-ai",
-  "last_instruction": "พัฒนา Dashboard ตรวจความเสี่ยงนักศึกษาปริญญาตรีจบไม่ทัน โดยใช้ Model, Table, Column และ Measure เดิมให้มากที่สุด ห้ามสร้าง logic ซ้ำหรือรื้อ model โดยไม่จำเป็น\n\nScope รุ่นนี้: เฉพาะหลักสูตร Thai และ English เท่านั้น; เก็บโครงสร้าง Chinese/HSK ไว้ Phase 2 แต่ห้ามใช้เป็นเงื่อนไขหลัก\n\nGraduation Readiness ต้องตรวจ:\n- Credit รวม, Major, GE 24, Free Elective ตาม Curriculum_Structure\n- GE: MUGE100, Language >= 6, MU Literacy >= 2, Literacy >= 10 และครบ 5 กลุ่ม\n- Curriculum courses ครบ, GPAX >= 2.00, ไม่มี Unresolved F/U/W, ไม่มีวิชาเรียนซ้ำ >= 3 ครั้ง, English ผ่าน\n- นับเครดิตเฉพาะ Fact_Credit_Allocation[Is_Credit_Count] = TRUE\n- GE เกิน 24 หรือ GE ที่ Program Type ไม่ตรง ให้จัดเป็น Free Elective\n- ห้ามใช้ Student Year หรือ Required_By_Year เป็นเกณฑ์จบ\n\nใช้สถานะเดิม:\n- Dim_Students[Eng_Status] สำหรับ English\n- Dim_Students[HSK_Status] สำหรับ HSK; ค่า “ไม่ใช้” ไม่ใช่ Missing Data\n- ใช้ GPAX และ measures เดิมหากมี\n\nผลลัพธ์ต่อนักศึกษา:\n- Graduation Readiness: ผ่าน / ไม่ผ่าน / ตรวจไม่ได้\n- Risk Level: High / Medium / Low\n- Risk Reason ที่อธิบายได้ เช่น เครดิตไม่ครบ, GE/Literacy ไม่ครบ, GPAX ต่ำ, F/U/W ค้าง, เรียนซ้ำ 3 ครั้ง, English ไม่ผ่าน\n- Data Quality เช่น Curriculum Master ไม่ครบ ต้องแยกจาก Student Risk\n\nDashboard:\n1. Overview: จำนวนนักศึกษา, High/Medium/Low Risk, Data Quality Issue, สัดส่วนตามหลักสูตร/ชั้นปี, ตารางรายชื่อพร้อม Risk\n2. Student Profile: ข้อมูล, GPAX, F/U/W, Retake, Credit Progress, ทุก graduation requirement, Risk\n3. GE/Literacy: GE progress และ 5 Literacy groups\n4. Curriculum Audit: วิชาที่ต้องเรียน/ผ่าน/ขาด และรายวิชาที่ขาด\n5. Data Quality: master/mapping/course/credit/program type ผิดปกติ\n\nห้ามสร้าง Program_Code เป็น Measure และห้ามสร้าง English Status, HSK Status หรือ GPAX ใหม่หากของเดิมใช้ได้"
+  "generated_by": "groq-ai"
 }

@@ -1,8 +1,10 @@
 {
   "project": "re_test",
-  "timestamp": "2026-09-23T03:33:48.360322+00:00",
+  "timestamp": "2026-10-16T10:05:22.110832+00:00",
   "stages": [
     "profile",
+    "semantic-profile",
+    "ai-calculation-tools",
     "local-ai-spec",
     "build",
     "qa"

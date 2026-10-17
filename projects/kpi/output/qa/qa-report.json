@@ -4,7 +4,7 @@
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "116 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -25,6 +25,16 @@
       "name": "Date normalization",
       "status": "pass",
       "detail": "All recognized date values were normalized"
+    },
+    {
+      "name": "Calculation results",
+      "status": "pass",
+      "detail": "Verified 2 KPI and 2 chart calculations"
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: No fields provided for mapping; nothing to normalize. Date fields, if added later, must be converted to Buddhist Era years (BE) as required. (0 records)"
     }
   ]
 }

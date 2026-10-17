@@ -1,0 +1,15 @@
+{
+  "kpis": [],
+  "charts": [],
+  "errors": [
+    "Total Revenue 2569: Calculation tool request contains an unsupported metric or aggregation.",
+    "Revenue by Category: Calculation tool request contains an unsupported metric or aggregation.",
+    "Maximum Revenue 2569: Calculation tool request contains an unsupported metric or aggregation.",
+    "Minimum Revenue 2569: Calculation tool request contains an unsupported metric or aggregation.",
+    "Maximum Revenue by Category: Calculation tool request contains an unsupported metric or aggregation.",
+    "Minimum Revenue by Category: Calculation tool request contains an unsupported metric or aggregation.",
+    "Revenue by Category: Calculation tool request contains an unsupported metric or aggregation.",
+    "Revenue Distribution by Category: Calculation tool request contains an unsupported metric or aggregation.",
+    "Revenue by Quarter: Calculation tool request contains an unsupported metric or aggregation."
+  ]
+}

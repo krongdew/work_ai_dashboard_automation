@@ -1,7 +1,6 @@
 # Insight Questions
 
-- นักศึกษากี่คนมีความเสี่ยงระดับสูง/กลาง/ต่ำ?
-- สาเหตุหลักของความเสี่ยงคืออะไร?
-- แนวโน้มเครดิตรวมต่อปีการศึกษามีการเปลี่ยนแปลงอย่างไร?
-- สัดส่วนนักศึกษาที่ผ่าน English มีเท่าไหร่ตามหลักสูตร?
-- ข้อมูลคุณภาพของ Required_By_Year มีผลต่อการประเมินความเสี่ยงอย่างไร?
+- How have total credits earned changed compared to the previous academic year?
+- Which faculty shows the highest average exam score and how does it trend over time?
+- What is the enrollment share of each major for the current academic year?
+- How does credit accumulation differ between course types?

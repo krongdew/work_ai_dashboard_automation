@@ -1,0 +1,391 @@
+{
+  "cache_key": "a2418177c43c78b092c472e399ed29978e1d2edd4d29aa781f31bfc86a380c0b",
+  "semantic": {
+    "generated_by": "local-ai",
+    "source": "metadata_only",
+    "profile_generated_at": "2026-10-16T15:12:49.307182+00:00",
+    "dataset_summary": "Metadata for student graduation readiness with 40 records and mixed categorical and numeric fields.",
+    "warnings": [
+      "Date field GPAX contains mixed formats; conversion to Buddhist Era may be ambiguous.",
+      "Many categorical fields have low distinct counts; aggregations may hide detail."
+    ],
+    "field_interpretations": [
+      {
+        "field": "Academic_Pass",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Only PASS/FAIL values present."
+      },
+      {
+        "field": "Comprehensive_QE_Required",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Binary YES/NO."
+      },
+      {
+        "field": "Comprehensive_QE_Status",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Includes N/A."
+      },
+      {
+        "field": "Core_Minor_Credits_Earned",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Core_Minor_Credits_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Curriculum_Credits_Pass",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "PASS/FAIL only."
+      },
+      {
+        "field": "Defense_Required",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "YES/NO."
+      },
+      {
+        "field": "Defense_Status",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Contains N/A, PENDING."
+      },
+      {
+        "field": "Degree_Level",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Thai degree names."
+      },
+      {
+        "field": "Elective_Credits_Earned",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Elective_Credits_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Free_Elective_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Free_Elective_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Language_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Lit_Group_Civic",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Lit_Group_Finance_Mgmt",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Lit_Group_Health",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Lit_Group_Intercultural_Global",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Lit_Group_Science_Env",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Literacy_Groups_Pass",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "N/A and PASS."
+      },
+      {
+        "field": "GE_Literacy_Total_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_MUGE100_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_MU_Literacy_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GE_Total_Credits",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "GPAX",
+        "semantic_type": "date",
+        "unit": "",
+        "aggregation_guidance": "average_when_comparable",
+        "business_role": "date",
+        "confidence": 0.95,
+        "limitations": "Mixed numeric strings parsed as dates; conversion to BE required."
+      },
+      {
+        "field": "GPAX_Minimum",
+        "semantic_type": "quantity",
+        "unit": "points",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Graduation_Readiness",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "READY / NOT READY."
+      },
+      {
+        "field": "Language_Pass",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "PASS/FAIL."
+      },
+      {
+        "field": "Language_Requirement_Type",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "ENGLISH, NOT_REQUIRED, HSK."
+      },
+      {
+        "field": "Language_Test_Status",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "PASS, NOT_REQUIRED, PENDING."
+      },
+      {
+        "field": "Max_Course_Attempts",
+        "semantic_type": "quantity",
+        "unit": "attempts",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Program_Mode",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Thai mode names."
+      },
+      {
+        "field": "Required_Credits_Earned",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Required_Credits_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Research_Credits_Earned",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Research_Credits_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Risk_Level",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "LOW, MEDIUM, HIGH."
+      },
+      {
+        "field": "Risk_Reason",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Thai explanations."
+      },
+      {
+        "field": "Study_Plan",
+        "semantic_type": "category",
+        "unit": "",
+        "aggregation_guidance": "group_only",
+        "business_role": "category",
+        "confidence": 0.99,
+        "limitations": "Plan identifiers and '-'."
+      },
+      {
+        "field": "Total_Credits_Earned",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      },
+      {
+        "field": "Total_Credits_Required",
+        "semantic_type": "quantity",
+        "unit": "credits",
+        "aggregation_guidance": "sum_when_additive",
+        "business_role": "measure",
+        "confidence": 0.99,
+        "limitations": "Partial non‑null."
+      }
+    ]
+  },
+  "normalization": {
+    "generated_by": "local-ai",
+    "profile_generated_at": "2026-10-16T15:12:49.307182+00:00",
+    "mappings": [],
+    "warnings": []
+  },
+  "calculation_requests": []
+}

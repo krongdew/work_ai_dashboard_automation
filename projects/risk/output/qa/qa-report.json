@@ -4,7 +4,7 @@
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "18756 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -25,6 +25,16 @@
       "name": "Date normalization",
       "status": "warning",
       "detail": "Required_By_Year: parse ไม่ได้ 544 ค่า, ชั้นปี: parse ไม่ได้ 8701 ค่า"
+    },
+    {
+      "name": "Calculation results",
+      "status": "pass",
+      "detail": "Verified 1 KPI and 1 chart calculations"
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: No fields provided for normalization; no mappings generated. (0 records)"
     }
   ]
 }

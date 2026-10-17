@@ -4,7 +4,7 @@
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "60 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -23,8 +23,18 @@
     },
     {
       "name": "Date normalization",
+      "status": "pass",
+      "detail": "All recognized date values were normalized"
+    },
+    {
+      "name": "Calculation results",
       "status": "warning",
-      "detail": "year: parse ไม่ได้ 60 ค่า"
+      "detail": "Total Students: Calculation tool request contains an unsupported metric or aggregation.; Graduation Rate: Calculation tool request contains an unsupported metric or aggregation.; English Requirement Compliance: Calculation tool request contains an unsupported metric or aggregation.; HSK Requirement Compliance: Calculation tool request contains an unsupported metric or aggregation.; Attrition Rate: Calculation tool request contains an unsupported metric or aggregation.; Student Count Over Years: Calculation tool request contains an unsupported metric or aggregation.; Graduation Rate by Year: Calculation tool request contains an unsupported metric or aggregation.; English Requirement Compliance by Year: Calculation tool request contains an unsupported metric or aggregation."
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: No fields provided for mapping. (0 records); AI normalization warning: Date fields, if any, will be normalized to Buddhist Era years. (0 records)"
     }
   ]
 }

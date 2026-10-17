@@ -1,10 +1,10 @@
 {
-  "status": "pass",
+  "status": "warning",
   "checks": [
     {
       "name": "Input records",
       "status": "pass",
-      "detail": "10 records processed"
+      "detail": "0 records processed"
     },
     {
       "name": "Identifier exclusion",
@@ -25,6 +25,16 @@
       "name": "Date normalization",
       "status": "pass",
       "detail": "All recognized date values were normalized"
+    },
+    {
+      "name": "Calculation results",
+      "status": "warning",
+      "detail": "Total Target: Calculation tool request contains an unsupported metric or aggregation.; Average Target per Program: Calculation tool request contains an unsupported metric or aggregation.; Target Trend by Academic Year: Calculation tool request contains an unsupported metric or aggregation.; Target Distribution by Category: Calculation tool request contains an unsupported metric or aggregation.; Target Share by Program: Calculation tool request contains an unsupported metric or aggregation."
+    },
+    {
+      "name": "Data normalization",
+      "status": "warning",
+      "detail": "AI normalization warning: No fields provided for mapping; no mappings generated. (0 records)"
     }
   ]
 }
